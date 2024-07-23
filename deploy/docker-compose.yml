@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  be:
+    container_name: emissary_be
+    image: emissary_be:0.1
+    build:
+      context: ../backend
+    ports:
+      - 8080:8080
+  
+  fe:
+    container_name: emissary_fe
+    image: emissary_fe:0.1
+    build:
+      context: ../frontend
+    ports:
+      - 3000:80
