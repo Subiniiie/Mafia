@@ -1,6 +1,7 @@
 package e106.emissary_backend.config;
 
 import e106.emissary_backend.security.config.JwtAuthenticationFilter;
+import e106.emissary_backend.security.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,9 +10,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 
 @Configuration
@@ -23,25 +22,41 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter authFilter;
     private final LogoutHandler logoutService;
     private final AuthenticationProvider authenticationProvider;
+    private final CustomOAuth2UserService oAuth2UserService;
 
     // Configuring HttpSecurity
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.csrf(csrf -> csrf.disable())
-//                .authorizeHttpRequests(auth -> auth.requestMatchers("/login", "/users").permitAll())
-//                .authorizeHttpRequests(auth -> auth.requestMatchers("api/boards", "/api/boards/**", "api/users").authenticated())
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/**").permitAll())
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authenticationProvider(authenticationProvider)
-                .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
-                .logout(
-                        logoutConfig -> {logoutConfig.
-                                logoutUrl("/logout")
-                                .addLogoutHandler(logoutService)
-                                .logoutSuccessHandler((((request, response, authentication) -> SecurityContextHolder.clearContext())));
-                        }
-                )
-                .build();
+        //csrf disable
+        http
+                .csrf((auth) -> auth.disable());
+
+        //From 로그인 방식 disable
+        http
+                .formLogin((auth) -> auth.disable());
+
+        //HTTP Basic 인증 방식 disable
+        http
+                .httpBasic((auth) -> auth.disable());
+
+        //oauth2
+        http
+                .oauth2Login((oauth2) -> oauth2
+                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
+                                .userService(oAuth2UserService)));
+
+        //경로별 인가 작업
+        http
+                .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers("/").permitAll()
+                        .anyRequest().authenticated());
+
+        //세션 설정 : STATELESS
+        http
+                .sessionManagement((session) -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        return http.build();
     }
 
 }

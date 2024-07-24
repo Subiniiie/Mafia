@@ -42,6 +42,7 @@ public class UserService {
         //
         if(present.isPresent()){
             User user = present.get();
+            user.setNickname(request.getNickname() != null ? request.getNickname() : present.get().getNickname());
             user.setPassword(request.getPassword() != null ? passwordEncoder.encode(request.getPassword()) : present.get().getPassword());
             user.setSkinImgUrl(request.getSkinImgUrl() != null ? request.getSkinImgUrl(): present.get().getSkinImgUrl());
             try{
