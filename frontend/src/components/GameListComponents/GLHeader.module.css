@@ -1,0 +1,34 @@
+.headerContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 30px;
+    background-color: #12151D;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* 그림자 추가 */
+}
+
+.filterSection {
+    flex: 2;
+    /* FilterBox가 공간을 최대한 차지하도록 설정 */
+}
+
+.searchSection {
+    flex: 3;
+    justify-content: center;
+    align-items: center;
+    /* SearchBar가 더 넓은 공간을 차지하도록 설정 */
+}
+
+.buttonSection {
+    flex: 2;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
