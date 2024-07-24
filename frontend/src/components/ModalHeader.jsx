@@ -14,4 +14,4 @@ const ModalHeader = ({ modalTitle, openModal }) => {
     )
 }
 
-export default ModalHeader
+export default ModalHeader;
