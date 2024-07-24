@@ -1,0 +1,6 @@
+/* Filter.module.css */
+.filterLabel {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}

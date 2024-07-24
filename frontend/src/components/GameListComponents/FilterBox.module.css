@@ -1,0 +1,13 @@
+/* FilterBox.module.css */
+.filterContainer {
+    padding: 20px;
+    background-color: #292c33;
+    border-radius: 8px;
+    max-width: 400px;
+    margin: auto;
+}
+
+.checkboxContainer {
+    display: flex;
+    flex-direction: column;
+}
