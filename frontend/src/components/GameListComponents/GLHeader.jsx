@@ -1,35 +1,3 @@
-// import { useState } from "react"
-// import FilterBox from "./FilterBox"
-// import SearchBar from "./SearchBar"
-// import CreateRoomModal from "../../modals/CreateRoomModal"
-// import styles from "./GLHeader.module.css"
-
-// const GLHeader = () => {
-
-//     const [isModalOpen, setIsModalOpen] = useState(false)
-
-//     return (
-//         <>
-//             <div className={styles.headerContainer}>
-//                 <div>
-//                     <FilterBox />
-//                 </div>
-//                 <div>
-//                     <SearchBar />
-//                 </div>
-//                 <div>
-//                     <button onClick={() => { setIsModalOpen(!isModalOpen) }}>새로운 도전</button>
-//                     {isModalOpen === true ? <CreateRoomModal /> : null}
-//                 </div>
-//             </div>
-//         </>
-//     )
-// }
-
-// export default GLHeader
-
-
-
 import { useState } from "react"
 import FilterBox from "./FilterBox"
 import SearchBar from "./SearchBar"
@@ -40,12 +8,10 @@ const GLHeader = () => {
 
     const [isModalOpen, setIsModalOpen] = useState(false)
 
-    const openModal = () => setIsModalOpen(true)
-    const closeModal = () => setIsModalOpen(false)
-
+    const openModal = () => setIsModalOpen(!isModalOpen)
 
     return (
-        <>
+        <div>
             <div className={styles.headerContainer}>
                 <div className={styles.filterSection}>
                     <FilterBox />
@@ -55,10 +21,11 @@ const GLHeader = () => {
                 </div>
                 <div className={styles.buttonSection}>
                     <button onClick={openModal}>새로운 도전</button>
-                    <CreateRoomModal isOpen={isModalOpen} onClose={closeModal} />
+                    {/* <CreateRoomModal isOpen={isModalOpen} onClose={closeModal} /> */}
+                    <CreateRoomModal isOpen={isModalOpen} openModal={openModal} />
                 </div>
             </div>
-        </>
+        </div>
     )
 }
 
