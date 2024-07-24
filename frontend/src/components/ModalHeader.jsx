@@ -1,14 +1,15 @@
-import React from "react";
+import styles from './ModalHeader.module.css'
 
-function ModalHeader({ title, onClose }) {
-    // ❌를 누르면 모달을 닫는 함수
-    function handleClose() {
-        onClose()
-    }
+const ModalHeader = ({ modalTitle, openModal }) => {
+
     return (
         <>
-            <span>{title}</span>
-            <span onClick={handleClose}>❌</span>
+            <div>
+                <div>
+                    {modalTitle}
+                </div>
+                <button onClick={openModal} className={styles.closeButton}>닫기</button>
+            </div>
         </>
     )
 }
