@@ -1,12 +1,16 @@
-import React from "react";
 import { Link } from "react-router-dom";
+import Navbar from "../components/Navbar"
+import GLHeader from "../components/GameListComponents/GLHeader"
+import GLMain from "../components/GameListComponents/GLMain"
 
 function GameListPage() {
     return (
-        <>
-            <p>게임 리스트 페이지</p>
+        <div>
+            <Navbar />
+            <GLHeader />
             <Link to="/game-room">게임 방 페이지</Link>
-        </>
+            <GLMain />
+        </div>
     )
 }
 
