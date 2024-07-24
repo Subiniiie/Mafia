@@ -1,39 +1,57 @@
 .navbar {
+    height: 10vh;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    padding: 1rem;
     background-color: #1a1a1a;
-    padding: 10px 20px;
-    color: #fff;
+    color: white;
 }
 
 .navbar-brand {
-    font-size: 24px;
-    font-weight: bold;
-}
-
-.year {
-    font-size: 14px;
-    margin-left: 5px;
-    color: #ccc;
-}
-
-.navbar-content {
     display: flex;
     align-items: center;
 }
 
-.navbar-links a {
-    margin-left: 15px;
-    color: #fff;
-    text-decoration: none;
+.navbar-content{
+    display: flex;
+    align-items: center;
+}
+.navbar-user {
+    text-align: right;
+    margin-right: 2rem;
 }
 
-.navbar-links a:hover {
+.navbar-user span{
+    color: white;
+}
+
+.username{
+    color: white;
+}
+
+.username:hover{
+    color: white;
     text-decoration: underline;
+    text-decoration-color: white;
 }
 
-.username {
-    font-weight: bold;
-    margin-right: 10px;
+.navbar-user > .username a:hover {
+    text-decoration: underline;
+    text-decoration-color: white;
 }
+
+.navbar-links{
+    display: flex;
+    align-items: center;
+}
+.navbar-links a{
+    margin-right: 1rem;
+    text-decoration: none;
+    color: white;
+}
+
+.navbar-links a:hover{
+    /*뭔가 효과를 넣을 수 있을듯*/
+}
+
+

@@ -15,7 +15,7 @@ function App() {
   return (
     <>
       <Navbar isLoggedIn={isLoggedIn} username={username} />
-      <BrowserRouter>
+
         <Routes>
           <Route path='/' element={<MainPage />}></Route>
           <Route path='/game-list' element={<GameListPage />}></Route>
@@ -23,7 +23,6 @@ function App() {
           <Route path='/achievements' element={<AchievementsPage />}></Route>
           <Route path='/profile' element={<ProfilePage />}></Route>
         </Routes>
-      </BrowserRouter>
     </>
   )
 }
