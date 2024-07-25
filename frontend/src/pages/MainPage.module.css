@@ -1,0 +1,34 @@
+.background-video{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+}
+
+.content{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: end;
+    padding: 40px;
+    z-index: 2;
+}
+
+.content a{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 140px;
+    height: 50px;
+    border-radius: 100px;
+    background-color: #860000;
+    margin-top: 50px;
+    font-size: 18px;
+    color: white;
+}

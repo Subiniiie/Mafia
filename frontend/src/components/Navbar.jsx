@@ -1,3 +1,5 @@
+import {Link, NavLink} from 'react-router-dom';
+
 import React from 'react';
 import './Navbar.css';
 
@@ -11,19 +13,23 @@ const Navbar = ({ isLoggedIn, username }) => {
             <div className="navbar-content">
                 {isLoggedIn ? (
                     <>
-                        <span>조국 광복을 위하여,</span>
-                        <span className="username">{username}님, 오늘도 대한 독립 만세!</span>
+                        <div className="navbar-user">
+                            <span>조국 광복을 위하여,<br/></span>
+                            <span><NavLink to="/" className="username">{username}님</NavLink>, 오늘도 대한 독립 만세!</span>
+                        </div>
                         <div className="navbar-links">
-                            <a href="/profile">프로필</a>
-                            <a href="/comrades">동지들</a>
-                            <a href="/settings">설정</a>
+                            <NavLink to="/profile">프로필</NavLink>
+                            <NavLink to="/comrades">동지들</NavLink>
+                            <NavLink to="/settings">설정</NavLink>
                         </div>
                     </>
                 ) : (
                     <>
-                        <a href="/login">활동하기</a>
-                        <a href="/signup">독립군 입단</a>
-                        <a href="/settings">설정</a>
+                        <div className="navbar-links">
+                            <NavLink to="/login">활동하기</NavLink>
+                            <NavLink to="/signup">독립군 입단</NavLink>
+                            <NavLink to="/settings">설정</NavLink>
+                        </div>
                     </>
                 )}
             </div>
