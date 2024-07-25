@@ -1,17 +1,19 @@
 package e106.emissary_backend.config;
 
-import e106.emissary_backend.security.config.JwtAuthenticationFilter;
+import e106.emissary_backend.security.config.JWTFilter;
+import e106.emissary_backend.security.config.CustomSuccessHandler;
 import e106.emissary_backend.security.service.CustomOAuth2UserService;
+import e106.emissary_backend.security.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
 
 @Configuration
 @EnableWebSecurity
@@ -19,14 +21,34 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter authFilter;
-    private final LogoutHandler logoutService;
-    private final AuthenticationProvider authenticationProvider;
     private final CustomOAuth2UserService oAuth2UserService;
+    private final CustomSuccessHandler customSuccessHandler;
+    private final JWTUtil jwtUtil;
 
     // Configuring HttpSecurity
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+//        http
+//                .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
+//
+//                    @Override
+//                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+//
+//                        CorsConfiguration configuration = new CorsConfiguration();
+//
+//                        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000")); // 여기
+//                        configuration.setAllowedMethods(Collections.singletonList("*"));
+//                        configuration.setAllowCredentials(true);
+//                        configuration.setAllowedHeaders(Collections.singletonList("*"));
+//                        configuration.setMaxAge(3600L);
+//
+//                        configuration.setExposedHeaders(Collections.singletonList("Set-Cookie"));
+//                        configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+//
+//                        return configuration;
+//                    }
+//                }));
         //csrf disable
         http
                 .csrf((auth) -> auth.disable());
@@ -38,12 +60,15 @@ public class SecurityConfig {
         //HTTP Basic 인증 방식 disable
         http
                 .httpBasic((auth) -> auth.disable());
-
+        //JWTFilter 추가
+        http
+                .addFilterAfter(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
         //oauth2
         http
                 .oauth2Login((oauth2) -> oauth2
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
-                                .userService(oAuth2UserService)));
+                                .userService(oAuth2UserService))
+                        .successHandler(customSuccessHandler));
 
         //경로별 인가 작업
         http

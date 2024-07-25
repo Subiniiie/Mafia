@@ -1,5 +1,6 @@
 package e106.emissary_backend.security.service;
 
+import ch.qos.logback.core.CoreConstants;
 import e106.emissary_backend.security.dto.CustomOAuth2User;
 import e106.emissary_backend.security.dto.GoogleResponse;
 import e106.emissary_backend.security.dto.OAuth2Response;
@@ -29,11 +30,10 @@ public class  CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         OAuth2User oAuth2User = super.loadUser(userRequest);
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
-
         OAuth2Response oAuth2Response = null;
         if(registrationId.equals("google")){
             oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
-        }else{
+        } else{
             return null;
         }
         String userEmail = oAuth2Response.getEmail();

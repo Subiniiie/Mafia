@@ -96,13 +96,13 @@ public class UserController {
     }
 
     @PatchMapping("/updatelostpw")
-    public ResponseEntity<Map<String,Object>> findpw(@RequestBody EditRequest request){
-        Map<String,Object> map = new HashMap<>();
-        try{
+    public ResponseEntity<Map<String, Object>> findpw(@RequestBody EditRequest request) {
+        Map<String, Object> map = new HashMap<>();
+        try {
             userService.updateLostPw(request, request.getPassword());
             map.put("status", "success");
             return ResponseEntity.ok(map);
-        } catch(Exception e){
+        } catch (Exception e) {
             map.put("status", "fail");
             map.put("msg", "해당 정보에 해당하는 데이터가 없습니다");
             return ResponseEntity.ok(map);
@@ -111,14 +111,14 @@ public class UserController {
 
     @DeleteMapping("/api/users")
     @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
-    public ResponseEntity<Map<String,Object>> deleteUser(Authentication authentication) {
-        Map<String,Object> map = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> deleteUser(Authentication authentication) {
+        Map<String, Object> map = new HashMap<>();
         // 이 경우도 비밀번호 확인로직이 필요하지 않을까...
-        try{
+        try {
             userService.deleteUser(authentication.getName());
             map.put("status", "success");
             return ResponseEntity.ok(map);
-        } catch(Exception e){
+        } catch (Exception e) {
             map.put("status", "fail");
             map.put("message", e.getMessage());
             return ResponseEntity.ok(map);

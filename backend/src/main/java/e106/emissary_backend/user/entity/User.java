@@ -16,19 +16,19 @@ import java.util.Collection;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "user")
+@Table(name = "users")
 @EqualsAndHashCode(callSuper=false)
 public class User extends BaseEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id", columnDefinition = "int UNSIGNED not null")
+    @Column(name = "user_id")
     private Long userId;
 
     @Column(name = "email", unique = true, nullable = false, length = 50)
     private String email;
 
-    @Column(name = "nickname", unique = false, nullable = false, length = 20)
+    @Column(name = "nickname", unique = false, nullable = false, length = 200)
     private String nickname;
 
     @Column(name = "password", /*nullable = false,*/ length = 200)
@@ -75,13 +75,13 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "citizen_win_cnt")
     private Long citizenWinCnt;
 
-    @ColumnDefault("ROLE_USER")
+    @ColumnDefault("'ROLE_USER'")
     @Builder.Default
     @Column(name = "role", nullable = false, length = 45)
     private String role = "ROLE_USER";
 
-    @ColumnDefault("0")
-    @Column(name = "is_deleted", nullable = false)
+    @ColumnDefault("false")
+    @Column(name = "is_deleted", nullable = true)
     private Boolean isDeleted;
 
 
