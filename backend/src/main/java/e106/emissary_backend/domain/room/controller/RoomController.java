@@ -2,7 +2,6 @@ package e106.emissary_backend.domain.room.controller;
 
 import e106.emissary_backend.domain.room.dto.RoomOptionDto;
 import e106.emissary_backend.domain.room.dto.RoomRequestDto;
-import e106.emissary_backend.domain.room.entity.Room;
 import e106.emissary_backend.domain.room.dto.RoomListDto;
 import e106.emissary_backend.domain.room.service.RoomService;
 import e106.emissary_backend.global.common.CommonResponseDto;
