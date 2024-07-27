@@ -1,7 +1,12 @@
-import React from 'react';
+import { useState } from "react"
+import LoginModal from "../modals/LoginModal";
 import './Navbar.css';
 
 const Navbar = ({ isLoggedIn, username }) => {
+
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const openModal = () => setIsModalOpen(!isModalOpen)
+
     return (
         <nav className="navbar">
             <div className="navbar-brand">
@@ -21,7 +26,9 @@ const Navbar = ({ isLoggedIn, username }) => {
                     </>
                 ) : (
                     <>
-                        <a href="/login">활동하기</a>
+                        {/* <a href="/login">활동하기</a> */}
+                        <button onClick={openModal}>활동하기</button>
+                        <LoginModal isOpen={isModalOpen} openModal={openModal} />
                         <a href="/signup">독립군 입단</a>
                         <a href="/settings">설정</a>
                     </>
