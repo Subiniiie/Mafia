@@ -12,4 +12,5 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     Optional<Slice<Room>> findAllBy(Pageable pageable);
 
     Optional<Room> findByRoomId(Long roomId);
+
 }

@@ -34,9 +34,9 @@ public class RedisGameService {
         return GameResponseDTO.toDto(game);
     }
 
-    public GameResponseDTO addPlayer(Long roomId, String nickname) {
-        Game game = redisGameRepository.findById(roomId).orElseThrow(
-                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
-        game.addPlayer(nickname);
-    }
+//    public GameResponseDTO addPlayer(Long roomId, String nickname) {
+//        Game game = redisGameRepository.findById(roomId).orElseThrow(
+//                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+//        game.addPlayer(nickname);
+//    }
 }

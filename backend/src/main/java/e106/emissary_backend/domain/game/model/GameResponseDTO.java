@@ -31,7 +31,7 @@ public class GameResponseDTO {
 
 //    private List<Player> playerList;
     // ID, player객체
-    private Map<String, Player> playerMap;
+    private Map<Long, Player> playerMap;
 
     private GameState gameState;
 

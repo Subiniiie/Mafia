@@ -3,6 +3,7 @@ package e106.emissary_backend.domain.game.entity;
 import e106.emissary_backend.domain.game.enumType.GameRole;
 import e106.emissary_backend.domain.game.enumType.GameState;
 import e106.emissary_backend.domain.game.model.Player;
+import e106.emissary_backend.domain.user.entity.User;
 import e106.emissary_backend.global.error.CommonErrorCode;
 import e106.emissary_backend.global.error.exception.GameFullException;
 import jakarta.persistence.EnumType;
@@ -43,7 +44,7 @@ public class Game {
 
 //    private List<Player> playerList = new ArrayList<>();
     // ID, player객체
-    private Map<String, Player> playerMap = new HashMap<>();
+    private Map<Long, Player> playerMap = new HashMap<>();
 
     @Enumerated(EnumType.STRING)
     private GameState gameState;
@@ -56,15 +57,15 @@ public class Game {
 
     private LocalDateTime finishAt;
 
-    public void addPlayer(String id, String nickname){
+    public void addPlayer(Player player){
         if(maxPlayer < playerMap.size()){
             throw new GameFullException(CommonErrorCode.GAME_FULL_EXCEPTION);
         }
 
-        playerMap.put(nickname,
+        playerMap.put(player.getId(),
                 Player.builder()
-                        .id(id)
-                        .nickname(nickname)
+                        .id(player.getId())
+                        .nickname(player.getNickname())
                         .isAlive(false)
                         .isLeft(false)
                         .role(GameRole.PERSON)

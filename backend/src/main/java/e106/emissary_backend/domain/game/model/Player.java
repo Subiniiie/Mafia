@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class Player implements Serializable {
 
     @Id
-    private String id;
+    private Long id;
 
     private String nickname;
 
@@ -29,5 +29,12 @@ public class Player implements Serializable {
     private boolean isLeft;
 
     private boolean isAlive;
+
+    public static Player createPlayer(Long id, String nickname) {
+        return Player.builder()
+                .id(id)
+                .nickname(nickname)
+                .build();
+    }
 }
 

@@ -30,6 +30,20 @@ public class RoomController {
         return ResponseEntity.ok(roomService.deleteRoom(roomId));
     }
 
+    /**
+     * 방 생성
+     */
+
+    /**
+     * 방 입장
+     */
+    // Todo : JWT 처리하는거 추가.
+    @PostMapping("/rooms/{roomId}")
+    public ResponseEntity<CommonResponseDto> enterRoom(@PathVariable Long roomId, @RequestHeader("Authentication") String token) {
+        long userId = Long.parseLong(token);
+        return ResponseEntity.ok(roomService.enterRoom(roomId, userId));
+    }
+
     @DeleteMapping("/api/rooms/{roomId}/{userId}")
     public ResponseEntity<CommonResponseDto> deleteRoom(@PathVariable Long roomId, @PathVariable Long userId){
         return ResponseEntity.ok(roomService.deleteUser(roomId, userId));

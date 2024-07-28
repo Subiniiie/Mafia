@@ -43,4 +43,5 @@ public class Room extends BaseTimeEntity {
         maxPlayer = roomRequestDto.getMaxPlayer();
         haveBetray = roomRequestDto.isHaveBetray();
     }
+
 }
