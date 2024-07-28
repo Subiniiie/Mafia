@@ -22,18 +22,20 @@ function GamePageHeader() {
         setIsModalOpen(!isModalOpen)
     }
 
-    const roomManagerSettings = <button onClick={openModal}>(방장만)설정</button>
+    const roomManagerSettings = <button className={styles.settings} onClick={openModal}>(방장만)설정</button>
     return (
         <>
-            <div className={styles.header}>
-                {roomTitle}
-                <div className={styles.right}>
-                    {roomManager ? roomManagerSettings : null}
-                    <button className={styles.exit}><Link to="/game-list">나가기</Link></button>
+            <div className={styles.container}>
+                <div className={styles.header}>
+                    {roomTitle}
+                    <div className={styles.right}>
+                        {roomManager ? roomManagerSettings : null}
+                        <button className={styles.exit}><Link to="/game-list">나가기</Link></button>
+                    </div>
                 </div>
-            </div>
-            <div>
-                {isModalOpen ? <GameSettingsModal isOpen={isModalOpen} openModal={openModal}/> : null}
+                <div>
+                    {isModalOpen ? <GameSettingsModal isOpen={isModalOpen} openModal={openModal}/> : null}
+                </div>
             </div>
         </>
     )

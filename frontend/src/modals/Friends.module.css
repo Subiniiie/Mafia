@@ -1,0 +1,11 @@
+.btn {
+    border: 0;
+    background-color: transparent;
+}
+
+.container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transfrom : translate(-50%, -50%)
+}

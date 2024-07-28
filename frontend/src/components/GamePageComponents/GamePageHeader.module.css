@@ -1,3 +1,7 @@
+.container {
+    height: 7vh;
+}
+
 .header {
     display: flex;
     justify-content: space-between;
@@ -12,4 +16,8 @@
 
 .exit {
     text-decoration: none;
+}
+
+.settings {
+    color: black;
 }

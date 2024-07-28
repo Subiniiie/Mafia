@@ -1,16 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import ModalHeader from "../components/ModalHeader"
 import RoomName from "../components/GamePageComponents/RoomName";
-import MaximumNumber from "../components/GamePageComponents/MaximumNumber";
 import SecretMode from "../components/GamePageComponents/SecretMode";
 import Password from "../components/GamePageComponents/Password";
 import Turncoat from "../components/GamePageComponents/Turncoat";
 import styles from "./GameSettingsModal.module.css"
 
-function GameSettingsModal({ isOpen, openModal }) {
-    function handleCloseModal() {
-        closeModal()
-    }
+function GameSettingsModal({ openModal }) {
     return (
         <>
             <div className={styles.modal}>
@@ -18,7 +14,6 @@ function GameSettingsModal({ isOpen, openModal }) {
                     <ModalHeader modalTitle="게임 설정" openModal={openModal}/>
                     <div className={styles.header}>
                         <RoomName />
-                        <MaximumNumber />
                     </div>
                     <div className={styles.footer}>
                         <SecretMode />
@@ -28,7 +23,7 @@ function GameSettingsModal({ isOpen, openModal }) {
                         <Turncoat />
                     </div>
                     <div>
-                        <button>변경</button>
+                        <button onClick={openModal}>변경</button>
                     </div>
                 </div>
             </div>

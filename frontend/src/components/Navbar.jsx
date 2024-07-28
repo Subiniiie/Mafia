@@ -1,5 +1,6 @@
 import { useState } from "react"
 import LoginModal from "../modals/LoginModal";
+import Friends from '../modals/Friends';
 import './Navbar.css';
 
 const Navbar = ({ isLoggedIn, username }) => {
@@ -21,6 +22,7 @@ const Navbar = ({ isLoggedIn, username }) => {
                         <div className="navbar-links">
                             <a href="/profile">프로필</a>
                             <a href="/comrades">동지들</a>
+                            <Friends />
                             <a href="/settings">설정</a>
                         </div>
                     </>

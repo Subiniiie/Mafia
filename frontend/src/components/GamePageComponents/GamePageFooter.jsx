@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import JobModal from "../../modals/JobModal";
+import GameChat from "./GameChat";
 import GameReadyStartBtn from "./GameReadyStartBtn";
 import styles from "./GamePageFooter.module.css"
 
@@ -15,14 +16,16 @@ function GamePageFooter() {
     const jobModalOpen = <JobModal isOpen={isModalOpen} openModal={openModal}/>
     return (
         <>
-            <div className={styles.footer}>
-            <button onClick={openModal}>직업</button>
-            채팅창이 들어갈 자리
-            <GameReadyStartBtn />
-            </div>
+            <div className={styles.container}>
+                <div className={styles.footer}>
+                <button className={styles.btn} onClick={openModal}>직업</button>
+                <GameChat />
+                <GameReadyStartBtn />
+                </div>
                 <div className="job-modals">
                     { isModalOpen ? jobModalOpen : null}
                 </div>
+            </div>
         </>
     )
 }

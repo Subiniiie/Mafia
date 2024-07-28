@@ -1,6 +1,14 @@
+.container {
+    height: 10vh;
+}
+
 .footer {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+}
+
+.btn {
+    color: black;
 }

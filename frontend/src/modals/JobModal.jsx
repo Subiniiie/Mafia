@@ -25,14 +25,16 @@ function JobModal({ isOpen, openModal }) {
     return (
         <>
             <div className={styles.modals}>
-                <div className={styles.modal}>
-                    <ModalHeader modalTitle="직업 설명" openModal={openModal} />
-                    이미지
-                </div>
-                <div className={styles.modal}>
-                    <ModalHeader modalTitle="직업 설명" openModal={openModal} />
-                    <h3>당신은 {myJob}입니다</h3>
-                    <p>{content}</p>
+                <div className={styles.content}>
+                    <div className={styles.front}>
+                        <ModalHeader modalTitle="직업 설명" openModal={openModal} />
+                        이미지
+                    </div>
+                    <div className={styles.back}>
+                        <ModalHeader modalTitle="직업 설명" openModal={openModal} />
+                        <h3>당신은 {myJob}입니다</h3>
+                        <p>{content}</p>
+                    </div>
                 </div>
             </div>
         </>

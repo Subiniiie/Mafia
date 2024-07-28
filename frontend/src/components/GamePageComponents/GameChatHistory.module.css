@@ -1,0 +1,7 @@
+.box {
+    width: 850px;
+    height: 400px;
+    text-align: left;
+    border: 1px solid red;
+    overflow-y: auto;
+}
