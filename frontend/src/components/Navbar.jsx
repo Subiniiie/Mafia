@@ -1,12 +1,16 @@
 import { useState } from "react"
 import LoginModal from "../modals/LoginModal";
+import SignUpModal from "../modals/SignUpModal"
 import Friends from '../modals/Friends';
 import './Navbar.css';
 
 const Navbar = ({ isLoggedIn, username }) => {
 
-    const [isModalOpen, setIsModalOpen] = useState(false)
-    const openModal = () => setIsModalOpen(!isModalOpen)
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+    const openLoginModal = () => setIsLoginModalOpen(!isLoginModalOpen)
+
+    const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false)
+    const openSignUpModal = () => setIsSignUpModalOpen(!isSignUpModalOpen)
 
     return (
         <nav className="navbar">
@@ -28,9 +32,11 @@ const Navbar = ({ isLoggedIn, username }) => {
                 ) : (
                     <>
                         {/* <a href="/login">활동하기</a> */}
-                        <button onClick={openModal}>활동하기</button>
-                        <LoginModal isOpen={isModalOpen} openModal={openModal} />
-                        <a href="/signup">독립군 입단</a>
+                        <button onClick={openLoginModal}>활동하기</button>
+                        <LoginModal isOpen={isLoginModalOpen} openModal={openLoginModal} />
+                        {/* <a href="/signup">독립군 입단</a> */}
+                        <button onClick={openSignUpModal}>독립군 입단</button>
+                        <SignUpModal isOpen={isSignUpModalOpen} openModal={openSignUpModal} />
                         <a href="/settings">설정</a>
                     </>
                 )}
