@@ -1,0 +1,27 @@
+.btn {
+    border: none;
+    background-color: transparent;
+}
+
+.btn:focus, .btn:active {
+    outline: none;
+    border: none;
+}
+
+.btn:hover {
+    color: blue;
+}
+
+.container {
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   width: 630px;
+   height: 420px;
+   color: black;
+   background-color: #fafafa;
+   border: 1px solid black;
+   border-radius: 20px;
+   z-index: 100;
+}

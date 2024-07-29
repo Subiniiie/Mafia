@@ -1,0 +1,23 @@
+.container {
+    height: 7vh;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.right {
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+}
+
+.exit {
+    text-decoration: none;
+}
+
+.settings {
+    color: black;
+}
