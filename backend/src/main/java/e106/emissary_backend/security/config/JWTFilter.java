@@ -1,7 +1,8 @@
 package e106.emissary_backend.security.config;
 
-import e106.emissary_backend.security.dto.CustomOAuth2User;
+import e106.emissary_backend.user.dto.CustomOAuth2User;
 import e106.emissary_backend.security.util.JWTUtil;
+import e106.emissary_backend.user.dto.CustomUserDetails;
 import e106.emissary_backend.user.entity.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -26,6 +27,7 @@ import java.util.Optional;
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
+    private final String IS_COME;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
@@ -38,12 +40,19 @@ public class JWTFilter extends OncePerRequestFilter {
                 .orElse(null);
 
         if (token != null && jwtUtil.validateToken(token)) {
+            Authentication authToken = null;
             User user = User.builder()
                     .nickname(jwtUtil.getUsername(token))
+                    .role(jwtUtil.getRole(token))
                     .build();
-            CustomOAuth2User customOAuth2User = new CustomOAuth2User(user, Map.of());
-            Authentication authToken = new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities());
-
+            if(Objects.equals(IS_COME, "OAUTH")) {
+                CustomOAuth2User customOAuth2User = new CustomOAuth2User(user, Map.of());
+                authToken = new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities());
+            }
+            if(Objects.equals(IS_COME, "COMMON")) {
+                CustomUserDetails customUserDetails = new CustomUserDetails(user);
+                authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+            }
             SecurityContextHolder.getContext().setAuthentication(authToken);
         }
 

@@ -1,7 +1,6 @@
-package e106.emissary_backend.security.service;
+package e106.emissary_backend.user.service;
 
-import ch.qos.logback.core.CoreConstants;
-import e106.emissary_backend.security.dto.CustomOAuth2User;
+import e106.emissary_backend.user.dto.CustomOAuth2User;
 import e106.emissary_backend.security.dto.GoogleResponse;
 import e106.emissary_backend.security.dto.OAuth2Response;
 import e106.emissary_backend.user.entity.User;

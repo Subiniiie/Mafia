@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @CrossOrigin
 public class UserController {
+
     private final UserService userService;
 
     @GetMapping("/api/checkemail")
@@ -67,7 +69,7 @@ public class UserController {
     @GetMapping("/api/users")
     @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
     public ResponseEntity<Map<String, Object>> detailsUser(Authentication authentication) {
-        User res = userService.detailsUser(authentication.getName());
+        UserDetails res = userService.loadUserByUsername(authentication.getName());
         Map<String, Object> map = new HashMap<>();
         if(res == null) {
             map.put("status", "fail");

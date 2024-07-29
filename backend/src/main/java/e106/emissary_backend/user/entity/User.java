@@ -18,7 +18,7 @@ import java.util.Collection;
 @Builder
 @Table(name = "users")
 @EqualsAndHashCode(callSuper=false)
-public class User extends BaseEntity implements UserDetails {
+public class User extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,64 +37,44 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "skin_img_url", length = 30)
     private String skinImgUrl; // img url 추가
 
-    @Column(name = "modified_at")
-    private LocalDateTime modifiedAt;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @ColumnDefault("0")
+    @Builder.Default
     @Column(name = "mafia_win_cnt")
-    private Long mafiaWinCnt;
+    private Long mafiaWinCnt = 0L;
 
-    @ColumnDefault("0")
+    @Builder.Default
     @Column(name = "mafia_play_cnt")
-    private Long mafiaPlayCnt;
+    private Long mafiaPlayCn = 0L;
 
-    @ColumnDefault("0")
+    @Builder.Default
     @Column(name = "police_win_cnt")
-    private Long policeWinCnt;
+    private Long policeWinCnt = 0L;
 
-    @ColumnDefault("0")
+    @Builder.Default
     @Column(name = "police_play_cnt")
-    private Long policePlayCnt;
+    private Long policePlayCnt = 0L;
 
-    @ColumnDefault("0")
+    @Builder.Default
     @Column(name = "turncoat_game_cnt")
-    private Long turncoatGameCnt;
+    private Long turncoatGameCnt = 0L;
 
-    @ColumnDefault("0")
+    @Builder.Default
     @Column(name = "turncoat_win_cnt")
-    private Long turncoatWinCnt;
+    private Long turncoatWinCnt = 0L;
 
-    @ColumnDefault("0")
+    @Builder.Default
     @Column(name = "citizen_game_cnt")
-    private Long citizenGameCnt;
+    private Long citizenGameCnt = 0L;
 
-    @ColumnDefault("0")
+    @Builder.Default
     @Column(name = "citizen_win_cnt")
-    private Long citizenWinCnt;
+    private Long citizenWinCnt = 0L;
 
-    @ColumnDefault("'ROLE_USER'")
     @Builder.Default
     @Column(name = "role", nullable = false, length = 45)
     private String role = "ROLE_USER";
 
-    @ColumnDefault("false")
-    @Column(name = "is_deleted", nullable = true)
-    private Boolean isDeleted;
-
-
-    @Override
-    public String getUsername() {
-        return getEmail();
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<GrantedAuthority> collection = new ArrayList<>();
-        collection.add(new SimpleGrantedAuthority(this.getRole()));
-        return collection;
-    }
+    @Builder.Default
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
 
 }

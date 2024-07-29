@@ -1,4 +1,4 @@
-package e106.emissary_backend.security.dto;
+package e106.emissary_backend.user.dto;
 
 import e106.emissary_backend.user.entity.User;
 import lombok.RequiredArgsConstructor;

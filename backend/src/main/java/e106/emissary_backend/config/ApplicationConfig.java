@@ -1,5 +1,6 @@
 package e106.emissary_backend.config;
 
+import e106.emissary_backend.user.dto.CustomUserDetails;
 import e106.emissary_backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -30,8 +31,9 @@ public class ApplicationConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return (username -> {
-            return userRepository.findByEmail(username)
+        return (email -> {
+            return userRepository.findByEmail(email)
+                    .map(CustomUserDetails::new)
                     .orElseThrow(()-> new UsernameNotFoundException("User not found"));
         });
     }
@@ -42,11 +44,6 @@ public class ApplicationConfig {
         authProvider.setUserDetailsService(userDetailsService());
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception{
-        return config.getAuthenticationManager();
     }
 
     @Bean

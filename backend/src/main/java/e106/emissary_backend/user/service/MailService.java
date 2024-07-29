@@ -1,5 +1,7 @@
+/*
 package e106.emissary_backend.user.service;
 
+import e106.emissary_backend.user.dto.MailRequest;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -26,13 +28,13 @@ public class MailService {
         return str.toString();
     }
 
-    public MimeMessage CreateMail(String mail){
+    public MimeMessage CreateMail(MailRequest request){
         tmp = verifyCode();
         MimeMessage message = javaMailSender.createMimeMessage();
 
         try{
             message.setFrom(senderEmail);
-            message.setRecipients(MimeMessage.RecipientType.TO,mail);
+            message.setRecipients(MimeMessage.RecipientType.TO,request.getMail());
             message.setSubject("이메일 인증");
             String body = "";
             body += "<h3>" + "요청하신 인증 번호입니다." + "</h3>";
@@ -45,10 +47,10 @@ public class MailService {
         return message;
     }
 
-    public String sendMail(String mail){
-        MimeMessage message = CreateMail(mail);
+    public String sendMail(MailRequest request){
+        MimeMessage message = CreateMail(request);
         javaMailSender.send(message);
         return tmp;
     }
-
 }
+*/

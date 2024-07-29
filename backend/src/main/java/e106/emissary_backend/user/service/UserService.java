@@ -1,12 +1,16 @@
 package e106.emissary_backend.user.service;
 
-import e106.emissary_backend.user.dto.CheckRequest;
-import e106.emissary_backend.user.dto.EditRequest;
-import e106.emissary_backend.user.dto.RegisterRequest;
+import e106.emissary_backend.user.dto.*;
 import e106.emissary_backend.user.entity.User;
 import e106.emissary_backend.user.repository.UserRepository;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,14 +18,19 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JavaMailSender javaMailSender;
+    private static final String senderEmail = "emissary1931@gmail.com";
+    private static String tmp;
     private final char[] charSet = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
             'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
 
+
     @Transactional
     public int registerUser(RegisterRequest request){
+//        if(!request.getEmailVerify().equals(tmp))return -1;
         try{
             User newUser = User.builder()
                     .nickname(request.getNickname())
@@ -39,7 +48,6 @@ public class UserService {
     @Transactional
     public void updateUser(EditRequest request, String email){
         Optional<User> present = userRepository.findByEmail(email);
-        //
         if(present.isPresent()){
             User user = present.get();
             user.setNickname(request.getNickname() != null ? request.getNickname() : present.get().getNickname());
@@ -75,6 +83,16 @@ public class UserService {
         Optional<User> present = userRepository.findByEmail(email);
         if(present.isPresent()){
             return present.get();
+        } else {
+            throw new RuntimeException("회원정보를 다시 확인하세요");
+        }
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Optional<User> present = userRepository.findByEmail(email);
+        if(present.isPresent()){
+            return new CustomUserDetails(present.get());
         } else{
             throw new RuntimeException("회원정보를 다시 확인하세요");
         }
@@ -113,6 +131,41 @@ public class UserService {
             throw new RuntimeException("회원정보를 다시 확인하세요");
         }
         return 1;
+    }
+
+    public String verifyCode(){
+        StringBuilder str = new StringBuilder();
+        int idx = 0;
+        for(int i = 0; i < 6; i++){
+            idx = (int)(charSet.length * Math.random());
+            str.append(charSet[idx]);
+        }
+        return str.toString();
+    }
+
+    public MimeMessage CreateMail(MailRequest request){
+        tmp = verifyCode();
+        MimeMessage message = javaMailSender.createMimeMessage();
+
+        try{
+            message.setFrom(senderEmail);
+            message.setRecipients(MimeMessage.RecipientType.TO,request.getMail());
+            message.setSubject("이메일 인증");
+            String body = "";
+            body += "<h3>" + "요청하신 인증 번호입니다." + "</h3>";
+            body += "<h1>" + tmp + "</h1>";
+            body += "<h3>" + "감사합니다." + "</h3>";
+            message.setText(body, "UTF-8", "html");
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+        return message;
+    }
+
+    public String sendMail(MailRequest request){
+        MimeMessage message = CreateMail(request);
+        javaMailSender.send(message);
+        return tmp;
     }
 
 }

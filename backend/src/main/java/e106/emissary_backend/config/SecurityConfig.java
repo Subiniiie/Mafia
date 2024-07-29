@@ -2,14 +2,18 @@ package e106.emissary_backend.config;
 
 import e106.emissary_backend.security.config.JWTFilter;
 import e106.emissary_backend.security.config.CustomSuccessHandler;
-import e106.emissary_backend.security.service.CustomOAuth2UserService;
+import e106.emissary_backend.security.config.LoginFilter;
+import e106.emissary_backend.user.service.CustomOAuth2UserService;
 import e106.emissary_backend.security.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -24,6 +28,7 @@ public class SecurityConfig {
     private final CustomOAuth2UserService oAuth2UserService;
     private final CustomSuccessHandler customSuccessHandler;
     private final JWTUtil jwtUtil;
+    private final AuthenticationConfiguration authenticationConfiguration;
 
     // Configuring HttpSecurity
     @Bean
@@ -62,20 +67,27 @@ public class SecurityConfig {
                 .httpBasic((auth) -> auth.disable());
         //JWTFilter 추가
         http
-                .addFilterAfter(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAfter(new JWTFilter(jwtUtil, "OAUTH"), UsernamePasswordAuthenticationFilter.class);
         //oauth2
         http
                 .oauth2Login((oauth2) -> oauth2
+                        .authorizationEndpoint(endpoint ->
+                                endpoint.baseUri("/oauth2/authorization"))
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
                                 .userService(oAuth2UserService))
                         .successHandler(customSuccessHandler));
 
-        //경로별 인가 작업
+        //경로별 인가 작업 (/login 페이지와 루트 페이지, 회원가입페이지는 비로그인한 사람에게 접근 허용)
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/").permitAll()
+                        .requestMatchers("/login","/", "/api/user").permitAll()
                         .anyRequest().authenticated());
 
+        http
+                .addFilterBefore(new JWTFilter(jwtUtil, "COMMON"), UsernamePasswordAuthenticationFilter.class);
+
+        http
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil), UsernamePasswordAuthenticationFilter.class);
         //세션 설정 : STATELESS
         http
                 .sessionManagement((session) -> session
@@ -84,4 +96,8 @@ public class SecurityConfig {
         return http.build();
     }
 
+    @Bean
+    public static AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception{
+        return config.getAuthenticationManager();
+    }
 }

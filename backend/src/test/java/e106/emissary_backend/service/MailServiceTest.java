@@ -1,6 +1,8 @@
 package e106.emissary_backend.service;
 
-import e106.emissary_backend.user.service.MailService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import e106.emissary_backend.user.dto.MailRequest;
+import e106.emissary_backend.user.service.UserService;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +14,7 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,21 +29,29 @@ class MailServiceTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private MailService mailService;
+    private UserService mailService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     @WithMockUser(username = "testuser", roles = "USER")
     void testMailSend() throws Exception {
-        String testEmail = "hwk216@naver.com";
+
+        MailRequest mailRequest = new MailRequest();
+        mailRequest.setMail("hwk216@naver.com");
+
+        String jsonRequest = objectMapper.writeValueAsString(mailRequest);
 
         MvcResult result = mockMvc.perform(post("/mail")
-                        .with(csrf())
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .param("mail", testEmail))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonRequest))
                 .andExpect(status().isOk())
                 .andReturn();
 
         String content = result.getResponse().getContentAsString();
-        assertEquals(content, content);
+        assertNotNull(content);
+        assertEquals(6, content.length());
+        assertTrue(content.matches("[0-9A-Z]{6}"));
     }
 }
