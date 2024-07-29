@@ -9,8 +9,8 @@ import ProfilePage from './pages/ProfilePage'
 import './App.css'
 
 function App() {
-  const [isLoggedIn] = useState(false);  // 로그인 상태를 여기에 맞게 설정하세요
-  // const [isLoggedIn, setIsLoggedIn] = useState(true);  // 로그인 상태를 여기에 맞게 설정하세요
+  // const [isLoggedIn] = useState(false);  // 로그인 상태를 여기에 맞게 설정하세요
+  const [isLoggedIn, setIsLoggedIn] = useState(true);  // 로그인 상태를 여기에 맞게 설정하세요
   const username = "이현규";  // 로그인된 사용자의 이름
   return (
     <>
