@@ -1,5 +1,6 @@
 package e106.emissary_backend.global.config;
 
+import e106.emissary_backend.domain.game.model.Game;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -20,13 +21,14 @@ public class RedisConfig{
     }
 
     @Bean
-    public RedisTemplate<Long, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<Long, Object> redisTemplate = new RedisTemplate<>();
+    public RedisTemplate<Long, Game> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<Long, Game> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);
         redisTemplate.setKeySerializer(new GenericToStringSerializer<>(Long.class));
         redisTemplate.setHashKeySerializer(new GenericToStringSerializer<>(Long.class));
-        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(Object.class));
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(Game.class)); // Game으로 변경
         return redisTemplate;
     }
+
 
 }

@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 
-@EnableJpaAuditing
+//@EnableJpaAuditing
 @SpringBootApplication
 @EnableRedisRepositories
 public class EmissaryBackendApplication {

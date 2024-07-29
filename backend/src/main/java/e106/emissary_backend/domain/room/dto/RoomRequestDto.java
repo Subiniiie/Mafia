@@ -1,14 +1,12 @@
 package e106.emissary_backend.domain.room.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Setter
 public class RoomRequestDto {
     private String title;
     private int password;

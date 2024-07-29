@@ -16,8 +16,6 @@ class RedisGameRepositoryTest {
     @Autowired
     private RedisGameRepository redisGameRepository;
 
-    @Autowired
-    private RedisTemplate<Long, Game> redisTemplate;
 
     private Game game;
 
