@@ -1,5 +1,5 @@
 import React from "react";
-import SearchBar from "../components/GameListComponents/SearchBar";
+import SearchBar from "../components/SearchBar";
 
 function FriendsListTab() {
     // 친구 목록 데이터를 받아와야함

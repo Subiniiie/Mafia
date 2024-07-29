@@ -1,5 +1,5 @@
 import React from "react";
-import SearchBar from "../components/GameListComponents/SearchBar";
+import SearchBar from "../components/SearchBar";
 
 function FriendsSearchTab() {
     // 랜덤으로 친구를 보여줌?
@@ -23,7 +23,7 @@ function FriendsSearchTab() {
                     </li>
                 ))}
             </ul>
-            <SearchBar />
+            <SearchBar placeholder="동지 이름을 입력해주세요."/>
         </>
     )
 }
