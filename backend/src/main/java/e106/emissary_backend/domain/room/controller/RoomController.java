@@ -2,7 +2,6 @@ package e106.emissary_backend.domain.room.controller;
 
 import e106.emissary_backend.domain.room.dto.RoomOptionDto;
 import e106.emissary_backend.domain.room.dto.RoomRequestDto;
-import e106.emissary_backend.domain.room.entity.Room;
 import e106.emissary_backend.domain.room.dto.RoomListDto;
 import e106.emissary_backend.domain.room.service.RoomService;
 import e106.emissary_backend.global.common.CommonResponseDto;
@@ -29,6 +28,20 @@ public class RoomController {
     @DeleteMapping("/api/rooms/{roomId}")
     public ResponseEntity<CommonResponseDto> deleteRoom(@PathVariable Long roomId){
         return ResponseEntity.ok(roomService.deleteRoom(roomId));
+    }
+
+    /**
+     * 방 생성
+     */
+
+    /**
+     * 방 입장
+     */
+    // Todo : JWT 처리하는거 추가.
+    @PostMapping("/rooms/{roomId}")
+    public ResponseEntity<CommonResponseDto> enterRoom(@PathVariable Long roomId, @RequestHeader("Authentication") String token) {
+        long userId = Long.parseLong(token);
+        return ResponseEntity.ok(roomService.enterRoom(roomId, userId));
     }
 
     @DeleteMapping("/api/rooms/{roomId}/{userId}")

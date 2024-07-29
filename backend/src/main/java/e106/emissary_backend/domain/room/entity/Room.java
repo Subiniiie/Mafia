@@ -1,6 +1,5 @@
 package e106.emissary_backend.domain.room.entity;
 
-import e106.emissary_backend.domain.room.dto.RoomOptionDto;
 import e106.emissary_backend.domain.room.dto.RoomRequestDto;
 import e106.emissary_backend.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -29,8 +28,8 @@ public class Room extends BaseTimeEntity {
     @Column(name = "owner_id", nullable = false)
     private long ownerId;
 
-    @Column(name = "now_player")
-    private int nowPlayer;
+//    @Column(name = "now_player")
+//    private int nowPlayer;
 
     @Column(name = "max_player")
     private int maxPlayer;
@@ -44,4 +43,5 @@ public class Room extends BaseTimeEntity {
         maxPlayer = roomRequestDto.getMaxPlayer();
         haveBetray = roomRequestDto.isHaveBetray();
     }
+
 }
