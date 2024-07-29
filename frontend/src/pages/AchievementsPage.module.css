@@ -1,0 +1,17 @@
+.container {
+    display: flex;
+    flex-direction: row;
+}
+
+.category {
+    border: 1px solid black;
+    height: 100vh;
+    width: 15%;
+    color: AchievementsPage.module.css
+}
+
+.main {
+    border: 1px solid black;
+    height: 100vh;
+    width: 85%;
+}

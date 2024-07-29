@@ -1,4 +1,5 @@
 import { useState } from "react"
+import {NavLink, Link} from "react-router-dom"
 import LoginModal from "../modals/LoginModal";
 import Friends from '../modals/Friends';
 import './Navbar.css';
@@ -11,8 +12,10 @@ const Navbar = ({ isLoggedIn, username }) => {
     return (
         <nav className="navbar">
             <div className="navbar-brand">
-                <span>밀정</span>
-                <span className="year">1931</span>
+                <Link to="/" className="main-link">
+                    <span>밀정</span>
+                    <span className="year">1931</span>
+                </Link>                
             </div>
             <div className="navbar-content">
                 {isLoggedIn ? (
@@ -22,8 +25,8 @@ const Navbar = ({ isLoggedIn, username }) => {
                             <span><NavLink to="/" className="username">{username}님</NavLink>, 오늘도 대한 독립 만세!</span>
                         </div>
                         <div className="navbar-links">
-                            <a href="/profile">프로필</a>
-                            <a href="/comrades">동지들</a>
+                            <a href="/achievements">프로필</a>
+                            <Friends />
                             <a href="/settings">설정</a>
                         </div>
                     </>
