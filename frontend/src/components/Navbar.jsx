@@ -1,13 +1,17 @@
 import { useState } from "react"
 import {NavLink, Link} from "react-router-dom"
 import LoginModal from "../modals/LoginModal";
+import SignUpModal from "../modals/SignUpModal"
 import Friends from '../modals/Friends';
 import './Navbar.css';
 
 const Navbar = ({ isLoggedIn, username }) => {
 
-    const [isModalOpen, setIsModalOpen] = useState(false)
-    const openModal = () => setIsModalOpen(!isModalOpen)
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+    const openLoginModal = () => setIsLoginModalOpen(!isLoginModalOpen)
+
+    const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false)
+    const openSignUpModal = () => setIsSignUpModalOpen(!isSignUpModalOpen)
 
     return (
         <nav className="navbar">
@@ -32,8 +36,17 @@ const Navbar = ({ isLoggedIn, username }) => {
                     </>
                 ) : (
                     <>
+<<<<<<< HEAD
                         <a href="/login">활동하기</a>
                         <a href="/signup">독립군 입단</a>
+=======
+                        {/* <a href="/login">활동하기</a> */}
+                        <button onClick={openLoginModal}>활동하기</button>
+                        <LoginModal isOpen={isLoginModalOpen} openModal={openLoginModal} />
+                        {/* <a href="/signup">독립군 입단</a> */}
+                        <button onClick={openSignUpModal}>독립군 입단</button>
+                        <SignUpModal isOpen={isSignUpModalOpen} openModal={openSignUpModal} />
+>>>>>>> 9bb9a95fb2d5dc4cdfc9236e0e92491a2041d6a6
                         <a href="/settings">설정</a>
                     </>
                 )}
