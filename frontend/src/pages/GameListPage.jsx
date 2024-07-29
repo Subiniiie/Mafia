@@ -1,17 +1,19 @@
-import { Link } from "react-router-dom";
-import Navbar from "../components/Navbar"
-import GLHeader from "../components/GameListComponents/GLHeader"
-import GLMain from "../components/GameListComponents/GLMain"
+import GLHeader from "../components/GameListComponents/GLHeader";
+import GLMain from "../components/GameListComponents/GLMain";
+import GLFooter from "../components/GameListComponents/GLFooter";
+import styles from "./GameListPage.module.css";
+
 
 function GameListPage() {
     return (
-        <div>
-            <Navbar />
+        <div className={styles.layout}>
             <GLHeader />
-            <Link to="/game-room">게임 방 페이지</Link>
-            <GLMain />
+            <main className={styles.main}>
+                <GLMain />
+            </main>
+            <GLFooter />
         </div>
-    )
+    );
 }
 
 export default GameListPage;

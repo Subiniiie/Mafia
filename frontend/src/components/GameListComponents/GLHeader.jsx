@@ -1,6 +1,6 @@
 import { useState } from "react"
 import FilterBox from "./FilterBox"
-import SearchBar from "./SearchBar"
+import SearchBar from "../../components/SearchBar"
 import CreateRoomModal from "../../modals/CreateRoomModal"
 import styles from "./GLHeader.module.css"
 
@@ -17,7 +17,7 @@ const GLHeader = () => {
                     <FilterBox />
                 </div>
                 <div className={styles.searchSection}>
-                    <SearchBar />
+                    <SearchBar placeholder="터전을 찾아보세요."/>
                 </div>
                 <div className={styles.buttonSection}>
                     <button onClick={openModal}>새로운 도전</button>

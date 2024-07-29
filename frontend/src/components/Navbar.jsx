@@ -1,9 +1,13 @@
-import {Link, NavLink} from 'react-router-dom';
-
-import React from 'react';
+import { useState } from "react"
+import LoginModal from "../modals/LoginModal";
+import Friends from '../modals/Friends';
 import './Navbar.css';
 
 const Navbar = ({ isLoggedIn, username }) => {
+
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const openModal = () => setIsModalOpen(!isModalOpen)
+
     return (
         <nav className="navbar">
             <div className="navbar-brand">
@@ -18,18 +22,16 @@ const Navbar = ({ isLoggedIn, username }) => {
                             <span><NavLink to="/" className="username">{username}님</NavLink>, 오늘도 대한 독립 만세!</span>
                         </div>
                         <div className="navbar-links">
-                            <NavLink to="/profile">프로필</NavLink>
-                            <NavLink to="/comrades">동지들</NavLink>
-                            <NavLink to="/settings">설정</NavLink>
+                            <a href="/profile">프로필</a>
+                            <a href="/comrades">동지들</a>
+                            <a href="/settings">설정</a>
                         </div>
                     </>
                 ) : (
                     <>
-                        <div className="navbar-links">
-                            <NavLink to="/login">활동하기</NavLink>
-                            <NavLink to="/signup">독립군 입단</NavLink>
-                            <NavLink to="/settings">설정</NavLink>
-                        </div>
+                        <a href="/login">활동하기</a>
+                        <a href="/signup">독립군 입단</a>
+                        <a href="/settings">설정</a>
                     </>
                 )}
             </div>

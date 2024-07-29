@@ -1,0 +1,13 @@
+.layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.main {
+    overflow-y: auto;
+    /* 내용이 길어질 경우 스크롤 가능 */
+    flex-grow: 1;
+    /* 나머지 공간을 채우도록 설정 */
+    background-color: #12151D;
+}

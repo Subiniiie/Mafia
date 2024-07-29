@@ -7,7 +7,7 @@
 //     )
 // }
 
-const SearchBar = () => {
+const SearchBar = ({placeholder}) => {
 
     return (
         <form
@@ -16,7 +16,7 @@ const SearchBar = () => {
             <input
                 required
                 type="text"
-                placeholder={"터전을 찾아보세요."}
+                placeholder={placeholder}
                 className="border-none w-[90%] pl-2"
             />
             <button className="w-[10%]">
