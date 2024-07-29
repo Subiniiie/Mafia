@@ -1,8 +1,8 @@
 package e106.emissary_backend.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import e106.emissary_backend.user.dto.MailRequest;
-import e106.emissary_backend.user.service.UserService;
+import e106.emissary_backend.domain.user.dto.MailRequest;
+import e106.emissary_backend.domain.user.service.UserService;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
