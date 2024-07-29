@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 import styles from "./GameRoomCard.module.css";
 
-const GameRoomCard = ({ title, leader, progress, isInProgress }) => {
+const GameRoomCard = ({ title, leader, progress, isInProgress, id }) => {
     return (
         <div>
-            <Link to="/game-room" className={`${styles.card} ${isInProgress ? styles.inProgress : styles.notStarted}`}>
+            <Link to={`/game-room/${id}`} className={`${styles.card} ${isInProgress ? styles.inProgress : styles.notStarted}`}>
                 <div>
                     <p className={styles.title}>{title}</p>
                     <p className={styles.leader}>대장 동지 : {leader}</p>

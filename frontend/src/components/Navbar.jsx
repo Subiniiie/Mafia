@@ -21,7 +21,6 @@ const Navbar = ({ isLoggedIn, username }) => {
                         <span className="username">{username}님, 오늘도 대한 독립 만세!</span>
                         <div className="navbar-links">
                             <a href="/profile">프로필</a>
-                            <a href="/comrades">동지들</a>
                             <Friends />
                             <a href="/settings">설정</a>
                         </div>
