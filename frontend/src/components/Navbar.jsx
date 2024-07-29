@@ -1,9 +1,21 @@
 import {Link, NavLink} from 'react-router-dom';
 
+import { useSelector, useDispatch } from "react-redux";
+import * as actions from "../actions/loginAction.jsx"
+
 import React from 'react';
 import './Navbar.css';
 
-const Navbar = ({ isLoggedIn, username }) => {
+const Navbar = () => {
+    const isLoggedIn = useSelector((state) => state.loginStatus).status;
+    const dispatch = useDispatch();
+    const username = "이현규"
+
+    const logout= () => {
+        localStorage.removeItem("LOGIN_INFO");
+        dispatch(actions.logout());
+    }
+
     return (
         <nav className="navbar">
             <div className="navbar-brand">
