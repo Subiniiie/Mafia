@@ -10,7 +10,9 @@ import lombok.*;
 import java.io.Serializable;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisHash;
 
+@RedisHash("player")
 @Slf4j
 @Getter
 @Builder
