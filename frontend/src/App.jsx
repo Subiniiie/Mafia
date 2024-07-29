@@ -7,6 +7,7 @@ import GamePage from './pages/GamePage'
 import AchievementsPage from './pages/AchievementsPage'
 import ProfilePage from './pages/ProfilePage'
 import './App.css'
+import PrivateRoute from "./routes/PrivateRoute.jsx";
 
 function App() {
   // const [isLoggedIn] = useState(false);  // 로그인 상태를 여기에 맞게 설정하세요
@@ -18,10 +19,12 @@ function App() {
 
         <Routes>
           <Route path='/' element={<MainPage />}></Route>
-          <Route path='/game-list' element={<GameListPage />}></Route>
-          <Route path={'/game-room/:id'} element={<GamePage />}></Route>
-          <Route path='/achievements' element={<AchievementsPage />}></Route>
-          <Route path='/profile' element={<ProfilePage />}></Route>
+          <Route element={<PrivateRoute />}>
+            <Route path='/game-list' element={<GameListPage />}></Route>
+            <Route path={'/game-room/:id'} element={<GamePage />}></Route>
+            <Route path='/achievements' element={<AchievementsPage />}></Route>
+            <Route path='/profile' element={<ProfilePage />}></Route>
+          </Route>
         </Routes>
     </>
   )
