@@ -1,34 +1,33 @@
-package e106.emissary_backend.domain.game.entity;
+package e106.emissary_backend.domain.game.model;
 
 import e106.emissary_backend.domain.game.enumType.GameRole;
 import e106.emissary_backend.domain.game.enumType.GameState;
-import e106.emissary_backend.domain.game.model.Player;
-import e106.emissary_backend.domain.user.entity.User;
 import e106.emissary_backend.global.error.CommonErrorCode;
 import e106.emissary_backend.global.error.exception.GameFullException;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.index.Indexed;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.List;
 
+@RedisHash("game")
 @Getter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-@RedisHash(value = "game")
+@NoArgsConstructor
 public class Game {
-
     @Id
     private Long gameId;
 
-    private String name;
+    private String title;
 
     private String ownerName;
 
@@ -38,12 +37,11 @@ public class Game {
 
     private Player police;
 
-    private boolean haveBetrayer;
+    private boolean isHaveBetrayer;
 
     private Player betrayer;
 
-//    private List<Player> playerList = new ArrayList<>();
-    // ID, player객체
+    @Builder.Default
     private Map<Long, Player> playerMap = new HashMap<>();
 
     @Enumerated(EnumType.STRING)

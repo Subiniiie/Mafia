@@ -36,20 +36,20 @@ public class SocketRoomController {
 ////        }
 //    }
 
-    // 위에 방법을 Redis에 맞게 바꾼게 아래 코드임
-    // PathVariable 사용시 오류 생김
-    @MessageMapping("/{roomId}/enter")
-    public void enterGameRoom(@DestinationVariable String roomId,
-                              SimpMessageHeaderAccessor headerAccessor) {
-        String userId = headerAccessor.getFirstNativeHeader("User");
-        
-        if(userId != null) {
-            // Todo : redis에 정보 저장 및 채팅방 입장처리
-            // roomId를 찾아서 방을 찾고 -> 그 방에 입장처리하기 <- 이건 redisRepository까지 가는게 맞지않을까?
-
-            // 이렇게 하면 이제 Javascript에서 responseDTO를 JSON으로 만든 데이터를 받아서
-            // 구독중인 모든 클라이언트의 화면을 바꿀 수 있음.
-            simpMessagingTemplate.convertAndSend("/sub/" + roomId, responseDTO);
-        }
-    }
+//    // 위에 방법을 Redis에 맞게 바꾼게 아래 코드임
+//    // PathVariable 사용시 오류 생김
+//    @MessageMapping("/{roomId}/enter")
+//    public void enterGameRoom(@DestinationVariable String roomId,
+//                              SimpMessageHeaderAccessor headerAccessor) {
+//        String userId = headerAccessor.getFirstNativeHeader("User");
+//
+//        if(userId != null) {
+//            // Todo : redis에 정보 저장 및 채팅방 입장처리
+//            // roomId를 찾아서 방을 찾고 -> 그 방에 입장처리하기 <- 이건 redisRepository까지 가는게 맞지않을까?
+//
+//            // 이렇게 하면 이제 Javascript에서 responseDTO를 JSON으로 만든 데이터를 받아서
+//            // 구독중인 모든 클라이언트의 화면을 바꿀 수 있음.
+//            simpMessagingTemplate.convertAndSend("/sub/" + roomId, responseDTO);
+//        }
+//    }
 }

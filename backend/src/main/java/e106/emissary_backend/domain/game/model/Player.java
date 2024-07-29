@@ -4,13 +4,15 @@ package e106.emissary_backend.domain.game.model;
 import e106.emissary_backend.domain.game.enumType.GameRole;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
 import lombok.*;
 
 import java.io.Serializable;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.redis.core.RedisHash;
 
+@RedisHash("player")
 @Slf4j
 @Getter
 @Builder
