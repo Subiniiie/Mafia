@@ -1,20 +1,17 @@
-import {Link, NavLink} from 'react-router-dom';
-
-import { useSelector, useDispatch } from "react-redux";
-import * as actions from "../actions/loginAction.jsx"
-
-import React from 'react';
+import { useState } from "react"
+import {Link, NavLink} from "react-router-dom";
+import LoginModal from "../modals/LoginModal";
+import SignUpModal from "../modals/SignUpModal.jsx"
+import Friends from '../modals/Friends';
 import './Navbar.css';
 
-const Navbar = () => {
-    const isLoggedIn = useSelector((state) => state.loginStatus).status;
-    const dispatch = useDispatch();
-    const username = "이현규"
+const Navbar = ({ isLoggedIn, username }) => {
 
-    const logout= () => {
-        localStorage.removeItem("LOGIN_INFO");
-        dispatch(actions.logout());
-    }
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+    const openLoginModal = () => setIsLoginModalOpen(!isLoginModalOpen)
+
+    const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false)
+    const openSignUpModal = () => setIsSignUpModalOpen(!isSignUpModalOpen)
 
     return (
         <nav className="navbar">
@@ -22,7 +19,7 @@ const Navbar = () => {
                 <Link to="/" className="main-link">
                     <span>밀정</span>
                     <span className="year">1931</span>
-                </Link>                
+                </Link>
             </div>
             <div className="navbar-content">
                 {isLoggedIn ? (
@@ -51,6 +48,7 @@ const Navbar = () => {
             </div>
         </nav>
     );
+
 };
 
 export default Navbar;
