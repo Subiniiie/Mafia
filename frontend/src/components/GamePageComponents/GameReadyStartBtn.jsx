@@ -1,9 +1,10 @@
 import React, {useState} from "react";
-// import styled from "styled-components"
+import styled from "styled-components"
 
-// const ReadyStartBtn = styled.button`
-// color: red;
-// `
+
+const ReadyStartBtn = styled.button`
+color: red;
+`
 
 function GameReadyStartBtn({roomManager}) {
 
