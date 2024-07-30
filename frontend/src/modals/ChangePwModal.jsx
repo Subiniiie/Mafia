@@ -1,8 +1,8 @@
 import ModalHeader from "../components/ModalHeader"
-import styles from "./SignUpModal.module.css"
+import styles from "./ChangePwModal.module.css"
 
-const SignUpModal = ({ isOpen, openModal }) => {
-    const modalTitle = 'SignUp Modal';
+const ChangePwModal = ({ isOpen, openModal }) => {
+    const modalTitle = 'Change PW Modal';
 
     if (!isOpen) return null; // 모달이 열리지 않았다면 렌더링하지 않음
 
@@ -19,37 +19,26 @@ const SignUpModal = ({ isOpen, openModal }) => {
                         className={styles.inputField}
                     />
 
-                    <h5>닉네임</h5>
-                    <input
-                        required
-                        type="text"
-                        placeholder="닉네임을 입력해주세요"
-                        className={styles.inputField}
-                    />
-
-                    <h5>비밀번호</h5>
-                    <input
-                        required
-                        type="text"
-                        placeholder="비밀번호를 입력해주세요"
-                        className={styles.inputField}
-                    />
-
-                    <h5>비밀번호 확인</h5>
-                    <input
-                        required
-                        type="text"
-                        placeholder="비밀번호를 다시 한번 입력해주세요"
-                        className={styles.inputField}
-                    />
-
-                    <button className={styles.submitButton}>
-                        입단하기
+                    <button>
+                        확인
                     </button>
+
+                    <h5>인증번호</h5>
+                    <input
+                        required
+                        type="text"
+                        placeholder="인증번호를 입력해주세요"
+                        className={styles.inputField}
+                    />
+
+                    <button>
+                        인증하기
+                    </button>
+
                 </div>
             </div>
         </div>
     );
 }
 
-export default SignUpModal;
+export default ChangePwModal;

@@ -1,8 +1,14 @@
 import ModalHeader from "../components/ModalHeader"
+import FindPwModal from "./FindPwModal";
 import styles from "./LoginModal.module.css"
+import { useState } from "react";
+
 
 const LoginModal = ({ isOpen, openModal }) => {
     const modalTitle = 'Login Modal';
+
+    const [isFindPwModalOpen, setIsFindPwModalOpen] = useState(false)
+    const openFindPwModal = () => setIsFindPwModalOpen(!isFindPwModalOpen)
 
     if (!isOpen) return null; // 모달이 열리지 않았다면 렌더링하지 않음
 
@@ -30,6 +36,10 @@ const LoginModal = ({ isOpen, openModal }) => {
                     <button className={styles.submitButton}>
                         활동하기
                     </button>
+
+                    <p onClick={openFindPwModal}>비밀번호 찾기</p>
+                    <FindPwModal isOpen={isFindPwModalOpen} openModal={openFindPwModal} />
+
                 </div>
             </div>
         </div>
