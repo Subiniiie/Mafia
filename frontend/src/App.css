@@ -1,4 +1,14 @@
 /* App.css */
+
+/* index.css 또는 App.css에 추가 */
+@import url('https://fonts.googleapis.com/css2?family=East+Sea+Dokdo&display=swap');
+
+.east-sea-dokdo-regular {
+  font-family: "East Sea Dokdo", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
 body,
 html {
   margin: 0;

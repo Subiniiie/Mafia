@@ -8,7 +8,7 @@ const LoginModal = ({ isOpen, openModal }) => {
     const modalTitle = 'Login Modal';
 
     const [isFindPwModalOpen, setIsFindPwModalOpen] = useState(false)
-    const openFindPwModal = () => setIsFindPwModalOpen(!isFindPwModalOpen)
+    const openFindPwModal = () => setIsFindPwModalOpen
 
     if (!isOpen) return null; // 모달이 열리지 않았다면 렌더링하지 않음
 
