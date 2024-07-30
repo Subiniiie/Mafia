@@ -33,16 +33,32 @@ public class RoomController {
     /**
      * 방 생성
      */
+    @PostMapping("/rooms")
+    public ResponseEntity<RoomOptionDto> makeRoom(@CookieValue("Authentication") String token,@RequestBody RoomRequestDto roomRequestDto) {
+        long userId = Long.parseLong(token);
+        return ResponseEntity.ok(roomService.makeRoom(userId, roomRequestDto));
+    }
 
     /**
      * 방 입장
      */
     // Todo : JWT 처리하는거 추가.
     @PostMapping("/rooms/{roomId}")
-    public ResponseEntity<CommonResponseDto> enterRoom(@PathVariable Long roomId, @RequestHeader("Authentication") String token) {
+    public ResponseEntity<CommonResponseDto> enterRoom(@CookieValue("Authentication") String token, @PathVariable Long roomId) {
         long userId = Long.parseLong(token);
         return ResponseEntity.ok(roomService.enterRoom(roomId, userId));
     }
+
+    /**
+     * 방 떠나기
+     */
+    @DeleteMapping("/rooms/{roomId}")
+    public ResponseEntity<CommonResponseDto> leaveRoom(@CookieValue("Authentication") String token, @PathVariable Long roomId) {
+        long userId = Long.parseLong(token);
+        return ResponseEntity.ok(roomService.leaveRoom(roomId, userId));
+    }
+
+
 
     @DeleteMapping("/api/rooms/{roomId}/{userId}")
     public ResponseEntity<CommonResponseDto> deleteRoom(@PathVariable Long roomId, @PathVariable Long userId){

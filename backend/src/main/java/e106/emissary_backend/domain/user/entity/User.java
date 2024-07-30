@@ -1,5 +1,6 @@
 package e106.emissary_backend.domain.user.entity;
 
+import e106.emissary_backend.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,7 +11,7 @@ import lombok.*;
 @Builder
 @Table(name = "users")
 @EqualsAndHashCode(callSuper=false)
-public class User extends BaseEntity{
+public class User extends BaseTimeEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

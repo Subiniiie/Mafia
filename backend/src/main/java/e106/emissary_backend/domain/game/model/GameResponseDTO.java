@@ -17,9 +17,9 @@ import java.util.Map;
 @AllArgsConstructor
 public class GameResponseDTO {
 
-    private long gameId;
+    private Long gameId;
 
-    private String name;
+    private String title;
 
     private String ownerName;
 
@@ -46,7 +46,7 @@ public class GameResponseDTO {
     public static GameResponseDTO toDto(Game game) {
         return GameResponseDTO.builder()
                 .gameId(game.getGameId())
-                .name(game.getName())
+                .title(game.getTitle())
                 .ownerName(game.getOwnerName())
                 .emissary(game.getEmissary())
                 .police(game.getPolice())

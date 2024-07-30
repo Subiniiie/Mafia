@@ -2,7 +2,6 @@ package e106.emissary_backend.domain.user.service;
 
 import e106.emissary_backend.domain.user.dto.*;
 import e106.emissary_backend.domain.user.repository.UserRepository;
-import e106.emissary_backend.user.dto.*;
 import e106.emissary_backend.domain.user.entity.User;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

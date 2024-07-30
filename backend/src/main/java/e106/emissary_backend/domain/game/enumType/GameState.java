@@ -1,7 +1,8 @@
 package e106.emissary_backend.domain.game.enumType;
 
 public enum GameState {
-    START,
+    WAIT,
+    STARTED,
     DAY,
     VOTE_START,
     VOTE_END,

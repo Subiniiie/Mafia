@@ -1,18 +1,18 @@
 package e106.emissary_backend.domain.game.controller;
 
 
-import e106.emissary_backend.domain.game.model.GameResponseDTO;
-import e106.emissary_backend.domain.game.service.RedisGameService;
+import e106.emissary_backend.domain.game.service.GameService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.socket.messaging.SessionConnectedEvent;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * MessageMapping request : /ws-stomp/....
@@ -25,7 +25,7 @@ public class SocketGameController {
     // webSocket의 기능 (SimpMessageSendingOperations 써도 됨.)
     private final SimpMessagingTemplate messagingTemplate;
 
-    private final RedisGameService redisGameService;
+    private final GameService gameService;
 
 //    // PathVariable 사용시 오류 생김
 //    @MessageMapping("/{roomId}/enter")
@@ -45,4 +45,15 @@ public class SocketGameController {
 //            messagingTemplate.convertAndSend("/sub/" + roomId, gameResponseDTO);
 //        }
 //    }
+
+
+    // Ready는 프론트에서 처리한다고 하여서 안함.
+    @MessageMapping("/rooms/start/{roomId}")
+    public void start(@AuthenticationPrincipal UserDetails userDetails, @DestinationVariable Long roomId){
+        long userId = Long.parseLong(userDetails.getUsername());
+
+        gameService.startGame(roomId);
+
+
+    }
 }
