@@ -1,9 +1,17 @@
 import { useState } from "react"
+import {Link, NavLink} from "react-router-dom";
 import LoginModal from "../modals/LoginModal";
-import SignUpModal from "../modals/SignUpModal"
+import SignUpModal from "../modals/SignupModal.jsx"
 import Friends from '../modals/Friends';
 import './Navbar.css';
 
+const Navbar = ({ isLoggedIn, username }) => {
+
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+    const openLoginModal = () => setIsLoginModalOpen(!isLoginModalOpen)
+
+    const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false)
+    const openSignUpModal = () => setIsSignUpModalOpen(!isSignUpModalOpen)
 const Navbar = ({ isLoggedIn, username }) => {
 
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
@@ -15,16 +23,21 @@ const Navbar = ({ isLoggedIn, username }) => {
     return (
         <nav className="navbar">
             <div className="navbar-brand">
-                <span>밀정</span>
-                <span className="year">1931</span>
+                <Link to="/" className="main-link">
+                    <span>밀정</span>
+                    <span className="year">1931</span>
+                </Link>
+                </Link>
             </div>
             <div className="navbar-content">
                 {isLoggedIn ? (
                     <>
-                        <span>조국 광복을 위하여,</span>
-                        <span className="username">{username}님, 오늘도 대한 독립 만세!</span>
+                        <div className="navbar-user">
+                            <span>조국 광복을 위하여,<br/></span>
+                            <span><NavLink to="/" className="username">{username}님</NavLink>, 오늘도 대한 독립 만세!</span>
+                        </div>
                         <div className="navbar-links">
-                            <a href="/profile">프로필</a>
+                            <a href="/achievements">프로필</a>
                             <Friends />
                             <a href="/settings">설정</a>
                         </div>
@@ -43,6 +56,8 @@ const Navbar = ({ isLoggedIn, username }) => {
             </div>
         </nav>
     );
+
+
 };
 
 export default Navbar;

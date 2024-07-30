@@ -1,7 +1,7 @@
 import ModalHeader from "../components/ModalHeader"
 import styles from "./SignUpModal.module.css"
 
-const LoginModal = ({ isOpen, openModal }) => {
+const SignUpModal = ({ isOpen, openModal }) => {
     const modalTitle = 'SignUp Modal';
 
     if (!isOpen) return null; // 모달이 열리지 않았다면 렌더링하지 않음
@@ -52,4 +52,4 @@ const LoginModal = ({ isOpen, openModal }) => {
     );
 }
 
-export default LoginModal;
+export default SignUpModal;
