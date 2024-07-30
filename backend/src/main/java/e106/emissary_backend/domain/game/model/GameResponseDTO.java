@@ -1,5 +1,6 @@
 package e106.emissary_backend.domain.game.model;
 
+import e106.emissary_backend.domain.game.entity.Game;
 import e106.emissary_backend.domain.game.enumType.GameState;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +19,7 @@ public class GameResponseDTO {
 
     private Long gameId;
 
-    private String name;
+    private String title;
 
     private String ownerName;
 
@@ -45,7 +46,7 @@ public class GameResponseDTO {
     public static GameResponseDTO toDto(Game game) {
         return GameResponseDTO.builder()
                 .gameId(game.getGameId())
-                .name(game.getTitle())
+                .title(game.getTitle())
                 .ownerName(game.getOwnerName())
                 .emissary(game.getEmissary())
                 .police(game.getPolice())

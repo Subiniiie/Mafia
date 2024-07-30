@@ -1,5 +1,6 @@
 package e106.emissary_backend.domain.game.model;
 
+import e106.emissary_backend.domain.game.entity.Game;
 import e106.emissary_backend.domain.game.enumType.GameRole;
 import e106.emissary_backend.domain.game.enumType.GameState;
 import e106.emissary_backend.global.error.CommonErrorCode;
@@ -14,13 +15,12 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
 
-@RedisHash("game")
 @Setter
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Game {
+public class GameDTO {
     @Id
     private Long gameId;
 
@@ -30,7 +30,8 @@ public class Game {
 
     private int maxPlayer;
 
-    private List<Player> emissary;
+    @Builder.Default
+    private List<Player> emissary = new ArrayList<>();
 
     private Player police;
 
@@ -70,4 +71,5 @@ public class Game {
     public Optional<Player> findPlayerByNickname(String nickname) {
         return Optional.ofNullable(playerMap.get(nickname));
     }
+
 }

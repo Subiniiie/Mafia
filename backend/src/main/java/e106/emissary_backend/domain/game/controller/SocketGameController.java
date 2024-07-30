@@ -2,7 +2,6 @@ package e106.emissary_backend.domain.game.controller;
 
 
 import e106.emissary_backend.domain.game.service.GameService;
-import e106.emissary_backend.domain.websocket.service.SocketRoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -50,6 +49,6 @@ public class SocketGameController {
     public void start(@AuthenticationPrincipal UserDetails userDetails, @DestinationVariable Long roomId){
         long userId = Long.parseLong(userDetails.getUsername());
 
-        gameService.start(roomId);
+        gameService.startGame(roomId);
     }
 }

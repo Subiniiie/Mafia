@@ -1,6 +1,8 @@
 package e106.emissary_backend.domain.room.service;
 
 
+import e106.emissary_backend.domain.game.entity.Game;
+import e106.emissary_backend.domain.game.mapper.GameMapper;
 import e106.emissary_backend.domain.game.repository.RedisGameRepository;
 import e106.emissary_backend.domain.room.dto.RoomListDto;
 import e106.emissary_backend.domain.room.dto.RoomOptionDto;
@@ -14,7 +16,7 @@ import e106.emissary_backend.domain.userInRoom.repoistory.UserInRoomRepository;
 import e106.emissary_backend.global.common.CommonResponseDto;
 import e106.emissary_backend.global.error.exception.NotFoundRoomException;
 import e106.emissary_backend.global.error.exception.NotFoundUserException;
-import e106.emissary_backend.domain.game.model.Game;
+import e106.emissary_backend.domain.game.model.GameDTO;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

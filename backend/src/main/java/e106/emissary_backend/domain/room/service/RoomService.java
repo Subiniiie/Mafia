@@ -1,8 +1,9 @@
 package e106.emissary_backend.domain.room.service;
 
+import e106.emissary_backend.domain.game.entity.Game;
 import e106.emissary_backend.domain.game.enumType.GameState;
-import e106.emissary_backend.domain.game.mapper.GameDaoMapper;
-import e106.emissary_backend.domain.game.model.Game;
+import e106.emissary_backend.domain.game.mapper.GameMapper;
+import e106.emissary_backend.domain.game.model.GameDTO;
 import e106.emissary_backend.domain.game.model.Player;
 import e106.emissary_backend.domain.game.repository.RedisGameRepository;
 import e106.emissary_backend.domain.room.dto.RoomOptionDto;
@@ -26,7 +27,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.redis.core.RedisKeyValueTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +44,7 @@ public class RoomService {
     private final UserInRoomRepository userInRoomRepository;
     private final UserRepository userRepository;
     private final RedisGameRepository redisGameRepository;
-    private final RedisTemplate<Long, Game> redisGameTemplate;
+    private final RedisTemplate<Long, GameDTO> redisGameTemplate;
 
     public List<RoomListDto> getRooms(Pageable pageable) {
         Slice<Room> roomList = roomRepository.findAllBy(pageable).orElseThrow(()-> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
@@ -116,7 +116,7 @@ public class RoomService {
 
         userInRoomRepository.save(userInRoom);
         // Redis 저장로직
-        Game game = Game.builder()
+        GameDTO gameDTO = GameDTO.builder()
                 .gameId(savedRoom.getRoomId())
                 .title(savedRoom.getTitle())
                 .ownerName(user.getNickname())
@@ -125,8 +125,9 @@ public class RoomService {
                 .gameState(GameState.WAIT)
                 .build();
         Player player = Player.createPlayer(user.getUserId(), user.getNickname());
-        game.addPlayer(player);
+        gameDTO.addPlayer(player);
 
+        Game game = GameMapper.INSTANCE.toGame(gameDTO);
 
         redisGameRepository.save(game);
 
@@ -157,9 +158,11 @@ public class RoomService {
         Game game = redisGameRepository.findByGameId(roomId).orElseThrow(
                 () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
 
-        game.addPlayer(player);
+        GameDTO gameDTO = GameMapper.INSTANCE.toGameDTO(game);
+        gameDTO.addPlayer(player);
 
-        redisGameRepository.save(game);
+        Game updateGame = GameMapper.INSTANCE.toGame(gameDTO);
+        redisGameRepository.save(updateGame);
 
         return new CommonResponseDto("ok");
     }

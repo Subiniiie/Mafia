@@ -2,20 +2,20 @@ package e106.emissary_backend.domain.game.util;
 
 
 import e106.emissary_backend.domain.game.enumType.GameRole;
-import e106.emissary_backend.domain.game.model.Game;
+import e106.emissary_backend.domain.game.model.GameDTO;
 import e106.emissary_backend.domain.game.model.Player;
 
 import java.util.*;
 
 public class RoleUtils {
 
-    public static Map<GameRole, Integer> getRole(Game game){
+    public static Map<GameRole, Integer> getRole(GameDTO gameDTO){
         Map<GameRole, Integer> roles = new HashMap<GameRole, Integer>();
 
-        int playerNum = game.getPlayerMap().size();
+        int playerNum = gameDTO.getPlayerMap().size();
 
         int emissary = 2;
-        int betray = game.isHaveBetrayer() ? 1 : 0;
+        int betray = gameDTO.isHaveBetrayer() ? 1 : 0;
         int police = 1;
 
         if(playerNum < 6){
@@ -29,10 +29,10 @@ public class RoleUtils {
         return roles;
     }
 
-    public static List<Player> grantRole(Map<GameRole, Integer> roles, Game game) {
+    public static void grantRole(Map<GameRole, Integer> roles, GameDTO gameDTO) {
         List<Player> emissary = new ArrayList<>();
-        int playerNum = game.getPlayerMap().size();
-        Map<Long, Player> playerMap = game.getPlayerMap();
+        int playerNum = gameDTO.getPlayerMap().size();
+        Map<Long, Player> playerMap = gameDTO.getPlayerMap();
         List<Player> players = new ArrayList<>(playerMap.values());
         Collections.shuffle(players);  // 플레이어 리스트를 섞습니다.
 
@@ -49,10 +49,10 @@ public class RoleUtils {
                 if (role == GameRole.EMISSARY) {
                     emissary.add(player);
                 } else if (role == GameRole.POLICE) {
-                    game.setPolice(player);
+                    gameDTO.setPolice(player);
                 } else if (role == GameRole.BETRAYER) {
-                    game.setBetrayer(player);
-                    game.setHaveBetrayer(true);
+                    gameDTO.setBetrayer(player);
+                    gameDTO.setHaveBetrayer(true);
                 }
 
                 index++;
@@ -66,7 +66,6 @@ public class RoleUtils {
             player.setAlive(true);
         }
 
-        game.setEmissary(emissary);
-        return emissary;
+        gameDTO.setEmissary(emissary);
     }
 }
