@@ -19,10 +19,10 @@ function App() {
 
         <Routes>
           <Route path='/' element={<MainPage />}></Route>
-            <Route path='/game-list' element={<GameListPage />}></Route>
-            <Route path={'/game-room/:id'} element={<GamePage />}></Route>
-            <Route path='/achievements' element={<AchievementsPage />}></Route>
-            <Route path='/profile' element={<ProfilePage />}></Route>
+          <Route path='/game-list' element={<GameListPage />}></Route>
+          <Route path={'/game-room/:id'} element={<GamePage />}></Route>
+          <Route path='/achievements' element={<AchievementsPage />}></Route>
+          <Route path='/profile' element={<ProfilePage />}></Route>
         </Routes>
     </>
   )

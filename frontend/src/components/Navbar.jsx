@@ -12,6 +12,13 @@ const Navbar = ({ isLoggedIn, username }) => {
 
     const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false)
     const openSignUpModal = () => setIsSignUpModalOpen(!isSignUpModalOpen)
+const Navbar = ({ isLoggedIn, username }) => {
+
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+    const openLoginModal = () => setIsLoginModalOpen(!isLoginModalOpen)
+
+    const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false)
+    const openSignUpModal = () => setIsSignUpModalOpen(!isSignUpModalOpen)
 
     return (
         <nav className="navbar">
@@ -19,6 +26,7 @@ const Navbar = ({ isLoggedIn, username }) => {
                 <Link to="/" className="main-link">
                     <span>밀정</span>
                     <span className="year">1931</span>
+                </Link>
                 </Link>
             </div>
             <div className="navbar-content">
@@ -48,6 +56,7 @@ const Navbar = ({ isLoggedIn, username }) => {
             </div>
         </nav>
     );
+
 
 };
 
