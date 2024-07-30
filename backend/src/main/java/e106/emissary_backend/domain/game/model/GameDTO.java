@@ -9,7 +9,6 @@ import jakarta.persistence.Enumerated;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
-import org.springframework.data.redis.core.index.Indexed;
 
 import java.time.LocalDateTime;
 import java.util.*;
