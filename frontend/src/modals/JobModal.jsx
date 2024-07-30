@@ -27,8 +27,7 @@ function JobModal({ isOpen, openModal }) {
             <div className={styles.modals}>
                 <div className={styles.content}>
                     <div className={styles.front}>
-                        <ModalHeader modalTitle="직업 설명" openModal={openModal} />
-                        이미지
+                        직업 이미지
                     </div>
                     <div className={styles.back}>
                         <ModalHeader modalTitle="직업 설명" openModal={openModal} />
