@@ -8,6 +8,7 @@ import e106.emissary_backend.domain.room.dto.RoomOptionDto;
 import e106.emissary_backend.domain.room.dto.RoomRequestDto;
 import e106.emissary_backend.domain.room.entity.Room;
 import e106.emissary_backend.domain.room.dto.RoomListDto;
+import e106.emissary_backend.domain.room.enumType.RoomState;
 import e106.emissary_backend.domain.room.repository.RoomRepository;
 import e106.emissary_backend.domain.user.entity.User;
 import e106.emissary_backend.domain.user.repository.UserRepository;
@@ -98,6 +99,7 @@ public class RoomService {
                 .haveBetray(roomRequestDto.isHaveBetray())
                 .maxPlayer(roomRequestDto.getMaxPlayer())
                 .ownerId(userId)
+                .roomState(RoomState.WAIT)
                 .build();
         User user = userRepository.findByUserId(userId).orElseThrow(() -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION));
 

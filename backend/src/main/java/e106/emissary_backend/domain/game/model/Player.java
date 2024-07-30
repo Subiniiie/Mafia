@@ -28,6 +28,8 @@ public class Player implements Serializable {
     @Enumerated(EnumType.STRING)
     private GameRole role;
 
+    private boolean isReady;
+
     private boolean isLeft;
 
     private boolean isAlive;

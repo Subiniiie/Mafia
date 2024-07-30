@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class RedisGameService {
+public class GameService {
 
     private final RedisTemplate<String, String> redisTemplate;
     private final RedisGameRepository redisGameRepository;
@@ -28,5 +28,12 @@ public class RedisGameService {
                 () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
 
         return GameResponseDTO.toDto(game);
+    }
+
+
+    public void start(Long roomId) {
+        redisGameRepository.findById(roomId).orElseThrow(
+                ()-> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+
     }
 }
