@@ -15,6 +15,7 @@ import org.springframework.data.redis.core.RedisHash;
 @RedisHash("player")
 @Slf4j
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

@@ -6,10 +6,7 @@ import e106.emissary_backend.global.error.CommonErrorCode;
 import e106.emissary_backend.global.error.exception.GameFullException;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
@@ -19,6 +16,7 @@ import java.util.*;
 import java.util.List;
 
 @RedisHash("game")
+@Setter
 @Getter
 @Builder
 @AllArgsConstructor
@@ -31,9 +29,9 @@ public class Game {
 
     private String ownerName;
 
-    private List<Player> emissary;
-
     private int maxPlayer;
+
+    private List<Player> emissary;
 
     private Player police;
 

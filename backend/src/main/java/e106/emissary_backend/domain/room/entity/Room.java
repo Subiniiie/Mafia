@@ -48,4 +48,8 @@ public class Room extends BaseTimeEntity {
         haveBetray = roomRequestDto.isHaveBetray();
     }
 
+    public void changeState(RoomState newState) {
+        roomState = newState;
+    }
+
 }

@@ -1,5 +1,6 @@
 package e106.emissary_backend.domain.room.service;
 
+import e106.emissary_backend.domain.game.enumType.GameState;
 import e106.emissary_backend.domain.game.mapper.GameDaoMapper;
 import e106.emissary_backend.domain.game.model.Game;
 import e106.emissary_backend.domain.game.model.Player;
@@ -121,6 +122,7 @@ public class RoomService {
                 .ownerName(user.getNickname())
                 .maxPlayer(savedRoom.getMaxPlayer())
                 .isHaveBetrayer(savedRoom.isHaveBetray())
+                .gameState(GameState.WAIT)
                 .build();
         Player player = Player.createPlayer(user.getUserId(), user.getNickname());
         game.addPlayer(player);
