@@ -2,7 +2,6 @@ package e106.emissary_backend.domain.user.service;
 
 import e106.emissary_backend.domain.user.dto.*;
 import e106.emissary_backend.domain.user.repository.UserRepository;
-import e106.emissary_backend.user.dto.*;
 import e106.emissary_backend.domain.user.entity.User;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -101,6 +100,7 @@ public class UserService implements UserDetailsService {
 
     public String emailExists(CheckRequest request){
         Optional<User> res = userRepository.findByEmail(request.getData());
+        System.out.println(request.getData());
         if(res.isPresent()){
             throw new RuntimeException(("이미 존재하는 이메일 입니다."));
         } else {
