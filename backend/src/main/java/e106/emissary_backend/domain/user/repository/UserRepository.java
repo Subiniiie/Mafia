@@ -3,6 +3,7 @@ package e106.emissary_backend.domain.user.repository;
 import e106.emissary_backend.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
 
