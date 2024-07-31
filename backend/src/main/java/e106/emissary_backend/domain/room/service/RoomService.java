@@ -17,10 +17,7 @@ import e106.emissary_backend.domain.userInRoom.entity.UserInRoom;
 import e106.emissary_backend.domain.userInRoom.repository.UserInRoomRepository;
 import e106.emissary_backend.global.common.CommonResponseDto;
 import e106.emissary_backend.global.error.CommonErrorCode;
-import e106.emissary_backend.global.error.exception.GameFullException;
-import e106.emissary_backend.global.error.exception.NotFoundGameException;
-import e106.emissary_backend.global.error.exception.NotFoundRoomException;
-import e106.emissary_backend.global.error.exception.NotFoundUserException;
+import e106.emissary_backend.global.error.exception.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -140,6 +137,9 @@ public class RoomService {
         }
 
         User user = userRepository.findByUserId(userId).orElseThrow(() -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION));
+        if(userInRoomRepository.findByPk_UserId(userId).isPresent()){
+            throw new AlreadyExistUserException(CommonErrorCode.ALREADY_EXIST_USER_EXCEPTION);
+        }
 
         UserInRoom userInRoom = UserInRoom.builder()
                 .pk(new UserInRoom.Pk(roomId, userId))

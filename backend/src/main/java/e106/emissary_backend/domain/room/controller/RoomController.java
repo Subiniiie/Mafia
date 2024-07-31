@@ -35,7 +35,9 @@ public class RoomController {
      */
     @PostMapping("/rooms")
     public ResponseEntity<RoomOptionDto> makeRoom(@CookieValue("Authentication") String token,@RequestBody RoomRequestDto roomRequestDto) {
-        long userId = Long.parseLong(token);
+//        long userId = Long.parseLong(token);
+        System.out.println(token);
+        long userId = 1L;
         return ResponseEntity.ok(roomService.makeRoom(userId, roomRequestDto));
     }
 

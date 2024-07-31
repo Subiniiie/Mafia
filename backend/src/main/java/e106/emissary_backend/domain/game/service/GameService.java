@@ -43,6 +43,7 @@ public class GameService {
     private final RedisPublisher publisher;
     private final ChannelTopic dayTopic;
     private final ChannelTopic startVoteTopic;
+    private final StartVoteTask startVoteTask;
 
     public void update(GameDTO gameDTO){
         Game game = gameDTO.toDao();
@@ -76,7 +77,7 @@ public class GameService {
         update(gameDTO);
 
         // todo : Start Vote Task 작성해야함. -> redis 발행 해놔야함
-        scheduler.schedule(new StartVoteTask(this, roomId), 2, TimeUnit.MINUTES);
+        scheduler.schedule(startVoteTask, 2, TimeUnit.MINUTES);
 
         publisher.publish(dayTopic, DayMessage.builder()
                         .gameId(roomId)
@@ -88,9 +89,5 @@ public class GameService {
         room.changeState(RoomState.STARTED);
     } // end of startGame
 
-    public void startVote(Long gameId) {
-        publisher.publish(startVoteTopic, StartVoteMessage.builder()
-                        .gameId(gameId)
-                        .build());
-    }
+
 }
