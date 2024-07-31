@@ -19,25 +19,33 @@ const FilterBox = () => {
     };
 
     return (
-        <div className={styles.filterContainer}>
-            <div className={styles.checkboxContainer}>
-                <Filter
-                    label="공개 임무"
-                    value="publicMission"
-                    onChange={handleCheckboxChange}
-                />
-                <Filter
-                    label="극비 임무"
-                    value="secretMission"
-                    onChange={handleCheckboxChange}
-                />
-                <Filter
-                    label="임무 시작 전"
-                    value="preMission"
-                    onChange={handleCheckboxChange}
-                />
+        <div className={styles.filterBox}>
+            <div className={styles.filterContainer}>
+                <div className={styles.checkboxContainer}>
+                    <Filter
+                        label="공개 임무"
+                        value="publicMission"
+                        onChange={handleCheckboxChange}
+                    />
+                    <Filter
+                        label="극비 임무"
+                        value="secretMission"
+                        onChange={handleCheckboxChange}
+                    />
+                </div>
+            </div>
+
+            <div className={styles.filterContainer}>
+                <div className={styles.checkboxContainer}>
+                    <Filter
+                        label="임무 시작 전"
+                        value="preMission"
+                        onChange={handleCheckboxChange}
+                    />
+                </div>
             </div>
         </div>
+
     );
 };
 

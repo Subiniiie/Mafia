@@ -80,9 +80,12 @@ const GLFooter = () => {
     }, [currentQuoteIndex]);
 
     return (
-        <footer className={styles.footer}>
-            <p className={styles.quote} ref={textRef}></p>
-            <p className={styles.author} ref={authorRef}></p>
+
+        <footer className="east-sea-dokdo-regular">
+            <div className={styles.footer}>
+                <p className={styles.quote} ref={textRef}></p>
+                <p className={styles.author} ref={authorRef}></p>
+            </div>
         </footer>
     );
 };

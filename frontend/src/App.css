@@ -9,6 +9,21 @@
   font-style: normal;
 }
 
+/* 김정철 명조체 폰트 가져오기 */
+@font-face {
+  font-family: 'KimjungchulMyungjo-Bold';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2302_01@1.0/KimjungchulMyungjo-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+}
+
+.kimjungchul-bold {
+  font-family: 'KimjungchulMyungjo-Bold', sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+
 body,
 html {
   margin: 0;
