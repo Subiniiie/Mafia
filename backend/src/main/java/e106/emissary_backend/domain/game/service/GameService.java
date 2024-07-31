@@ -7,6 +7,10 @@ import e106.emissary_backend.domain.game.mapper.GameMapper;
 import e106.emissary_backend.domain.game.model.GameDTO;
 import e106.emissary_backend.domain.game.model.GameResponseDTO;
 import e106.emissary_backend.domain.game.repository.RedisGameRepository;
+import e106.emissary_backend.domain.game.service.publisher.RedisPublisher;
+import e106.emissary_backend.domain.game.service.subscriber.DaySubscriber;
+import e106.emissary_backend.domain.game.service.timer.SchedulerService;
+import e106.emissary_backend.domain.game.service.timer.task.StartVoteTask;
 import e106.emissary_backend.domain.game.util.RoleUtils;
 import e106.emissary_backend.domain.room.entity.Room;
 import e106.emissary_backend.domain.room.enumType.RoomState;
@@ -17,11 +21,12 @@ import e106.emissary_backend.global.error.exception.NotFoundRoomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisKeyValueTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +37,10 @@ public class GameService {
     private final RoomRepository roomRepository;
     private final RedisKeyValueTemplate redisKeyValueTemplate;
     private final GameMapper gameMapper;
+    private final SchedulerService scheduler;
+
+    private final RedisPublisher publisher;
+    private final ChannelTopic voteTopic;
 
     public void update(GameDTO gameDTO){
         Game game = GameMapper.INSTANCE.toGame(gameDTO);
@@ -46,7 +55,7 @@ public class GameService {
     } // end of findGameById
 
 
-    public void startGame(Long roomId) {
+    public void setGame(Long roomId) {
         Game game = redisGameRepository.findById(roomId).orElseThrow(
                 () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
 
@@ -62,7 +71,10 @@ public class GameService {
 
         update(gameDTO);
 
-        // todo : 타이머 설정 해야해
+        // todo : Start Vote Task 작성해야함. -> redis 발행 해놔야함
+        scheduler.schedule(new StartVoteTask(this, roomId), 2, TimeUnit.MINUTES);
+
+        publisher.publish(voteTopic, new String("asg"));
 
         Room room = roomRepository.findById(roomId).orElseThrow(
                 () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));

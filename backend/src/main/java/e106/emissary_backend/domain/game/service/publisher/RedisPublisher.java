@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 public class RedisPublisher {
     private final RedisTemplate<String, Object> redisTemplate;
 
-    // 구독한 채널로 메시지 발송
+    // 구독한 채널로 메시지 발송 -> 발송시 메시지 규격 맞추기
     public void publish(ChannelTopic topic, Object object) {
         redisTemplate.convertAndSend(topic.getTopic(), object);
     }

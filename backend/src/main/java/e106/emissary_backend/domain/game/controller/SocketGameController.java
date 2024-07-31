@@ -11,9 +11,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 /**
  * MessageMapping request : /ws-stomp/....
  */
@@ -52,7 +49,7 @@ public class SocketGameController {
     public void start(@AuthenticationPrincipal UserDetails userDetails, @DestinationVariable Long roomId){
         long userId = Long.parseLong(userDetails.getUsername());
 
-        gameService.startGame(roomId);
+        gameService.setGame(roomId);
 
 
     }
