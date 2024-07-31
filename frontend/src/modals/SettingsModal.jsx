@@ -4,7 +4,17 @@ import { useState } from "react";
 
 
 const SettingsModal = ({ isOpen, openModal }) => {
-    const modalTitle = 'Settings Modal';
+    const modalTitle = '환경 설정';
+
+    const [ isVolumeOn, setIsVolumeOn ] = useState(true)
+    const changeVolume = function() {
+        setIsVolumeOn(prevState => !prevState)
+    }
+
+    const [ isMicOn, setIsMicOn ] = useState(true)
+    const changeMic = function() {
+        setIsMicOn(prevState => !prevState)
+    }
 
     if (!isOpen) return null; // 모달이 열리지 않았다면 렌더링하지 않음
 
@@ -12,26 +22,25 @@ const SettingsModal = ({ isOpen, openModal }) => {
         <div className={styles.modalOverlay} onClick={openModal}>
             <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
                 <ModalHeader modalTitle={modalTitle} openModal={openModal} />
-                <div className={styles.formContainer}>
-                    <h5>이메일</h5>
-                    <input
-                        required
-                        type="text"
-                        placeholder="이메일을 입력해주세요"
-                        className={styles.inputField}
-                    />
-
-                    <h5>비밀번호</h5>
-                    <input
-                        required
-                        type="text"
-                        placeholder="비밀번호를 입력해주세요"
-                        className={styles.inputField}
-                    />
-
-                    <button className={styles.submitButton}>
-                        활동하기
-                    </button>
+                <div className={styles.sound}>
+                    <div className={styles.soundText}>음량</div>
+                    <div>
+                        <img src={ isVolumeOn ? "/volume.png" : "volume_mute.png" }
+                            alt="volume" 
+                            width="30px"
+                            onClick={changeVolume}
+                        />
+                    </div>
+                </div>
+                <div className={styles.voice}>
+                    <div className={styles.voiceText}>마이크</div>
+                    <div>
+                        <img src={ isMicOn ? "/mic.png" : "mic_mute.png"}
+                            alt="mic"
+                            width="30px"
+                            onClick={changeMic}
+                        />
+                    </div>
                 </div>
             </div>
         </div>

@@ -27,42 +27,43 @@
     flex-direction: column;
 }
 
-.formContainer {
+.sound {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    /* 요소 사이 간격 추가 */
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    color: #EAEAEA;
+    margin: 35px 0;
 }
 
-.inputField {
-    border: 2px solid #DDD;
-    /* 입력 필드 테두리 */
-    padding: 8px 10px;
-    border-radius: 5px;
-    /* 입력 필드 모서리 둥글게 */
-    font-size: 16px;
-    /* 글자 크기 조정 */
+.soundText {
+    width: 60px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    color: #EAEAEA;
 }
 
-.submitButton {
-    background-color: #CECACA;
-    /* 버튼 배경색 */
-    color: white;
-    padding: 10px 15px;
-    border-radius: 5px;
-    /* 버튼 모서리 둥글게 */
-    border: none;
-    /* 테두리 제거 */
-    cursor: pointer;
-    /* 커서 포인터 */
-    font-size: 16px;
-    font-weight: bold;
-    transition: background-color 0.3s;
-    /* 호버 효과 */
-    width: 30%;
+.voice {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    color: #EAEAEA;
 }
 
-.submitButton:hover {
-    background-color: #004494;
-    /* 버튼 호버 색상 변경 */
+.voiceText {
+    width: 60px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    color: #EAEAEA;
 }
