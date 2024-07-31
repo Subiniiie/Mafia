@@ -1,13 +1,13 @@
-import React, {Component} from "react";
+import React, {Component} from 'react';
 
-export default class OpenViduVideoComponent extends Component {
+export default class OpenViduVideoComponnet extends Component {
     constructor(props){
         super(props);
-        this.videoRef = React.createRef(null);
+        this.videoRef = React.createRef();
     }
 
     componentDidUpdate(props){
-        if (props && !!this.vidoeRef){
+        if (props && !!this.videoRef){
             this.props.streamManager.addVideoElement(this.videoRef.current);
         }
     }
@@ -20,17 +20,9 @@ export default class OpenViduVideoComponent extends Component {
 
     render(){
         return(
-            <>
-                {this.props.screenOn ? (
-                    <video autoPlay={true}
-                           ref={this.videoRef}/>
-                ):(
-                    // img
-                    <p> REPLACE IMAGE </p>
-                )}
-
-            </>
-
+            <video autoPlay={true}
+                   ref={this.videoRef}
+           />
         );
     }
 }
