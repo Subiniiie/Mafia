@@ -12,9 +12,9 @@ import org.springframework.data.redis.core.RedisHash;
 @Builder
 public class Refresh {
 
-    @Id
     private Long userId;
     private String username;
+    @Id
     private String refresh;
     private String expiration;
 }

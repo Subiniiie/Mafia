@@ -98,9 +98,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         refreshRepository.save(refreshEntity);
 
-        Boolean isExist = refreshRepository.existsByRefresh(refresh);
-        System.out.println(refresh);
-        System.out.println("Token saved: " + isExist);
     }
 
     private void addAccess(Long userId, String username, String access, Long expiredMs) {

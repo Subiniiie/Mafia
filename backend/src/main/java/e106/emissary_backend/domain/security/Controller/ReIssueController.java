@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.HandlerMapping;
 
 import java.util.Date;
 
@@ -27,7 +26,6 @@ public class ReIssueController {
     private final JwtService jwtService;
     private final AccessRepository accessRepository;
     private final RefreshRepository refreshRepository;
-    private final HandlerMapping stompWebSocketHandlerMapping;
 
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
@@ -38,7 +36,7 @@ public class ReIssueController {
             if(cookie.getName().equals("Refresh")) {
                 refresh = cookie.getValue();
             }
-            if(cookie.getName().equals("AccessToken")) {
+            if(cookie.getName().equals("Access")) {
                 access = cookie.getValue();
             }
         }
@@ -57,20 +55,23 @@ public class ReIssueController {
             return new ResponseEntity<>("refresh token invalid", HttpStatus.BAD_REQUEST);
         }
 
-        Boolean isExist = jwtService.existsByRefresh(refresh);
-        if(!isExist){
+        if(jwtService.findByRefresh(refresh).isEmpty()){
             return new ResponseEntity<>("refresh token invalid12", HttpStatus.BAD_REQUEST);
         }
 
-        if(access != null && jwtUtil.validateToken(access)) {
+        System.out.println(access);
+        System.out.println(!jwtUtil.validateToken(access));
+        if(access != null && !jwtUtil.validateToken(access)) {
             jwtService.deleteByAccess(access);
+            System.out.println(jwtService.findByAccess(access).isEmpty());
+            System.out.println(!jwtUtil.validateToken(access));
         }
 
         String username = jwtUtil.getUsername(refresh);
         String userId = jwtUtil.getUserId(refresh);
         String role = jwtUtil.getRole(refresh);
 
-        String newAccess = jwtUtil.createJwt("Access", Long.parseLong(userId), username,role, 60000L);
+        String newAccess = jwtUtil.createJwt("Access", Long.parseLong(userId), username,role, 600000L);
         String newRefresh = jwtUtil.createJwt("Refresh", Long.parseLong(userId), username,role, 86400000L);
 
         jwtService.deleteByRefresh(refresh);

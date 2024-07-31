@@ -12,9 +12,9 @@ import org.springframework.data.redis.core.RedisHash;
 @Builder
 public class Access {
 
-    @Id
     private Long userId;
     private String username;
+    @Id
     private String access;
     private String expiration;
 }

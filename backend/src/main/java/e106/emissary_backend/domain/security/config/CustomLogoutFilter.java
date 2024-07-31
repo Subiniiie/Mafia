@@ -39,7 +39,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
             chain.doFilter(request, response);
             return;
         }
-        System.out.println("dasdf");
+
         String refresh = Optional.ofNullable(request.getCookies())
                 .flatMap(cookies -> Arrays.stream(cookies)
                         .filter(cookie -> Objects.equals("Refresh", cookie.getName()))
@@ -58,32 +58,28 @@ public class CustomLogoutFilter extends GenericFilterBean {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        System.out.println("dasdf");
+
         if(jwtUtil.validateToken(refresh) || jwtUtil.validateToken(access)) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        System.out.println("dasdf");
+
         String category1 = jwtUtil.getCategory(refresh);
         String category2 = jwtUtil.getCategory(access);
         if(!category1.equals("Refresh") || !category2.equals("Access")){
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        System.out.println("dasdf");
-        Boolean isExist1 = jwtService.existsByRefresh(refresh);
-        Boolean isExist2 = jwtService.existsByAccess(access);
 
-        System.out.println("isExist1 = " + isExist1);
-        System.out.println("isExist2 = " + isExist2);
-
-        if(!isExist1 || !isExist2){
+        if(jwtService.findByRefresh(refresh).isEmpty() || jwtService.findByAccess(access).isEmpty()){
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        System.out.println("dasdf");
         jwtService.deleteByRefresh(refresh);
         jwtService.deleteByAccess(access);
+
+        System.out.println(refresh);
+        System.out.println(access);
 
         Cookie cookie1 = new Cookie("Refresh", null);
         Cookie cookie2 = new Cookie("Access", null);
