@@ -19,13 +19,11 @@ function AchievementsPage() {
     return (
             <div className={styles.main}>
                 {myAchievementsCard.map((achievement) => (
-                    // <div className={styles.item} key={achievement.id}>
                         <AchievementsCard 
                             achievementName={achievement.achievementName}
                             achievementDate={achievement.achievementDate}
                             description={achievement.description}
                         />
-                    // </div>
                 ))}
             </div>
     )
