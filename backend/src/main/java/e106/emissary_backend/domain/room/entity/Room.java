@@ -1,6 +1,7 @@
 package e106.emissary_backend.domain.room.entity;
 
 import e106.emissary_backend.domain.room.dto.RoomRequestDto;
+import e106.emissary_backend.domain.room.enumType.RoomState;
 import e106.emissary_backend.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -31,6 +32,9 @@ public class Room extends BaseTimeEntity {
 //    @Column(name = "now_player")
 //    private int nowPlayer;
 
+    @Enumerated(EnumType.STRING)
+    private RoomState roomState;
+
     @Column(name = "max_player")
     private int maxPlayer;
 
@@ -42,6 +46,10 @@ public class Room extends BaseTimeEntity {
         password = roomRequestDto.getPassword();
         maxPlayer = roomRequestDto.getMaxPlayer();
         haveBetray = roomRequestDto.isHaveBetray();
+    }
+
+    public void changeState(RoomState newState) {
+        roomState = newState;
     }
 
 }
