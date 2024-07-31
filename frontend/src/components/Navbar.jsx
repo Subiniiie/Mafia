@@ -1,5 +1,5 @@
-import { useState } from "react"
-import { Link, NavLink } from "react-router-dom";
+import { useState, useEffect } from "react"
+import { Link, NavLink, useLocation } from "react-router-dom";
 import LoginModal from "../modals/LoginModal";
 import SignUpModal from "../modals/SignUpModal.jsx"
 import SettingsModal from "../modals/SettingsModal.jsx"
@@ -25,6 +25,24 @@ const Navbar = ({ isLoggedIn, username }) => {
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
     const openSettingsModal = () => setIsSettingsModalOpen(!isSettingsModalOpen)
 
+    const location = useLocation()
+
+    // URL이 변경되면 모달을 닫음
+    useEffect(() => {
+        if (isFriendsModalOpen) {
+            setIsFriendsModalOpen(false)
+        }
+        if (isSettingsModalOpen) {
+            setIsSettingsModalOpen(false);
+        }
+        if (isLoginModalOpen) {
+            setIsLoginModalOpen(false);
+        }
+        if (isSignUpModalOpen) {
+            setIsSignUpModalOpen(false);
+        }
+    }, [location])
+
     return (
         <nav className="navbar">
             <Link to="/" className="main-link">
@@ -45,9 +63,6 @@ const Navbar = ({ isLoggedIn, username }) => {
                         </div>
 
                         <div className="navbar-links">
-
-                            <Friends />
-
                             <Link to="/achievements" className="links">
                                 <img src={ProfileButton} alt="ProfileButton" className="navbar-buttons" />
                                 <p>프로필</p>
@@ -63,22 +78,12 @@ const Navbar = ({ isLoggedIn, username }) => {
                     </>
                 ) : (
                     <>
-
-
                         <button onClick={openLoginModal}>활동하기</button>
                         <LoginModal isOpen={isLoginModalOpen} openModal={openLoginModal} />
                         <button onClick={openSignUpModal}>독립군 입단</button>
                         <SignUpModal isOpen={isSignUpModalOpen} openModal={openSignUpModal} />
-
-
                     </>
                 )}
-
-                {/* <Link to="/settings" className="links">
-                    <img src={SettingsButton} alt="SettingsButton" className="navbar-buttons" />
-                    <p>설정</p>
-                </Link> */}
-
                 <div onClick={openSettingsModal} className="links">
                     <img src={SettingsButton} alt="SettingsButton" className="navbar-buttons" />
                     <p>설정</p>
