@@ -29,6 +29,8 @@ public class RedisConfig{
     @Bean
     public RedisTemplate<Long, Game> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<Long, Game> redisTemplate = new RedisTemplate<>();
+    public RedisTemplate<Long, Game> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<Long, Game> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);
         redisTemplate.setKeySerializer(new GenericToStringSerializer<>(Long.class));
         redisTemplate.setHashKeySerializer(new GenericToStringSerializer<>(Long.class));

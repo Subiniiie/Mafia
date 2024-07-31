@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -32,29 +33,55 @@ public class JWTFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
 
-        String token = Optional.ofNullable(request.getCookies())
+        String accessToken = Optional.ofNullable(request.getCookies())
                 .flatMap(cookies -> Arrays.stream(cookies)
-                        .filter(cookie -> Objects.equals("Authorization", cookie.getName()))
+                        .filter(cookie -> Objects.equals("Access", cookie.getName()))
                         .map(Cookie::getValue)
                         .findAny())
                 .orElse(null);
 
-        if (token != null && jwtUtil.validateToken(token)) {
-            Authentication authToken = null;
-            User user = User.builder()
-                    .nickname(jwtUtil.getUsername(token))
-                    .role(jwtUtil.getRole(token))
-                    .build();
-            if(Objects.equals(IS_COME, "OAUTH")) {
-                CustomOAuth2User customOAuth2User = new CustomOAuth2User(user, Map.of());
-                authToken = new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities());
-            }
-            if(Objects.equals(IS_COME, "COMMON")) {
-                CustomUserDetails customUserDetails = new CustomUserDetails(user);
-                authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
-            }
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+        String requestURI = request.getRequestURI();
+        if (requestURI.equals("/reissue")) {
+            chain.doFilter(request, response);
+            return;
         }
+
+        if(accessToken == null){
+            chain.doFilter(request, response);
+            return;
+        }
+
+        if(jwtUtil.validateToken(accessToken)){
+            PrintWriter writer = response.getWriter();
+            writer.print("access token expired");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        String category = jwtUtil.getCategory(accessToken);
+
+        if(!category.equals("Access")){
+            PrintWriter writer = response.getWriter();
+            writer.print("invalid access token");
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        Authentication authToken = null;
+        User user = User.builder()
+                .nickname(jwtUtil.getUsername(accessToken))
+                .role(jwtUtil.getRole(accessToken))
+                .build();
+        if(Objects.equals(IS_COME, "OAUTH")) {
+            CustomOAuth2User customOAuth2User = new CustomOAuth2User(user, Map.of());
+            authToken = new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities());
+        }
+        if(Objects.equals(IS_COME, "COMMON")) {
+            CustomUserDetails customUserDetails = new CustomUserDetails(user);
+            authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+        }
+        SecurityContextHolder.getContext().setAuthentication(authToken);
 
         chain.doFilter(request, response);
     }

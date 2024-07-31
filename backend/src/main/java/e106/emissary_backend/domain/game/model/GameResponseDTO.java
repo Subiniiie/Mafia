@@ -1,6 +1,5 @@
 package e106.emissary_backend.domain.game.model;
 
-import e106.emissary_backend.domain.game.entity.Game;
 import e106.emissary_backend.domain.game.enumType.GameState;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +17,7 @@ import java.util.Map;
 public class GameResponseDTO {
 
     private Long gameId;
+    private Long gameId;
 
     private String title;
 
@@ -29,7 +29,7 @@ public class GameResponseDTO {
 
     private Player betrayer;
 
-//    private List<Player> playerList;
+    //    private List<Player> playerList;
     // ID, player객체
     private Map<Long, Player> playerMap;
 

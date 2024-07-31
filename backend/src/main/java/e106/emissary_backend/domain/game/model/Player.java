@@ -11,6 +11,8 @@ import java.io.Serializable;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.redis.core.RedisHash;
 
 //@RedisHash("player")
 @Slf4j
@@ -42,4 +44,3 @@ public class Player implements Serializable {
                 .build();
     }
 }
-

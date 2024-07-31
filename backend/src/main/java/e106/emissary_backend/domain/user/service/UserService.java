@@ -100,6 +100,7 @@ public class UserService implements UserDetailsService {
 
     public String emailExists(CheckRequest request){
         Optional<User> res = userRepository.findByEmail(request.getData());
+        System.out.println(request.getData());
         if(res.isPresent()){
             throw new RuntimeException(("이미 존재하는 이메일 입니다."));
         } else {
