@@ -11,8 +11,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RoomOptionDto {
     private String title;
-    private int password;
-    private int maxPlayer;
+    private Integer password;
+    private Integer maxPlayer;
     private boolean haveBetray;
     private String owner;
+
+    public static RoomOptionDto of(String owner, RoomRequestDto roomRequestDto){
+        return RoomOptionDto.builder()
+                .title(roomRequestDto.getTitle())
+                .password(roomRequestDto.getPassword())
+                .maxPlayer(roomRequestDto.getMaxPlayer())
+                .haveBetray(roomRequestDto.isHaveBetray())
+                .owner(owner)
+                .build();
+    }
 }

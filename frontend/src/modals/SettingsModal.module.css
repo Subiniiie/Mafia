@@ -1,0 +1,69 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    /* 배경을 더욱 어둡게 조정 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    background: #220F0F;
+    padding: 20px;
+    border-radius: 10px;
+    /* 모서리를 둥글게 */
+    width: 400px;
+    /* 너비 조정 */
+    max-width: 90%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    /* 그림자 추가 */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.sound {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    color: #EAEAEA;
+    margin: 35px 0;
+}
+
+.soundText {
+    width: 60px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    color: #EAEAEA;
+}
+
+.voice {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    color: #EAEAEA;
+}
+
+.voiceText {
+    width: 60px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    color: #EAEAEA;
+}

@@ -1,39 +1,112 @@
 .navbar {
+    height: 100px;
     display: flex;
     justify-content: space-between;
+    padding: 1rem;
+    background-color: #0E121B;
+    color: white;
+}
+
+.main-link {
+    color: white;
+    display: flex;
     align-items: center;
-    background-color: #1a1a1a;
-    padding: 10px 20px;
-    color: #fff;
 }
 
-.navbar-brand {
-    font-size: 24px;
-    font-weight: bold;
+.navbar-logo {
+    height: 100%;
+    /* 원하는 높이로 조정 */
+    width: auto;
+    margin-left: 25px;
+    /* 이미지와 텍스트 간의 간격 */
+
 }
 
-.year {
-    font-size: 14px;
-    margin-left: 5px;
-    color: #ccc;
-}
 
 .navbar-content {
     display: flex;
     align-items: center;
+    margin-top: 5px;
 }
 
-.navbar-links a {
-    margin-left: 15px;
-    color: #fff;
-    text-decoration: none;
+.navbar-brand {
+    display: flex;
+    align-items: center;
 }
 
-.navbar-links a:hover {
-    text-decoration: underline;
+
+.navbar-user {
+    display: flex;
+    align-items: center;
+    position: relative;
+    /* 상대 위치 설정 */
+    text-align: left;
+    margin-right: 40px;
+    font-size: 20px;
+}
+
+.navbar-user-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar-user-text-first-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar-user span {
+    color: white;
 }
 
 .username {
-    font-weight: bold;
-    margin-right: 10px;
+    color: white;
+    font-size: 32px;
+}
+
+.username:hover {
+    color: white;
+    text-decoration: underline;
+    text-decoration-color: white;
+}
+
+.navbar-user>.username a:hover {
+    text-decoration: underline;
+    text-decoration-color: rgb(255, 255, 255);
+}
+
+.navbar-logout {
+    /* position: absolute; */
+    /* 절대 위치 설정 */
+    /* right: 0;
+    top: 6px; */
+    /* 부모의 오른쪽 끝에 배치 */
+    height: 25px;
+    /* 원하는 높이로 조정 */
+    width: auto;
+    cursor: pointer;
+}
+
+.navbar-links {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-links a:hover {
+    /*뭔가 효과를 넣을 수 있을듯*/
+}
+
+.links {
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.navbar-buttons {
+    height: 50px;
+    width: auto;
+    margin-bottom: 7px;
 }

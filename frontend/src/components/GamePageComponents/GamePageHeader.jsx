@@ -17,9 +17,11 @@ function GamePageHeader() {
     // 방장만 게임 설정 바꿀 수 있게
     // 버튼을 클릭하면 게임 설정 모달이 열림
     const [ isModalOpen, setIsModalOpen ] = useState(false)
+    const [ blackBackground, setBlackBackground ] = useState(false)
 
     function openModal() {
         setIsModalOpen(!isModalOpen)
+        setBlackBackground((preState) => !preState)
     }
 
     const roomManagerSettings = <button className={styles.settings} onClick={openModal}>(방장만)설정</button>
@@ -37,6 +39,7 @@ function GamePageHeader() {
                     {isModalOpen ? <GameSettingsModal isOpen={isModalOpen} openModal={openModal}/> : null}
                 </div>
             </div>
+            { blackBackground ? <div className="black">gdgd</div> : null}
         </>
     )
 }

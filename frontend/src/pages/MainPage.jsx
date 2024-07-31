@@ -1,16 +1,20 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import bgVideo from "../assets/video/video.mp4"
+import styles from './MainPage.module.css'
 
 function MainPage() {
-  
     return (
-        <>
-            <p>메인 페이지</p>
-            <ul>
-                <li><Link to="/game-list">게임 리스트 페이지</Link></li>
-                <li><Link to="/achievements">업적 페이지</Link></li>
-            </ul>
-        </>
+        <div className={styles.container}>
+            <div className={styles.vidioContainer}>
+                <video autoPlay loop muted className={styles.backgroundVideo}>
+                    <source src={bgVideo} type="video/mp4"/>
+                </video>
+            </div>
+            <div className={styles.content}>
+                <Link to="/game-list">여정시작</Link>
+            </div>
+        </div>
     )
 }
 

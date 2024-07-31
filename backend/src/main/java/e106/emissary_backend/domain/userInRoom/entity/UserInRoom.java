@@ -5,6 +5,7 @@ import e106.emissary_backend.domain.room.entity.Room;
 import e106.emissary_backend.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
