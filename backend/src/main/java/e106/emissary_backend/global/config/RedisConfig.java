@@ -27,9 +27,8 @@ public class RedisConfig{
     public RedisTemplate<Long, Game> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<Long, Game> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);
-        redisTemplate.setKeySerializer(new GenericToStringSerializer<>(Long.class));
-        redisTemplate.setHashKeySerializer(new GenericToStringSerializer<>(Long.class));
-        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(Game.class)); // Game으로 변경
+
+        redisTemplate.setDefaultSerializer(new StringRedisSerializer());
         return redisTemplate;
     }
 
