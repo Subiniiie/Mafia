@@ -11,13 +11,13 @@ const GLHeader = () => {
     const openModal = () => setIsModalOpen(!isModalOpen)
 
     return (
-        <div>
+        <div className="east-sea-dokdo-regular">
             <div className={styles.headerContainer}>
                 <div className={styles.filterSection}>
                     <FilterBox />
                 </div>
                 <div className={styles.searchSection}>
-                    <SearchBar placeholder="터전을 찾아보세요."/>
+                    <SearchBar placeholder="터전을 찾아보세요." />
                 </div>
                 <div className={styles.buttonSection}>
                     <button onClick={openModal}>새로운 도전</button>
@@ -25,7 +25,7 @@ const GLHeader = () => {
                     <CreateRoomModal isOpen={isModalOpen} openModal={openModal} />
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
 
