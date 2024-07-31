@@ -5,19 +5,3 @@
     gap: 2px;
     justify-content: center;
 }
-
-.item {
-    flex: 1 1 calc(20% - 20px);
-    max-width: calc(20% - 20px);
-    width: 230px;
-    height: 350px;
-    border: 1px solid black;
-    border-radius: 20px;
-    transition: transform 0.6s;
-    margin: 10px;
-    perspective: 1000px;
-}
-
-.item:hover {
-    transform: rotateY(180deg);
-}
