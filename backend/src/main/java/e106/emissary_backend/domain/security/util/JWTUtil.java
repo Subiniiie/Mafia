@@ -23,9 +23,17 @@ public class JWTUtil {
         secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
+    public String getCategory(String token){
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("category", String.class);
+    }
+
     public String getUsername(String token) {
 
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("username", String.class);
+    }
+
+    public String getUserId(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("userId", String.class);
     }
 
     public String getRole(String token) {
@@ -33,14 +41,11 @@ public class JWTUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
     }
 
-    public Boolean isExpired(String token) {
-
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
-    }
-
-    public String createJwt(String username, String role, Long expiredMs) {
+    public String createJwt(String category,Long userId, String username ,String role, Long expiredMs) {
 
         return Jwts.builder()
+                .claim("category", category)
+                .claim("userId", String.valueOf(userId))
                 .claim("username", username)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
@@ -52,7 +57,7 @@ public class JWTUtil {
     public boolean validateToken(String token) {
         try {
             Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
-            return true;
+            return false;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("유효하지않은 토큰입니다", e);
         } catch (ExpiredJwtException e) {
@@ -60,6 +65,6 @@ public class JWTUtil {
         } catch (IllegalArgumentException e) {
             log.info("잘못된 토큰입니다.", e);
         }
-        return false;
+        return true;
     }
 }
