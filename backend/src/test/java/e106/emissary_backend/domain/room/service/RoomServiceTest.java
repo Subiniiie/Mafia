@@ -12,7 +12,7 @@ import e106.emissary_backend.domain.room.repository.RoomRepository;
 import e106.emissary_backend.domain.user.entity.User;
 import e106.emissary_backend.domain.user.repository.UserRepository;
 import e106.emissary_backend.domain.userInRoom.entity.UserInRoom;
-import e106.emissary_backend.domain.userInRoom.repoistory.UserInRoomRepository;
+import e106.emissary_backend.domain.userInRoom.repository.UserInRoomRepository;
 import e106.emissary_backend.global.common.CommonResponseDto;
 import e106.emissary_backend.global.error.exception.NotFoundRoomException;
 import e106.emissary_backend.global.error.exception.NotFoundUserException;
