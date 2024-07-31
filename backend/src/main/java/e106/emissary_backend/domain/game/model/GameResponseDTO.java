@@ -18,7 +18,6 @@ import java.util.Map;
 public class GameResponseDTO {
 
     private Long gameId;
-    private Long gameId;
 
     private String title;
 

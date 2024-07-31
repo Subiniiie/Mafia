@@ -26,7 +26,6 @@ public class SocketGameController {
     private final SimpMessagingTemplate messagingTemplate;
 
     private final GameService gameService;
-    private final GameService gameService;
 
 //    // PathVariable 사용시 오류 생김
 //    @MessageMapping("/{roomId}/enter")
@@ -53,6 +52,6 @@ public class SocketGameController {
     public void start(@AuthenticationPrincipal UserDetails userDetails, @DestinationVariable Long roomId){
         long userId = Long.parseLong(userDetails.getUsername());
 
-        gameService.startGame(roomId);
+        gameService.setGame(roomId);
     }
 }

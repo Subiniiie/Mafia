@@ -15,10 +15,8 @@ import e106.emissary_backend.domain.user.entity.User;
 import e106.emissary_backend.domain.user.repository.UserRepository;
 import e106.emissary_backend.domain.userInRoom.entity.UserInRoom;
 import e106.emissary_backend.domain.userInRoom.repository.UserInRoomRepository;
-import e106.emissary_backend.domain.userInRoom.repository.UserInRoomRepository;
 import e106.emissary_backend.global.common.CommonResponseDto;
 import e106.emissary_backend.global.error.CommonErrorCode;
-import e106.emissary_backend.global.error.exception.GameFullException;
 import e106.emissary_backend.global.error.exception.GameFullException;
 import e106.emissary_backend.global.error.exception.NotFoundGameException;
 import e106.emissary_backend.global.error.exception.NotFoundRoomException;
@@ -49,8 +47,6 @@ public class RoomService {
     public List<RoomListDto> getRooms(Pageable pageable) {
         Slice<Room> roomList = roomRepository.findAllBy(pageable).orElseThrow(()-> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
         return roomList.stream().map(room -> RoomListDto.builder()
-                        .title(room.getTitle())
-                        .ownerName(userRepository.findNicknameByUserId(room.getOwnerId()).orElseThrow(
                         .title(room.getTitle())
                         .ownerName(userRepository.findNicknameByUserId(room.getOwnerId()).orElseThrow(
                                 () -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION)))
@@ -157,7 +153,6 @@ public class RoomService {
 
         // Redis 저장 로직
         Player player = Player.createPlayer(userId, user.getNickname());
-        Game game = redisGameRepository.findByGameId(roomId).orElseThrow(
         Game game = redisGameRepository.findByGameId(roomId).orElseThrow(
                 () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
 

@@ -12,8 +12,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-@Repository
 public interface RedisGameRepository extends CrudRepository<Game, Long> {
-    Optional<Game> findByGameId(Long gameDBId);
     Optional<Game> findByGameId(Long gameDBId);
 }

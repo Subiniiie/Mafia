@@ -17,7 +17,7 @@ import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 
 @Configuration
-public class RedisConfig{
+public class RedisConfig {
 
     @Bean
     public RedisMessageListenerContainer redisMessageListener(RedisConnectionFactory connectionFactory) {
@@ -27,8 +27,6 @@ public class RedisConfig{
     }
 
     @Bean
-    public RedisTemplate<Long, Game> redisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<Long, Game> redisTemplate = new RedisTemplate<>();
     public RedisTemplate<Long, Game> redisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<Long, Game> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);
