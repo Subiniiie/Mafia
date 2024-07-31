@@ -28,7 +28,7 @@ public class GameResponseDTO {
 
     private Player betrayer;
 
-//    private List<Player> playerList;
+    //    private List<Player> playerList;
     // ID, player객체
     private Map<Long, Player> playerMap;
 
