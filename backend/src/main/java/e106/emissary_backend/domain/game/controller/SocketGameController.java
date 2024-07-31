@@ -27,26 +27,7 @@ public class SocketGameController {
 
     private final GameService gameService;
 
-//    // PathVariable 사용시 오류 생김
-//    @MessageMapping("/{roomId}/enter")
-//    public void enterGameRoom(@DestinationVariable Long roomId,
-//                              SimpMessageHeaderAccessor headerAccessor) {
-//        String userId = headerAccessor.getFirstNativeHeader("User");
-//
-//        if(userId != null) {
-//            // Todo : DB에 접근하는 코드로 인원늘리고
-//            // Todo : redis에 현재 세션 정보 저장
-//            GameResponseDTO gameResponseDTO = redisGameService.findGameById(roomId);
-//
-//
-//            // 전체적으로 보내야하는 경우 publisher를 사용해서 하자
-//            // 서비스로 가서 publish가 필요한경우 하자,,
-//            // to front : key : /sub/roomId , value : gameResponseDTO(JSON)
-//            messagingTemplate.convertAndSend("/sub/" + roomId, gameResponseDTO);
-//        }
-//    }
-
-
+    
     // Ready는 프론트에서 처리한다고 하여서 안함.
     @MessageMapping("/rooms/start/{roomId}")
     public void start(@AuthenticationPrincipal UserDetails userDetails, @DestinationVariable Long roomId){

@@ -137,6 +137,8 @@ public class RoomService {
         }
 
         User user = userRepository.findByUserId(userId).orElseThrow(() -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION));
+
+        log.info("user : " + user.getUserId());
         if(userInRoomRepository.findByPk_UserId(userId).isPresent()){
             throw new AlreadyExistUserException(CommonErrorCode.ALREADY_EXIST_USER_EXCEPTION);
         }

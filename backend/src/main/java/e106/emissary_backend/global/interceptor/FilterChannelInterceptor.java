@@ -1,4 +1,4 @@
-package e106.emissary_backend.domain.websocket.interceptor;
+package e106.emissary_backend.global.interceptor;
 
 
 import e106.emissary_backend.domain.security.util.JWTUtil;
