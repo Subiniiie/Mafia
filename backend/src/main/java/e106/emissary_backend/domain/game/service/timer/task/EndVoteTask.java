@@ -16,6 +16,7 @@ public class EndVoteTask implements GameTask {
     @Override
     public void execute(Long gameId) {
         // todo : vote 종료 로직 구현
+
     }
 
 }

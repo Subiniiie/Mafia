@@ -2,6 +2,7 @@ package e106.emissary_backend.domain.game.service.timer.task;
 
 import e106.emissary_backend.domain.game.service.GameService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @RequiredArgsConstructor
 public class StartVoteTask implements GameTask {
@@ -16,6 +17,6 @@ public class StartVoteTask implements GameTask {
     @Override
     public void execute(Long gameId) {
         //todo : vote 시작 로직 구현
-
+        gameService.startVote(gameId);
     }
 }

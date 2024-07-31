@@ -2,7 +2,6 @@ package e106.emissary_backend.domain.room.service;
 
 
 import e106.emissary_backend.domain.game.entity.Game;
-import e106.emissary_backend.domain.game.mapper.GameMapper;
 import e106.emissary_backend.domain.game.repository.RedisGameRepository;
 import e106.emissary_backend.domain.room.dto.RoomListDto;
 import e106.emissary_backend.domain.room.dto.RoomOptionDto;
@@ -12,11 +11,10 @@ import e106.emissary_backend.domain.room.repository.RoomRepository;
 import e106.emissary_backend.domain.user.entity.User;
 import e106.emissary_backend.domain.user.repository.UserRepository;
 import e106.emissary_backend.domain.userInRoom.entity.UserInRoom;
-import e106.emissary_backend.domain.userInRoom.repoistory.UserInRoomRepository;
+import e106.emissary_backend.domain.userInRoom.repository.UserInRoomRepository;
 import e106.emissary_backend.global.common.CommonResponseDto;
 import e106.emissary_backend.global.error.exception.NotFoundRoomException;
 import e106.emissary_backend.global.error.exception.NotFoundUserException;
-import e106.emissary_backend.domain.game.model.GameDTO;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -126,24 +124,24 @@ class RoomServiceTest {
 //        }
     }
 
-//    @Test
-//    void makeRoom_Success() {
-//        when(userRepository.findByUserId(anyLong())).thenReturn(Optional.of(testUser));
-//        when(roomRepository.save(any(Room.class))).thenReturn(testRoom);
-//
-//        RoomOptionDto result = roomService.makeRoom(1L, testRoomRequestDto);
-//
-//        assertNotNull(result);
-//        assertEquals("TestUser", result.getOwner());
-//        assertEquals("Test Room", result.getTitle());
-//        assertEquals(4, result.getMaxPlayer());
-//        assertTrue(result.isHaveBetray());
-//
-//        verify(userRepository).findByUserId(1L);
-//        verify(roomRepository).save(any(Room.class));
-//        verify(userInRoomRepository).save(any(UserInRoom.class));
-//        verify(redisGameRepository).save(any(Game.class));
-//    }
+    @Test
+    void makeRoom_Success() {
+        when(userRepository.findByUserId(anyLong())).thenReturn(Optional.of(testUser));
+        when(roomRepository.save(any(Room.class))).thenReturn(testRoom);
+
+        RoomOptionDto result = roomService.makeRoom(1L, testRoomRequestDto);
+
+        assertNotNull(result);
+        assertEquals("TestUser", result.getOwner());
+        assertEquals("Test Room", result.getTitle());
+        assertEquals(4, result.getMaxPlayer());
+        assertTrue(result.isHaveBetray());
+
+        verify(userRepository).findByUserId(1L);
+        verify(roomRepository).save(any(Room.class));
+        verify(userInRoomRepository).save(any(UserInRoom.class));
+        verify(redisGameRepository).save(any(Game.class));
+    }
 
     @Test
     void makeRoom_UserNotFound() {
@@ -155,23 +153,23 @@ class RoomServiceTest {
         verifyNoInteractions(roomRepository, userInRoomRepository, redisGameRepository);
     }
 
-//    @Test
-//    void enterRoom_Success() {
-//        when(roomRepository.findByRoomId(anyLong())).thenReturn(Optional.of(testRoom));
-//        when(userRepository.findByUserId(anyLong())).thenReturn(Optional.of(testUser));
-//        when(userInRoomRepository.countPeopleByRoomId(anyLong())).thenReturn(3);
-//        when(redisGameRepository.findByGameId(anyLong())).thenReturn(Optional.of(new Game()));
-//
-//        CommonResponseDto result = roomService.enterRoom(1L, 1L);
-//
-//        assertNotNull(result);
-//        assertEquals("ok", result.getResult());
-//
-//        verify(roomRepository).findByRoomId(1L);
-//        verify(userRepository).findByUserId(1L);
-//        verify(userInRoomRepository).save(any(UserInRoom.class));
-//        verify(redisGameRepository).save(any(Game.class));
-//    }
+    @Test
+    void enterRoom_Success() {
+        when(roomRepository.findByRoomId(anyLong())).thenReturn(Optional.of(testRoom));
+        when(userRepository.findByUserId(anyLong())).thenReturn(Optional.of(testUser));
+        when(userInRoomRepository.countPeopleByRoomId(anyLong())).thenReturn(3);
+        when(redisGameRepository.findByGameId(anyLong())).thenReturn(Optional.of(new Game()));
+
+        CommonResponseDto result = roomService.enterRoom(1L, 1L);
+
+        assertNotNull(result);
+        assertEquals("ok", result.getResult());
+
+        verify(roomRepository).findByRoomId(1L);
+        verify(userRepository).findByUserId(1L);
+        verify(userInRoomRepository).save(any(UserInRoom.class));
+        verify(redisGameRepository).save(any(Game.class));
+    }
 
     @Test
     void enterRoom_RoomNotFound() {

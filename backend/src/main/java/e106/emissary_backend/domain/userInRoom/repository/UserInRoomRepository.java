@@ -1,4 +1,4 @@
-package e106.emissary_backend.domain.userInRoom.repoistory;
+package e106.emissary_backend.domain.userInRoom.repository;
 
 import e106.emissary_backend.domain.userInRoom.entity.UserInRoom;
 import org.springframework.data.jpa.repository.JpaRepository;

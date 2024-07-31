@@ -2,6 +2,7 @@ package e106.emissary_backend.global.config;
 
 import e106.emissary_backend.domain.game.entity.Game;
 import e106.emissary_backend.domain.game.service.subscriber.DaySubscriber;
+import e106.emissary_backend.domain.game.service.subscriber.StartVoteSubscriber;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -45,25 +46,36 @@ public class RedisConfig{
 
     @Bean
     public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory connectionFactory,
-                                                                       MessageListenerAdapter voteListenerAdapter,
-                                                                       ChannelTopic voteTopic) {
+                                                                       MessageListenerAdapter dayListenerAdapter,
+                                                                       ChannelTopic dayTopic,
+                                                                       MessageListenerAdapter startVoteAdapter,
+                                                                       ChannelTopic startVoteTopic) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         // subscriber, topic
-        container.addMessageListener(voteListenerAdapter, voteTopic);
+        container.addMessageListener(dayListenerAdapter, dayTopic);
+        container.addMessageListener(startVoteAdapter, startVoteTopic);
 
         return container;
     }
 
     @Bean
-    public MessageListenerAdapter voteListenerAdapter(DaySubscriber subscriber) {
+    public MessageListenerAdapter dayListenerAdapter(DaySubscriber subscriber) {
         return new MessageListenerAdapter(subscriber, "sendMessage");
     }
 
     @Bean
-    public ChannelTopic voteTopic() {
+    public ChannelTopic dayTopic() {
         return new ChannelTopic("DAY");
     }
 
+    @Bean
+    public MessageListenerAdapter startVoteAdapter(StartVoteSubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "sendMessage");
+    }
 
+    @Bean
+    public ChannelTopic startVoteTopic() {
+        return new ChannelTopic("START_VOTE");
+    }
 }

@@ -3,12 +3,13 @@ package e106.emissary_backend.domain.game.service;
 import e106.emissary_backend.domain.game.entity.Game;
 import e106.emissary_backend.domain.game.enumType.GameRole;
 import e106.emissary_backend.domain.game.enumType.GameState;
-import e106.emissary_backend.domain.game.mapper.GameMapper;
 import e106.emissary_backend.domain.game.model.GameDTO;
 import e106.emissary_backend.domain.game.model.GameResponseDTO;
 import e106.emissary_backend.domain.game.repository.RedisGameRepository;
 import e106.emissary_backend.domain.game.service.publisher.RedisPublisher;
 import e106.emissary_backend.domain.game.service.subscriber.DaySubscriber;
+import e106.emissary_backend.domain.game.service.subscriber.message.DayMessage;
+import e106.emissary_backend.domain.game.service.subscriber.message.StartVoteMessage;
 import e106.emissary_backend.domain.game.service.timer.SchedulerService;
 import e106.emissary_backend.domain.game.service.timer.task.StartVoteTask;
 import e106.emissary_backend.domain.game.util.RoleUtils;
@@ -28,22 +29,23 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+
 @Service
 @RequiredArgsConstructor
 public class GameService {
 
-    private final RedisTemplate<String, String> redisTemplate;
+//    private final RedisTemplate<String, String> redisTemplate;
     private final RedisGameRepository redisGameRepository;
     private final RoomRepository roomRepository;
     private final RedisKeyValueTemplate redisKeyValueTemplate;
-    private final GameMapper gameMapper;
     private final SchedulerService scheduler;
 
     private final RedisPublisher publisher;
-    private final ChannelTopic voteTopic;
+    private final ChannelTopic dayTopic;
+    private final ChannelTopic startVoteTopic;
 
     public void update(GameDTO gameDTO){
-        Game game = GameMapper.INSTANCE.toGame(gameDTO);
+        Game game = gameDTO.toDao();
         redisKeyValueTemplate.update(game);
     }
 
@@ -59,25 +61,36 @@ public class GameService {
         Game game = redisGameRepository.findById(roomId).orElseThrow(
                 () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
 
-        GameDTO gameDTO = GameMapper.INSTANCE.toGameDTO(game);
+        GameDTO gameDTO = GameDTO.toDto(game);
 
         gameDTO.setGameState(GameState.STARTED);
         gameDTO.setDay(0);
         gameDTO.setStartAt(LocalDateTime.now());
+        gameDTO.setTimer(LocalDateTime.now());
 
         // 역할부여
         Map<GameRole, Integer> roles = RoleUtils.getRole(gameDTO);
         RoleUtils.grantRole(roles, gameDTO);
 
+        // 저장하기
         update(gameDTO);
 
         // todo : Start Vote Task 작성해야함. -> redis 발행 해놔야함
         scheduler.schedule(new StartVoteTask(this, roomId), 2, TimeUnit.MINUTES);
 
-        publisher.publish(voteTopic, new String("asg"));
+        publisher.publish(dayTopic, DayMessage.builder()
+                        .gameId(roomId)
+                        .gameDTO(gameDTO)
+                        .build());
 
         Room room = roomRepository.findById(roomId).orElseThrow(
                 () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
         room.changeState(RoomState.STARTED);
     } // end of startGame
+
+    public void startVote(Long gameId) {
+        publisher.publish(startVoteTopic, StartVoteMessage.builder()
+                        .gameId(gameId)
+                        .build());
+    }
 }

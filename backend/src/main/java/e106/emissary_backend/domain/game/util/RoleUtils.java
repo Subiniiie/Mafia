@@ -31,7 +31,9 @@ public class RoleUtils {
 
     public static void grantRole(Map<GameRole, Integer> roles, GameDTO gameDTO) {
         List<Player> emissary = new ArrayList<>();
+
         int playerNum = gameDTO.getPlayerMap().size();
+
         Map<Long, Player> playerMap = gameDTO.getPlayerMap();
         List<Player> players = new ArrayList<>(playerMap.values());
         Collections.shuffle(players);  // 플레이어 리스트를 섞습니다.
