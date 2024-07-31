@@ -5,11 +5,16 @@
     transform: translate(-50%, -50%);
     width: 630px;
     height: 420px;
-    color: black;
-    background-color: #fafafa;
+    color: #DDD;
+    background: rgba(34, 15, 15, 0.6);
     border: 1px solid black;
     border-radius: 20px;
     z-index: 100;
+}
+
+.content {
+    justify-content: center;
+    align-item: center;
 }
 
 .header {

@@ -21,3 +21,13 @@
 .settings {
     color: black;
 }
+
+.black {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100px;
+    height: 1000px;
+    background-color: black;
+    z-index: 50;
+}

@@ -12,18 +12,20 @@ function GameSettingsModal({ openModal }) {
             <div className={styles.modal}>
                 <div>
                     <ModalHeader modalTitle="게임 설정" openModal={openModal}/>
-                    <div className={styles.header}>
-                        <RoomName />
-                    </div>
-                    <div className={styles.footer}>
-                        <SecretMode />
-                        <Password />
-                    </div>
-                    <div>
-                        <Turncoat />
-                    </div>
-                    <div>
-                        <button onClick={openModal}>변경</button>
+                    <div className={styles.content}>
+                        <div className={styles.header}>
+                            <RoomName />
+                        </div>
+                        <div className={styles.footer}>
+                            <SecretMode />
+                            <Password />
+                        </div>
+                        <div>
+                            <Turncoat />
+                        </div>
+                        <div>
+                            <button onClick={openModal}>변경</button>
+                        </div>
                     </div>
                 </div>
             </div>
