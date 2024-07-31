@@ -2,11 +2,14 @@ package e106.emissary_backend.domain.game.controller;
 
 
 import e106.emissary_backend.domain.game.service.GameService;
+import e106.emissary_backend.domain.game.service.GameService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -22,6 +25,7 @@ public class SocketGameController {
     // webSocket의 기능 (SimpMessageSendingOperations 써도 됨.)
     private final SimpMessagingTemplate messagingTemplate;
 
+    private final GameService gameService;
     private final GameService gameService;
 
 //    // PathVariable 사용시 오류 생김

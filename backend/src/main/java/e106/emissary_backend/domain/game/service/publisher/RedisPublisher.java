@@ -1,5 +1,8 @@
 package e106.emissary_backend.domain.game.service.publisher;
 
+import e106.emissary_backend.domain.game.entity.Game;
+import e106.emissary_backend.domain.game.service.subscriber.message.DayMessage;
+import e106.emissary_backend.domain.game.service.subscriber.message.StartVoteMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
@@ -8,10 +11,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 public class RedisPublisher {
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<Long, Game> redisTemplate;
 
-    // 구독한 채널로 메시지 발송
-    public void publish(ChannelTopic topic, Object object) {
-        redisTemplate.convertAndSend(topic.getTopic(), object);
+    // 구독한 채널로 메시지 발송 -> 발송시 메시지 규격 맞추기
+    public void publish(ChannelTopic topic, DayMessage message) {
+        redisTemplate.convertAndSend(topic.getTopic(), message);
+    }
+
+    public void publish(ChannelTopic topic, StartVoteMessage message) {
+        redisTemplate.convertAndSend(topic.getTopic(), message);
     }
 }
