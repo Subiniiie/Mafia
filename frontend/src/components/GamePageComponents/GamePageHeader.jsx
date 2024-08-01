@@ -24,7 +24,7 @@ function GamePageHeader() {
         setBlackBackground((preState) => !preState)
     }
 
-    const roomManagerSettings = <button className={styles.settings} onClick={openModal}>(방장만)설정</button>
+    const roomManagerSettings = <button className={styles.settings} onClick={openModal}>게임설정</button>
     return (
         <>
             <div className={styles.container}>
@@ -32,14 +32,17 @@ function GamePageHeader() {
                     {roomTitle}
                     <div className={styles.right}>
                         {roomManager ? roomManagerSettings : null}
-                        <button className={styles.exit}><Link to="/game-list">나가기</Link></button>
+                            <Link to="/game-list" className={styles.exit}>
+                                <img src="/exit.png" alt="exit.png" className={styles.exitImage}/>
+                                나가기
+                            </Link>
                     </div>
                 </div>
                 <div>
                     {isModalOpen ? <GameSettingsModal isOpen={isModalOpen} openModal={openModal}/> : null}
                 </div>
             </div>
-            { blackBackground ? <div className="black">gdgd</div> : null}
+            { blackBackground ? <div className={styles.black} onClick={openModal}></div> : null}
         </>
     )
 }

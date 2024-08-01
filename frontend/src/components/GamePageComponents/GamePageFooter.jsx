@@ -7,13 +7,15 @@ import styles from "./GamePageFooter.module.css"
 function GamePageFooter() {
     // 모달을 열고 닫을 변수
     const [ isModalOpen, setIsModalOpen ] = useState(false)
+    const [ blackBackground, setBlackBackground ] =useState(false)
 
     function openModal() {
-        setIsModalOpen(!isModalOpen)
+        setIsModalOpen(preState => !preState)
+        setBlackBackground(preState => !preState)
     }
 
 
-    const jobModalOpen = <JobModal isOpen={isModalOpen} openModal={openModal}/>
+    const jobModalOpen = <JobModal isOpen={isModalOpen} openModal={openModal} />
     return (
         <>
             <div className={styles.container}>
@@ -26,6 +28,7 @@ function GamePageFooter() {
                     { isModalOpen ? jobModalOpen : null}
                 </div>
             </div>
+            {blackBackground ? <div className={styles.black} onClick={openModal}></div> : null}
         </>
     )
 }
