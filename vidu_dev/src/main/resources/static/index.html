@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>화상 채팅 애플리케이션</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+        .header-left input {
+            margin-right: 10px;
+            padding: 5px;
+        }
+        .header button {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        #leaveSessionButton {
+            background-color: #f44336;
+            color: white;
+            border: none;
+        }
+        .video-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            flex-grow: 1;
+            margin-bottom: 20px;
+        }
+        .video-box {
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            width: 300px;
+            height: 200px;
+            overflow: hidden;
+            position: relative; /* 추가 */
+        }
+        .nickname {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 5px;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+        .chat-area {
+            display: flex;
+            flex-direction: column;
+            height: 200px;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .chat-input {
+            display: flex;
+        }
+        .chat-input input {
+            flex-grow: 1;
+            padding: 5px;
+        }
+        .chat-input button {
+            padding: 5px 10px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-left">
+        <input type="text" placeholder="닉네임" aria-label="닉네임">
+        <input type="text" placeholder="세션 번호" aria-label="세션 번호">
+        <button id="connectButton">접속</button>
+    </div>
+    <button id="leaveSessionButton" style="display: none;">나가기</button>
+</div>
+
+<div class="video-container" id="video-container-test">
+    <div class="video-box"></div>
+    <div class="video-box"></div>
+    <div class="video-box"></div>
+    <div class="video-box"></div>
+    <div class="video-box"></div>
+    <div class="video-box"></div>
+    <div class="video-box"></div>
+    <div class="video-box"></div>
+</div>
+
+<div id="video-waiting-container" style="display: none;"></div>
+
+<div class="chat-area">
+    <div class="chat-messages" id="chatMessages">
+        <!-- 여기에 채팅 메시지가 표시됩니다 -->
+    </div>
+    <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="메시지를 입력하세요" aria-label="채팅 메시지">
+        <button id="sendButton">전송</button>
+    </div>
+</div>
+
+<script src="openvidu-browser-2.30.0.js"></script>
+<script src="connectionHandler.js"></script>
+<script src="util.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
