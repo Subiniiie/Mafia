@@ -1,15 +1,15 @@
 package e106.emissary_backend.domain.game.controller;
 
 
-import e106.emissary_backend.domain.game.service.GameService;
+import e106.emissary_backend.domain.game.model.ConfirmVoteRequestDTO;
+import e106.emissary_backend.domain.game.model.VoteRequestDTO;
 import e106.emissary_backend.domain.game.service.GameService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -27,31 +27,38 @@ public class SocketGameController {
 
     private final GameService gameService;
 
-//    // PathVariable 사용시 오류 생김
-//    @MessageMapping("/{roomId}/enter")
-//    public void enterGameRoom(@DestinationVariable Long roomId,
-//                              SimpMessageHeaderAccessor headerAccessor) {
-//        String userId = headerAccessor.getFirstNativeHeader("User");
-//
-//        if(userId != null) {
-//            // Todo : DB에 접근하는 코드로 인원늘리고
-//            // Todo : redis에 현재 세션 정보 저장
-//            GameResponseDTO gameResponseDTO = redisGameService.findGameById(roomId);
-//
-//
-//            // 전체적으로 보내야하는 경우 publisher를 사용해서 하자
-//            // 서비스로 가서 publish가 필요한경우 하자,,
-//            // to front : key : /sub/roomId , value : gameResponseDTO(JSON)
-//            messagingTemplate.convertAndSend("/sub/" + roomId, gameResponseDTO);
-//        }
-//    }
-
 
     // Ready는 프론트에서 처리한다고 하여서 안함.
     @MessageMapping("/rooms/start/{roomId}")
     public void start(@AuthenticationPrincipal UserDetails userDetails, @DestinationVariable Long roomId){
+        // todo : 한번 JWT로 요청해보고 안되면 고치기
         long userId = Long.parseLong(userDetails.getUsername());
 
         gameService.setGame(roomId);
+    }
+
+    @MessageMapping("/vote/{roomId}")
+    public void vote(@AuthenticationPrincipal UserDetails userDetails
+            , @DestinationVariable Long roomId
+            , @Payload VoteRequestDTO request) {
+        long userId = Long.parseLong(userDetails.getUsername());
+        // todo : 닉네임으로 넘어오면 roomService에서 닉네임으로 Id찾아오기
+        long targetId = request.getTargetId();
+
+        gameService.startVote(roomId, userId, targetId);
+    }
+
+    @MessageMapping("/confirm/{roomId}")
+    public void confirmVote(@AuthenticationPrincipal UserDetails userDetails,
+                            @DestinationVariable Long roomId,
+                            @Payload ConfirmVoteRequestDTO request){
+        long userId = Long.parseLong(userDetails.getUsername());
+
+        gameService.startConfirm(roomId, userId, request.isConfirm());
+    }
+
+    @MessageMapping("/remove/{roomId}/{targetId}")
+    public void removeUser(@DestinationVariable Long roomId, @DestinationVariable Long targetId) {
+        gameService.removeUser(roomId, targetId);
     }
 }
