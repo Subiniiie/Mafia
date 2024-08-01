@@ -2,8 +2,15 @@ import React, {useState} from "react";
 import styled from "styled-components"
 
 
+
 const ReadyStartBtn = styled.button`
-color: red;
+width: 90px;
+background-color: rgba(255, 0, 0, 0.5);
+color: white;
+border: 1px solid rgba(255, 0, 0, 0.7);
+border-radius: 15px;
+margin-top: 10px;
+margin-right: 10px;
 `
 
 function GameReadyStartBtn({roomManager}) {
@@ -22,6 +29,7 @@ function GameReadyStartBtn({roomManager}) {
             <ReadyStartBtn 
                 onClick={playerCnt}
                 disabled = {playerReadyCnt === 8}
+                
             >
                 {roomManager && playerReadyCnt === 7 ? "시작" : "준비"}
             </ReadyStartBtn>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import ModalHeader from "../components/ModalHeader"
 import RoomName from "../components/GamePageComponents/RoomName";
 import SecretMode from "../components/GamePageComponents/SecretMode";
