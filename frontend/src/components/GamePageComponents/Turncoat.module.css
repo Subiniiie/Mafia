@@ -1,0 +1,16 @@
+.container {
+    display: flex;
+    align-items: center;
+    margin-top: -20px;
+}
+
+.labelStyle {
+    font-size: 16px;
+    line-height: 70px;
+    margin-right: 5px;
+}
+
+.inputStyle {
+    width: 15px;
+    height: 15px;
+}
