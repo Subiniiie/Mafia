@@ -14,6 +14,7 @@ public class Refresh {
 
     private Long userId;
     private String username;
+    private String email;
     @Id
     private String refresh;
     private String expiration;
