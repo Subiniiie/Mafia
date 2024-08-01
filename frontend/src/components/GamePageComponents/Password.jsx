@@ -1,10 +1,13 @@
 import React from "react";
+import styles from "./Password.module.css"
 
 function Password() {
     return(
         <>
-            <p>비밀번호</p>
-            <input type="text" placeholder=" Room password"></input>
+            <div className={styles.containerStyle}>
+                <span className={styles.labelStyle}>비밀번호</span>
+                <input className={styles.inputStyle} type="text" placeholder="비밀번호를 입력해주세요."></input>
+            </div>
         </>
     )
 }
