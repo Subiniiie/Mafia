@@ -84,9 +84,16 @@ public class SecurityConfig {
         //HTTP Basic 인증 방식 disable
         http
                 .httpBasic((auth) -> auth.disable());
+
+        //경로별 인가 작업 (/login 페이지와 루트 페이지, 회원가입페이지는 비로그인한 사람에게 접근 허용)
+        http
+                .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers("/api/login","/", "/api/user", "/api/mail", "/api/reissue", "/api/logout").permitAll()
+                        .anyRequest().authenticated());
+
         //JWTFilter 추가
         http
-                .addFilterAfter(new JWTFilter(jwtUtil, "OAUTH"), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JWTFilter(jwtUtil, "OAUTH"), UsernamePasswordAuthenticationFilter.class);
         //oauth2
         http
                 .oauth2Login((oauth2) -> oauth2
@@ -95,14 +102,6 @@ public class SecurityConfig {
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
                                 .userService(oAuth2UserService))
                         .successHandler(customSuccessHandler));
-
-        //경로별 인가 작업 (/login 페이지와 루트 페이지, 회원가입페이지는 비로그인한 사람에게 접근 허용)
-        http
-                .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login","/", "/api/user", "/api/mail", "/api/reissue", "/api/login").permitAll()
-                        .anyRequest().authenticated());
-//                                .anyRequest().permitAll());
-
         http
                 .addFilterBefore(new JWTFilter(jwtUtil, "COMMON"), UsernamePasswordAuthenticationFilter.class);
 
