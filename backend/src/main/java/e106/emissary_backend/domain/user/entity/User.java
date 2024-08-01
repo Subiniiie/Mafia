@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -15,6 +17,7 @@ import java.util.Set;
 @Builder
 @Table(name = "users")
 @EqualsAndHashCode(callSuper=false)
+@ToString(exclude = "achievementUsers")
 public class User extends BaseTimeEntity{
 
     @Id
@@ -46,7 +49,7 @@ public class User extends BaseTimeEntity{
 
     @Builder.Default
     @Column(name = "mafia_play_cnt")
-    private Long mafiaPlayCn = 0L;
+    private Long mafiaPlayCnt = 0L;
 
     @Builder.Default
     @Column(name = "police_win_cnt")
@@ -65,6 +68,10 @@ public class User extends BaseTimeEntity{
     private Long turncoatWinCnt = 0L;
 
     @Builder.Default
+    @Column(name = "turncoat_single_win_cnt")
+    private Long turncoatSingleWinCnt = 0L;
+
+    @Builder.Default
     @Column(name = "citizen_game_cnt")
     private Long citizenGameCnt = 0L;
 
@@ -80,7 +87,8 @@ public class User extends BaseTimeEntity{
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
 
-    @OneToMany(mappedBy = "user")
-    private Set<AchievementUsers> achievementUsers;
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<AchievementUsers> achievementUsers = new ArrayList<>();
 
 }
