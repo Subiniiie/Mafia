@@ -1,11 +1,10 @@
 package e106.emissary_backend.domain.game.repository;
 
-import e106.emissary_backend.domain.game.model.Game;
+import e106.emissary_backend.domain.game.entity.Game;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest;
-import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.Optional;
 

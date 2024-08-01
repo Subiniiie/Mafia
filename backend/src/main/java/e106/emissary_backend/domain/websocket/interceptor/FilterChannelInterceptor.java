@@ -1,51 +1,79 @@
 package e106.emissary_backend.domain.websocket.interceptor;
 
-import com.nimbusds.jose.Algorithm;
-import com.nimbusds.jwt.JWT;
-import org.springframework.core.annotation.Order;
+
+import e106.emissary_backend.domain.security.util.JWTUtil;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.List;
+
+import static com.nimbusds.oauth2.sdk.token.TokenTypeURI.JWT;
 
 // Spring Security보다 인터셉터의 우선순위 올리기
 @Order(Ordered.HIGHEST_PRECEDENCE * 99)
+@Component
 public class FilterChannelInterceptor implements ChannelInterceptor {
 
+    @Autowired
+    private JWTUtil jwtUtil;
+
+    @Override
+    public Message<?> preSend(Message<?> message, MessageChannel channel) {
+        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+
+        if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+            String jwtToken = extractJwtFromCookie(accessor);
+            if (jwtToken != null) {
+                try {
+                    if (jwtUtil.validateToken(jwtToken)) {
+//                        String username = jwtUtil.getUsername(jwtToken);
+                        Long userId = jwtUtil.getUserId(jwtToken);
+                        String role = jwtUtil.getRole(jwtToken);
+
+                        accessor.setUser(new UsernamePasswordAuthenticationToken(
+                                userId,
+                                null,
+                                Collections.singletonList(new SimpleGrantedAuthority(role)))
+                        );
+                    } else {
+                        throw new MessageDeliveryException("Invalid JWT token");
+                    }
+                }catch(Exception e) {
+                    throw new MessageDeliveryException("JWT processing error : " + e);
+                }
+            }
+        }
+
+        return message;
+    }
+
     /**
-     preSend : 메시지가 채널로 전송되기전에 호출되는 메소드
-     StompHeaderAccessor : STOMP 헤더에 접근이 가능해짐
+     * Todo 쿠키 저장방식에 따라 바꾸기
      */
-//    @Override
-//    public Message<?> preSend(Message<?> message, MessageChannel channel) {
-//        StompHeaderAccessor headerAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-//
-//        assert headerAccessor != null;
-//        // 첫번째 연결시에만 Header 확인하기 위해 getCommand사용 -> 이후엔 저장된 정보 사용
-//        if(headerAccessor.getCommand().equals(StompCommand.CONNECT)){
-//            // connectHeader에 있는 Authorization에서 토큰을 꺼내기
-//            String token = String.valueOf(headerAccessor.getNativeHeader("Authorization").get(0));
-//            // 토큰에서 BARER부분 지우기
-//            // 수정해야함
-//            token = token.replace("BARER ", " ");
-//
-//            try{
-//                // User헤더에 JWT인증정보 넣음
-//                Integer userId = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET)).build().verify(token)
-//                        .getClaim("id").asInt();
-//
-//                // User라는 네이티브 헤더 추가
-//                headerAccessor.addNativeHeader("User", String.valueOf(userId));
-//            } catch (TokenExpiredException e) {
-//                e.printStackTrace();
-//            } catch (JWTVerificationException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        // 소켓에 connect할 때, User라는 Native Header에서 유저정보를 이제 들고오면 됨.
-//        return message;
-//    }
+    private String extractJwtFromCookie(StompHeaderAccessor accessor) {
+        List<String> cookieHeaders = accessor.getNativeHeader("Cookie");
+        if (cookieHeaders != null && !cookieHeaders.isEmpty()) {
+            for (String cookie : cookieHeaders.get(0).split("; ")) {
+                if (cookie.startsWith("jwt=")) {
+                    return cookie.substring(4); // "jwt=" 이후의 값
+                }
+            }
+        }
+        return null;
+    }
 }
