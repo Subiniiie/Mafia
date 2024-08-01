@@ -29,7 +29,7 @@ public class SocketGameController {
 
 
     // Ready는 프론트에서 처리한다고 하여서 안함.
-    @MessageMapping("/rooms/start/{roomId}")
+    @MessageMapping("/start/{roomId}")
     public void start(@AuthenticationPrincipal UserDetails userDetails, @DestinationVariable Long roomId) {
         // todo : 한번 JWT로 요청해보고 안되면 고치기
         long userId = Long.parseLong(userDetails.getUsername());
@@ -76,5 +76,10 @@ public class SocketGameController {
     @MessageMapping("/detect/{roomId}/{targetId}")
     public void detect(@DestinationVariable Long roomId, @DestinationVariable Long targetId) {
         gameService.detect(roomId, targetId);
+    }
+
+    @MessageMapping("/day/{roomId}")
+    public void day(@DestinationVariable Long roomId) {
+        gameService.day(roomId);
     }
 }

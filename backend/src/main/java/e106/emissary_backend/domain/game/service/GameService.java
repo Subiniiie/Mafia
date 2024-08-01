@@ -290,5 +290,15 @@ public class GameService {
         publisher.publish(nightPoliceTopic, nightPoliceMessage);
     }
 
+    public void day(Long gameId) {
+        Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
+                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
 
+        GameDTO gameDTO = GameDTO.toDto(game);
+        gameDTO.setGameState(GameState.DAY);
+        gameDTO.setDay(game.getDay() + 1);
+
+        // 2분뒤 다시 토론 시작
+        scheduler.scheduleTask(gameId, TaskName.START_VOTE_TASK, startVoteTask, 2, TimeUnit.MINUTES);
+    }
 }
