@@ -35,7 +35,8 @@ public class Player implements Serializable {
 
     private boolean isLeft;
 
-    private boolean isAlive;
+    @Builder.Default
+    private boolean isAlive = true;
 
     public static Player createPlayer(Long id, String nickname) {
         return Player.builder()

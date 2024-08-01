@@ -53,8 +53,12 @@ public class SocketGameController {
                             @DestinationVariable Long roomId,
                             @Payload ConfirmVoteRequestDTO request){
         long userId = Long.parseLong(userDetails.getUsername());
-        boolean confirm = request.isConfirm();
 
-        gameService.startConfirm(roomId, userId, confirm);
+        gameService.startConfirm(roomId, userId, request.isConfirm());
+    }
+
+    @MessageMapping("/remove/{roomId}/{targetId}")
+    public void removeUser(@DestinationVariable Long roomId, @DestinationVariable Long targetId) {
+        gameService.removeUser(roomId, targetId);
     }
 }

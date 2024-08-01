@@ -15,6 +15,7 @@ import java.util.HashMap;
 public class EndConfirmMessage {
     private long gameId;
     private HashMap<Long, Integer> voteMap;
+    private Long targetId;
     private String result;
 
     public void organizeVote() {

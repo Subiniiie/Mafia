@@ -32,6 +32,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -100,7 +101,7 @@ public class GameService {
     } // end of startGame
 
     public void startVote(long gameId, long userId, long targetId) {
-        Map<Long, Player> playerMap = getPlayerMap(gameId);
+        Map<Long, Player> playerMap = getAlivePlayerMap(gameId);
 
         String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
 
@@ -117,12 +118,14 @@ public class GameService {
         }
     } // end of startVote
 
-    private Map<Long, Player> getPlayerMap(long gameId) {
+    private Map<Long, Player> getAlivePlayerMap(long gameId) {
         Game game = redisGameRepository.findById(gameId).orElseThrow(
                 () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
 
         GameDTO gameDTO = GameDTO.toDto(game);
-        Map<Long, Player> playerMap = gameDTO.getPlayerMap();
+        Map<Long, Player> playerMap = gameDTO.getPlayerMap().entrySet().stream()
+                .filter(entry -> entry.getValue().isAlive())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         return playerMap;
     } // end of getPlayerMap
@@ -154,7 +157,7 @@ public class GameService {
     } // end of endVote
 
     public void startConfirm(Long gameId, long userId, boolean confirm) {
-        Map<Long, Player> playerMap = getPlayerMap(gameId);
+        Map<Long, Player> playerMap = getAlivePlayerMap(gameId);
 
         String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
 
@@ -178,18 +181,25 @@ public class GameService {
         publisher.publish(endConfirmTopic, message);
 
         // 레디스에 결과 삭제
-        String voteKey = GameConstant.VOTE_KEY_PREFIX + message.getGameId();
+        long gameId = message.getGameId();
+        String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
         voteRedisTemplate.delete(voteKey);
-
-        // 이제 죽여야겠지?
     } // end of endConfirm
 
     /**
      제거하는 로직
      */
-    public void eliminate() {
+    public void removeUser(Long gameId, Long targetId) {
+        Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
+                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
 
+        GameDTO gameDTO = GameDTO.toDto(game);
+
+        Map<Long, Player> playerMap = gameDTO.getPlayerMap();
+
+        playerMap.get(targetId).setAlive(false);
+
+        update(gameDTO);
     }
-
 
 }
