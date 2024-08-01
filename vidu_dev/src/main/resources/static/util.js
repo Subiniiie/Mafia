@@ -25,13 +25,16 @@ function addUserScreen(videoElement, streamManager) {
 function addStreamManager(streamManager) {
     const creationTime = streamManager.stream.creationTime;
 
+    console.log('시발')
+    console.log(connectionHandler.streamManagers);
+
     let index = 0;
-    for (; index < streamManagers.length; ++index) {
-        const creationT = streamManagers[index].stream.creationTime;
+    for (; index < connectionHandler.streamManagers.length; ++index) {
+        const creationT = connectionHandler.streamManagers[index].stream.creationTime;
         if (creationTime < creationT) break;
     }
 
-    streamManagers.splice(index, 0, streamManager);
+    connectionHandler.streamManagers.splice(index, 0, streamManager);
 
     return index;
 }

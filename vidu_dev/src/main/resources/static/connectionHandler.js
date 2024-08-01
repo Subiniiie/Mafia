@@ -1,10 +1,10 @@
 // OpenVidu 상태(이벤트 발생)에 따른 처리를 위한 handler
 class OpenViduConnectionHandler {
-    constructor(session, reconnectTimeout = 5000) {
+    constructor(session) {
         this.session = session;
-        this.reconnectTimeout = reconnectTimeout;
         this.disconnectedUsers = new Map();
         this.parentMap = new Map();
+        this.streamManagers = [];
         this.setupEventListeners();
     }
 
@@ -23,6 +23,9 @@ class OpenViduConnectionHandler {
         if (this.disconnectedUsers.has(connectionId)) return;
 
         this.disconnectedUsers.set(connectionId, event.connection);
+        
+        console.log('[handleConnectionDestroyed] 호출');
+        
         this.finalizeDisconnection(connectionId);
     }
 
@@ -72,7 +75,12 @@ class OpenViduConnectionHandler {
     }
 
     finalizeDisconnection(connectionId) {
+        console.log('[finalizeDisconnection] disconnectedUser 배열');
+        console.log(this.disconnectedUsers);
         if (this.disconnectedUsers.has(connectionId)) {
+
+            console.log('[finalizeDisconnection] disconnectedUsers 존재')
+
             const userConnection = this.disconnectedUsers.get(connectionId);
             console.log(`Connection permanently lost for user: ${connectionId}`);
 
@@ -92,6 +100,19 @@ class OpenViduConnectionHandler {
 
         // 부모 'div' 태그 삭제
         parent.remove();
+
+        const removeIdx = this.streamManagers.findIndex(streamManager =>
+            streamManager.stream.connection.connectionId === connectionId
+        );
+        if (removeIdx === -1) {
+            console.log('[cleanupResources] 삭제할 streamManager를 찾을 수 없습니다');
+            return;
+        }
+
+        console.log('전시발');
+        console.log(this.streamManagers);
+
+        this.streamManagers.splice(removeIdx, 1);
 
         this.parentMap.delete(connectionId);
 
