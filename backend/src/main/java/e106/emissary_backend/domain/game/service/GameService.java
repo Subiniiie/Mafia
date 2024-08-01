@@ -9,12 +9,8 @@ import e106.emissary_backend.domain.game.model.GameResponseDTO;
 import e106.emissary_backend.domain.game.model.Player;
 import e106.emissary_backend.domain.game.repository.RedisGameRepository;
 import e106.emissary_backend.domain.game.service.publisher.RedisPublisher;
-import e106.emissary_backend.domain.game.service.subscriber.message.DayMessage;
-import e106.emissary_backend.domain.game.service.subscriber.message.EndConfirmMessage;
-import e106.emissary_backend.domain.game.service.subscriber.message.EndVoteMessage;
-import e106.emissary_backend.domain.game.service.subscriber.message.NightEmissaryMessage;
+import e106.emissary_backend.domain.game.service.subscriber.message.*;
 import e106.emissary_backend.domain.game.service.timer.SchedulerService;
-import e106.emissary_backend.domain.game.service.timer.task.EndConfirmTask;
 import e106.emissary_backend.domain.game.service.timer.task.StartConfirmTask;
 import e106.emissary_backend.domain.game.service.timer.task.StartVoteTask;
 import e106.emissary_backend.domain.game.service.timer.task.TaskName;
@@ -57,6 +53,7 @@ public class GameService {
     private final ChannelTopic endConfirmTopic;
 
     private final ChannelTopic nightEmissaryTopic;
+    private final ChannelTopic nightPoliceTopic;
 
     public void update(GameDTO gameDTO){
         Game game = gameDTO.toDao();
@@ -245,7 +242,7 @@ public class GameService {
         }
 
         if(targetPlayer.getRole() == GameRole.EMISSARY){
-            throw new EmissaryAppeaseEmissaryException(CommonErrorCode.EMISSARY_APPEASE_EMISSARY);
+            throw new EmissaryAppeaseEmissaryException(CommonErrorCode.EMISSARY_APPEASE_EMISSARY_EXCEPTION);
         }
 
         // todo : game안에 Player상태 변경
@@ -265,5 +262,33 @@ public class GameService {
         }else {
             targetPlayer.setRole(GameRole.BETRAYER);
         }
+
+        update(gameDTO);
+
+        //레디스에 발행
+        publisher.publish(nightEmissaryTopic, NightEmissaryMessage.builder()
+                        .gameId(gameId)
+                        .targetId(targetId)
+                        .result("success")
+                        .build());
     }
+
+    public void detect(Long gameId, Long targetId) {
+        Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
+                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+
+        GameDTO gameDTO = GameDTO.toDto(game);
+        Map<Long, Player> playerMap = gameDTO.getPlayerMap();
+        Player targetPlayer = playerMap.get(targetId);
+
+        if(!targetPlayer.isAlive()){
+            throw new AlreadyRemoveUserException(CommonErrorCode.ALREADY_REMOVE_USER_EXCEPTION);
+        }
+
+        // todo : 이미 조사한 유저에 대해서 어떻게하지? -> 그냥 다 모른다 쳐!
+        NightPoliceMessage nightPoliceMessage = NightPoliceMessage.builder().gameId(gameId).targetId(targetId).result(targetPlayer.getRole()).build();
+        publisher.publish(nightPoliceTopic, nightPoliceMessage);
+    }
+
+
 }

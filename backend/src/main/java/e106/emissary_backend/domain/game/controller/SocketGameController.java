@@ -72,4 +72,9 @@ public class SocketGameController {
     public void appease(@DestinationVariable Long roomId, @DestinationVariable Long targetId) {
         gameService.appease(roomId, targetId);
     }
+
+    @MessageMapping("/detect/{roomId}/{targetId}")
+    public void detect(@DestinationVariable Long roomId, @DestinationVariable Long targetId) {
+        gameService.detect(roomId, targetId);
+    }
 }

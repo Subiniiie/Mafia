@@ -63,7 +63,8 @@ public class RedisConfig {
                                                                        MessageListenerAdapter endVoteAdapter, ChannelTopic endVoteTopic,
                                                                        MessageListenerAdapter startConfirmAdapter, ChannelTopic startConfirmTopic,
                                                                        MessageListenerAdapter endConfirmAdapter, ChannelTopic endConfirmTopic,
-                                                                       MessageListenerAdapter nightEmissaryAdapter, ChannelTopic nightEmissaryTopic) {
+                                                                       MessageListenerAdapter nightEmissaryAdapter, ChannelTopic nightEmissaryTopic,
+                                                                       MessageListenerAdapter nightPoliceAdapter, ChannelTopic nightPoliceTopic) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         // subscriber, topic
@@ -73,6 +74,7 @@ public class RedisConfig {
         container.addMessageListener(startConfirmAdapter, startConfirmTopic);
         container.addMessageListener(endConfirmAdapter, endConfirmTopic);
         container.addMessageListener(nightEmissaryAdapter, nightEmissaryTopic);
+        container.addMessageListener(nightPoliceAdapter, nightPoliceTopic);
 
         return container;
     }
@@ -136,6 +138,16 @@ public class RedisConfig {
     @Bean
     public ChannelTopic nightEmissaryTopic() {
         return new ChannelTopic("NIGHT_EMISSARY");
+    }
+
+    @Bean
+    public MessageListenerAdapter nightPoliceAdapter(NightPoliceSubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "sendMessage");
+    }
+
+    @Bean
+    public ChannelTopic nightPoliceTopic() {
+        return new ChannelTopic("NIGHT_POLICE");
     }
 
 }

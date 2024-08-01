@@ -57,6 +57,12 @@ public class GlobalExceptionAdvice {
     }
 
     @ExceptionHandler
+    public ResponseEntity<Object> alreadyDetectUser(AlreadyDetectUserException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return handleExceptionInternal(errorCode);
+    }
+
+    @ExceptionHandler
     public ResponseEntity<Object> emissaryAppeaseEmissary(EmissaryAppeaseEmissaryException e) {
         ErrorCode errorCode = e.getErrorCode();
         return handleExceptionInternal(errorCode);
