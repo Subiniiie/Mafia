@@ -22,6 +22,7 @@ import e106.emissary_backend.domain.room.entity.Room;
 import e106.emissary_backend.domain.room.enumType.RoomState;
 import e106.emissary_backend.domain.room.repository.RoomRepository;
 import e106.emissary_backend.global.error.CommonErrorCode;
+import e106.emissary_backend.global.error.exception.AlreadyRemoveUserException;
 import e106.emissary_backend.global.error.exception.AlreadyUseAppeaseException;
 import e106.emissary_backend.global.error.exception.NotFoundGameException;
 import e106.emissary_backend.global.error.exception.NotFoundRoomException;
@@ -210,8 +211,17 @@ public class GameService {
     public void kill(Long gameId, Long targetId) {
         Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
                 () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+        GameDTO gameDTO = GameDTO.toDto(game);
+        Player targetPlayer = gameDTO.getPlayerMap().get(targetId);
 
+        if(targetPlayer.isAlive()){
+            throw new AlreadyRemoveUserException(CommonErrorCode.ALREADY_REMOVE_USER_EXCEPTION);
+        }
 
+        targetPlayer.setAlive(false);
+
+        // todo : Redis에 발행해야함
+        publisher.publish();
     }
 
     public void appease(Long gameId, Long targetId) {
