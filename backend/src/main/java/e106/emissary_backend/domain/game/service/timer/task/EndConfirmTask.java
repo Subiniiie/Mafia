@@ -1,18 +1,14 @@
 package e106.emissary_backend.domain.game.service.timer.task;
 
-import e106.emissary_backend.domain.game.GameConstant;
 import e106.emissary_backend.domain.game.service.GameService;
-import e106.emissary_backend.domain.game.service.publisher.RedisPublisher;
+import e106.emissary_backend.domain.game.service.subscriber.message.EndConfirmMessage;
 import e106.emissary_backend.domain.game.service.subscriber.message.EndVoteMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
 
 @Service
 @RequiredArgsConstructor
-public class EndVoteTask implements GameTask {
+public class EndConfirmTask implements GameTask {
     private Long gameId;
 
     private final GameService gameService;
@@ -28,10 +24,7 @@ public class EndVoteTask implements GameTask {
         // todo : 투표 결과를 EndVoteMessage에 담아서 내려보내야함.
         // todo : 이거 그냥 바로 service로 넘길까? 그래야 publish를 한번에 처리하기가 좋고 schedule 예약하기가 좋음
         // todo : 게임 상태도 confirm으로 바꿔줘야함
-        String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
-
-        HashMap<Long, Integer> voteMap = gameService.getVoteMapFromRedis(voteKey);
-        gameService.endVote(EndVoteMessage.builder().gameId(gameId).voteMap(voteMap).build());
+        gameService.endConfirm(EndConfirmMessage.builder().gameId(gameId).build());
     }
 
     public void setGameId(long gameId){
