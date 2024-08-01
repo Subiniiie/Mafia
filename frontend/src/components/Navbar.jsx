@@ -9,6 +9,10 @@ import Logo from '../assets/Logo.png'; // 이미지 파일 import
 import LogoutButton from '../assets/Buttons/LogoutButton.png'
 import ProfileButton from '../assets/Buttons/ProfileButton.png'
 import SettingsButton from '../assets/Buttons/SettingsButton.png'
+import SpeakerOffButton from '../assets/Buttons/SpeakerOffButton.png'
+import SpeakerOnButton from '../assets/Buttons/SpeakerOnButton.png'
+import SpeakerOffLockedButton from '../assets/Buttons/SpeakerOffLockedButton.png'
+import SpeakerOnLockedButton from '../assets/Buttons/SpeakerOnLockedButton.png'
 
 
 const Navbar = ({ isLoggedIn, username }) => {
@@ -22,8 +26,11 @@ const Navbar = ({ isLoggedIn, username }) => {
     const [isFriendsModalOpen, setIsFriendsModalOpen] = useState(false)
     const openFriendsModal = () => setIsFriendsModalOpen(!isFriendsModalOpen)
 
-    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
-    const openSettingsModal = () => setIsSettingsModalOpen(!isSettingsModalOpen)
+    // const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
+    // const openSettingsModal = () => setIsSettingsModalOpen(!isSettingsModalOpen)
+
+    const [isSpeakerOn, setIsSpeakerOn] = useState(true)
+    const turnSpeakerOn = () => setIsSpeakerOn(!isSpeakerOn)
 
     const location = useLocation()
 
@@ -32,9 +39,9 @@ const Navbar = ({ isLoggedIn, username }) => {
         if (isFriendsModalOpen) {
             setIsFriendsModalOpen(false)
         }
-        if (isSettingsModalOpen) {
-            setIsSettingsModalOpen(false);
-        }
+        // if (isSettingsModalOpen) {
+        //     setIsSettingsModalOpen(false);
+        // }
         if (isLoginModalOpen) {
             setIsLoginModalOpen(false);
         }
@@ -62,14 +69,14 @@ const Navbar = ({ isLoggedIn, username }) => {
                             </div>
                         </div>
 
-                        <div className="navbar-links">
+                        <div className="navbar-links kimjungchul-bold">
                             <Link to="/achievements" className="links">
                                 <img src={ProfileButton} alt="ProfileButton" className="navbar-buttons" />
                                 <p>프로필</p>
                             </Link>
 
                             <div onClick={openFriendsModal} className="links">
-                                <img src={ProfileButton} alt="ProfileButton" className="navbar-buttons" />
+                                <img src={SettingsButton} alt="SettingsButton" className="navbar-buttons" />
                                 <p>동지들</p>
                             </div>
                             <Friends isOpen={isFriendsModalOpen} openModal={openFriendsModal} />
@@ -84,11 +91,23 @@ const Navbar = ({ isLoggedIn, username }) => {
                         <SignUpModal isOpen={isSignUpModalOpen} openModal={openSignUpModal} />
                     </>
                 )}
-                <div onClick={openSettingsModal} className="links">
+                {/* <div onClick={openSettingsModal} className="links">
                     <img src={SettingsButton} alt="SettingsButton" className="navbar-buttons" />
                     <p>설정</p>
                 </div>
-                <SettingsModal isOpen={isSettingsModalOpen} openModal={openSettingsModal} />
+                <SettingsModal isOpen={isSettingsModalOpen} openModal={openSettingsModal} /> */}
+
+                {isSpeakerOn ? (
+                    <div className="Speaker-Box">
+                        <img src={SpeakerOnButton} alt="SpeakerOnButton" className="speaker-buttons" />
+                        <img src={SpeakerOffLockedButton} alt="SpeakerOffLockedButton" className="speaker-buttons" onClick={turnSpeakerOn} />
+                    </div>
+                ) : (
+                    <div className="Speaker-Box">
+                        <img src={SpeakerOnLockedButton} alt="SpeakerOnLockedButton" className="speaker-buttons" onClick={turnSpeakerOn} />
+                        <img src={SpeakerOffButton} alt="SpeakerOffButton" className="speaker-buttons" />
+                    </div>
+                )}
             </div>
         </nav>
     );
