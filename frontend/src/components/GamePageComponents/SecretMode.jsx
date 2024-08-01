@@ -1,10 +1,13 @@
 import React from "react";
+import styles from "./SecretMode.module.css"
 
 function SecretMode() {
     return (
         <>
-            <p>비공개</p>
-            <input type="checkbox"></input>
+            <div className={styles.container}>
+                <span className={styles.labelStyle}>비공개</span>
+                <input className={styles.inputStyle} type="checkbox"></input>
+            </div>
         </>
     )
 }
