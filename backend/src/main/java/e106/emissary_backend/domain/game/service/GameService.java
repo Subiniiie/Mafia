@@ -205,4 +205,12 @@ public class GameService {
         update(gameDTO);
     }
 
+    public void appease(Long gameId, Long targetId) {
+        Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
+                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+
+        if(game.getEmissary() == null){
+            throw
+        }
+    }
 }

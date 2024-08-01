@@ -30,7 +30,7 @@ public class SocketGameController {
 
     // Ready는 프론트에서 처리한다고 하여서 안함.
     @MessageMapping("/rooms/start/{roomId}")
-    public void start(@AuthenticationPrincipal UserDetails userDetails, @DestinationVariable Long roomId){
+    public void start(@AuthenticationPrincipal UserDetails userDetails, @DestinationVariable Long roomId) {
         // todo : 한번 JWT로 요청해보고 안되면 고치기
         long userId = Long.parseLong(userDetails.getUsername());
 
@@ -51,7 +51,7 @@ public class SocketGameController {
     @MessageMapping("/confirm/{roomId}")
     public void confirmVote(@AuthenticationPrincipal UserDetails userDetails,
                             @DestinationVariable Long roomId,
-                            @Payload ConfirmVoteRequestDTO request){
+                            @Payload ConfirmVoteRequestDTO request) {
         long userId = Long.parseLong(userDetails.getUsername());
 
         gameService.startConfirm(roomId, userId, request.isConfirm());
@@ -60,5 +60,16 @@ public class SocketGameController {
     @MessageMapping("/remove/{roomId}/{targetId}")
     public void removeUser(@DestinationVariable Long roomId, @DestinationVariable Long targetId) {
         gameService.removeUser(roomId, targetId);
+    }
+
+    @MessageMapping("/kill/{roomId}/{targetId}")
+    public void kill(@DestinationVariable Long roomId, @DestinationVariable Long targetId) {
+
+    }
+
+    // 변절자 만들기
+    @MessageMapping("/appease/{roomId}/{targetId}")
+    public void appease(@DestinationVariable Long roomId, @DestinationVariable Long targetId) {
+        gameService.appease(roomId, targetId);
     }
 }
