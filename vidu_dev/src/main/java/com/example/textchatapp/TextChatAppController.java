@@ -17,8 +17,10 @@ public class TextChatAppController {
 
     private final OpenVidu openVidu;
 
-    private Map<String, Session> mapSessions = new ConcurrentHashMap<>();
-    private Map<String, Map<String, OpenViduRole>> mapSessionNamesTokens = new ConcurrentHashMap<>();
+    // <sessionNo, Session>
+    private final Map<String, Session> mapSessions = new ConcurrentHashMap<>();
+    // <sessionId, <token, role>>
+    private final Map<String, Map<String, SessionRole>> mapSessionNamesTokens = new ConcurrentHashMap<>();
 
     public TextChatAppController(@Value("${OPENVIDU_URL}") String OPENVIDU_URL,
                                  @Value("${OPENVIDU_SECRET}") String OPENVIDU_SECRET) {
@@ -33,20 +35,19 @@ public class TextChatAppController {
 
         System.out.println("[/get-token] 토큰 발급: sessionId=" + sessionNo + ", userId=" + userId);
 
-        OpenViduRole role = null;
-
         boolean isSessionAlreadyExisting = mapSessions.containsKey(sessionNo);
+        SessionRole role = null;
 
         if (isSessionAlreadyExisting) {
             System.out.println("[/get-token] 세션 " + sessionNo + "이 이미 존재합니다. 유저로 접속합니다.");
-            role = OpenViduRole.PUBLISHER;
+            role = SessionRole.USER;
         } else {
             System.out.println("[/get-token] 새로운 세션 " + sessionNo + "을 생성합니다. 방장으로 접속합니다.");
-            role = OpenViduRole.MODERATOR;
+            role = SessionRole.HOST;
         }
 
         ConnectionProperties connectionProperties = new ConnectionProperties.Builder().type(ConnectionType.WEBRTC)
-                .role(role).data(userId).build();
+                .role(OpenViduRole.PUBLISHER).data(userId).build();
 
         JsonObject json = new JsonObject();
 
@@ -56,7 +57,7 @@ public class TextChatAppController {
                 String token = session.createConnection(connectionProperties).getToken();
 
                 // Update our collection storing the new token
-                this.mapSessionNamesTokens.get(sessionNo).put(token, role);
+                this.mapSessionNamesTokens.get(session.getSessionId()).put(token, role);
 
                 json.addProperty("token", token);
 
@@ -83,8 +84,8 @@ public class TextChatAppController {
             String token = session.createConnection(connectionProperties).getToken();
 
             // Store the session and the token in our collections
-            this.mapSessionNamesTokens.put(sessionNo, new ConcurrentHashMap<>());
-            this.mapSessionNamesTokens.get(sessionNo).put(token, role);
+            this.mapSessionNamesTokens.put(session.getSessionId(), new ConcurrentHashMap<>());
+            this.mapSessionNamesTokens.get(session.getSessionId()).put(token, role);
 
             // Prepare the response with the sessionId and the token
             json.addProperty("token", token);
@@ -96,6 +97,20 @@ public class TextChatAppController {
             return getErrorResponse(e);
         }
     }
+
+    @PostMapping("/users/roles")
+    public ResponseEntity<JsonObject> getRoles(@RequestBody Map<String, Object> params) {
+        String sessionId = params.get("sessionId").toString();
+        String token = params.get("token").toString();
+
+        SessionRole role = mapSessionNamesTokens.get(sessionId).get(token);
+
+        JsonObject json = new JsonObject();
+        json.addProperty("role", role.name());
+
+        return ResponseEntity.ok(json);
+    }
+
 
     // 유저가 세션에서 나가고 서버에 요청을 하면
     // mapSessions와 mapSessionNamesTokens을 업데이트 하고

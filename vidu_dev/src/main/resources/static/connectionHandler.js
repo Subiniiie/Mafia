@@ -109,7 +109,7 @@ class OpenViduConnectionHandler {
             return;
         }
 
-        console.log('전시발');
+        console.log('[cleanupResources] 호출');
         console.log(this.streamManagers);
 
         this.streamManagers.splice(removeIdx, 1);

@@ -25,7 +25,7 @@ function addUserScreen(videoElement, streamManager) {
 function addStreamManager(streamManager) {
     const creationTime = streamManager.stream.creationTime;
 
-    console.log('시발')
+    console.log('[addStreamManager] 호출')
     console.log(connectionHandler.streamManagers);
 
     let index = 0;
