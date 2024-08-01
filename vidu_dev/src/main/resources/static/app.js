@@ -11,8 +11,6 @@ const OV = new OpenVidu();
 
 let userId = null;
 let connectionHandler = null;
-let streamManagers = [];
-
 
 // 접속 버튼 클릭 이벤트 리스너
 connectButton.addEventListener('click', async () => {
@@ -70,7 +68,7 @@ async function getToken(userId, sessionNo) {
 
 // OpenVidu 세션 연결 함수
 async function connectToSession(token) {
-    session = OV.initSession();
+    const session = OV.initSession();
     connectionHandler = new OpenViduConnectionHandler(session);
 
     try {
@@ -78,7 +76,7 @@ async function connectToSession(token) {
         console.log('세션에 연결되었습니다');
 
         // 자신의 비디오 스트림 생성 및 게시
-        publisher = OV.initPublisher('video-waiting-container', {
+        const publisher = OV.initPublisher('video-waiting-container', {
             audioSource: undefined,
             videoSource: undefined,
             publishAudio: true,
@@ -104,8 +102,8 @@ async function connectToSession(token) {
 
 // 세션 나가기 함수
 function leaveSession() {
-    if (session) {
-        session.disconnect();
+    if (connectionHandler.session) {
+        connectionHandler.session.disconnect();
 
         // video-container-test 내부의 video-box 초기화
         const elem = document.getElementById('video-container-test');
@@ -126,8 +124,8 @@ function leaveSession() {
 // 채팅 메시지 전송 함수
 function sendChatMessage() {
     const message = chatInput.value.trim();
-    if (message && session) {
-        session.signal({
+    if (message && connectionHandler.session) {
+        connectionHandler.session.signal({
             data: JSON.stringify({ userId: userId, message: message }),
             type: 'chat'
         }).then(() => {
