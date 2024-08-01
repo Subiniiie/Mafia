@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import ModalHeader from "../components/ModalHeader"
 import FindPwModal from "./FindPwModal";
 import styles from "./LoginModal.module.css"
@@ -5,7 +6,7 @@ import { useState } from "react";
 import axios from "axios";
 
 const LoginModal = ({ isOpen, openModal }) => {
-    const modalTitle = 'Login Modal';
+    const modalTitle = '활동하기';
 
     const [isFindPwModalOpen, setIsFindPwModalOpen] = useState(false)
     const openFindPwModal = () => setIsFindPwModalOpen
@@ -27,38 +28,44 @@ const LoginModal = ({ isOpen, openModal }) => {
         }
     };
 
+    const loginModalClass = classNames('kimjungchul-gothic-regular', styles.modalContent)
+
     if (!isOpen) return null; // 모달이 열리지 않았다면 렌더링하지 않음
 
     return (
         <div className={styles.modalOverlay} onClick={openModal}>
-            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={loginModalClass} onClick={(e) => e.stopPropagation()}>
                 <ModalHeader modalTitle={modalTitle} openModal={openModal} />
                 <div className={styles.formContainer}>
-                    <h5>이메일</h5>
-                    <input
-                        required
-                        type="text"
-                        placeholder="이메일을 입력해주세요"
-                        className={styles.inputField}
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
+                    <div className={styles.formContainerMini}>
+                        <h5>이메일</h5>
+                        <input
+                            required
+                            type="text"
+                            placeholder="이메일을 입력해주세요"
+                            className={styles.inputField}
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                    </div>
 
-                    <h5>비밀번호</h5>
-                    <input
-                        required
-                        type="text"
-                        placeholder="비밀번호를 입력해주세요"
-                        className={styles.inputField}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
+                    <div className={styles.formContainerMini}>
+                        <h5>비밀번호</h5>
+                        <input
+                            required
+                            type="password"
+                            placeholder="비밀번호를 입력해주세요"
+                            className={styles.inputField}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                    </div>
 
                     <button className={styles.submitButton} onClick={handleLogin}>
                         활동하기
                     </button>
 
-                    <p onClick={openFindPwModal}>비밀번호 찾기</p>
+                    <p onClick={openFindPwModal} className={styles.findPw}>비밀번호 찾기</p>
                     <FindPwModal isOpen={isFindPwModalOpen} openModal={openFindPwModal} />
 
                 </div>
