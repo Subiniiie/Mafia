@@ -42,8 +42,8 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisTemplate<String, HashMap<Integer, Integer>> voteRedisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, HashMap<Integer, Integer>> template = new RedisTemplate<>();
+    public RedisTemplate<String, HashMap<Long, Integer>> voteRedisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, HashMap<Long, Integer>> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new Jackson2JsonRedisSerializer<>(HashMap.class));

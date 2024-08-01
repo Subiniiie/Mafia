@@ -13,8 +13,10 @@ import e106.emissary_backend.domain.game.service.subscriber.message.DayMessage;
 import e106.emissary_backend.domain.game.service.subscriber.message.EndConfirmMessage;
 import e106.emissary_backend.domain.game.service.subscriber.message.EndVoteMessage;
 import e106.emissary_backend.domain.game.service.timer.SchedulerService;
+import e106.emissary_backend.domain.game.service.timer.task.EndConfirmTask;
 import e106.emissary_backend.domain.game.service.timer.task.StartConfirmTask;
 import e106.emissary_backend.domain.game.service.timer.task.StartVoteTask;
+import e106.emissary_backend.domain.game.service.timer.task.TaskName;
 import e106.emissary_backend.domain.game.util.RoleUtils;
 import e106.emissary_backend.domain.room.entity.Room;
 import e106.emissary_backend.domain.room.enumType.RoomState;
@@ -87,7 +89,7 @@ public class GameService {
 
         // 타이머 - 토론시간임.
         startVoteTask.setGameId(roomId);
-        scheduler.schedule(startVoteTask, 2, TimeUnit.MINUTES);
+        scheduler.scheduleTask(roomId, TaskName.START_VOTE_TASK, startVoteTask, 2, TimeUnit.MINUTES);
 
         publisher.publish(dayTopic, DayMessage.builder()
                 .gameId(roomId)
@@ -113,6 +115,7 @@ public class GameService {
         // 모든 플레이어가 투표했는지 확인
         if (voteMap.values().stream().mapToInt(Integer::intValue).sum() == playerMap.size()) {
             // todo : 만약 여기서 바로 이걸 타면 endVote타이머 종료해야함.
+            // todo : 예약된 Task를 종료하고 Task를 직접 실행하자.
             EndVoteMessage endVoteMessage = EndVoteMessage.builder().gameId(gameId).voteMap(voteMap).build();
             endVote(endVoteMessage);
         }
@@ -146,7 +149,7 @@ public class GameService {
         // 타이머 - 최후변론 시간 주고 최종투표 안내.
         long gameId = message.getGameId();
         startConfirmTask.setGameId(gameId);
-        scheduler.schedule(startConfirmTask, 2, TimeUnit.MINUTES);
+        scheduler.scheduleTask(gameId, TaskName.START_CONFIRM_TASK, startConfirmTask, 2, TimeUnit.MINUTES);
 
         // subscriber에게 메시지 발행
         publisher.publish(endVoteTopic, message);

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -16,7 +17,6 @@ public class StartVoteTask implements GameTask {
     private Long gameId;
 
     private final RedisPublisher publisher;
-    private final GameService gameService;
 
     private final ChannelTopic startVoteTopic;
     private final SchedulerService scheduler;
@@ -36,7 +36,8 @@ public class StartVoteTask implements GameTask {
         
         // 2분뒤 투표종료 안내
         endVoteTask.setGameId(gameId);
-        scheduler.schedule(endVoteTask, 2, TimeUnit.MINUTES);
+        ScheduledFuture<?> future = scheduler.scheduleTask(gameId, TaskName.START_VOTE_TASK, endVoteTask, 2, TimeUnit.MINUTES);
+
     }
 
     public void setGameId(long gameId){

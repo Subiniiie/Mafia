@@ -35,7 +35,7 @@ public class StartConfirmTask implements GameTask {
         
         // 2분뒤 투표종료 안내
         endConfirmTask.setGameId(gameId);
-        scheduler.schedule(endConfirmTask, 2, TimeUnit.MINUTES);
+        scheduler.scheduleTask(gameId, "EndConfirmTask", endConfirmTask, 2, TimeUnit.MINUTES);
     }
 
     public void setGameId(long gameId){
