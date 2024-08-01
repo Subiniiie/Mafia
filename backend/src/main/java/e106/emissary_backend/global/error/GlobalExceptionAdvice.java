@@ -44,6 +44,12 @@ public class GlobalExceptionAdvice {
         return handleExceptionInternal(errorCode);
     }
 
+    @ExceptionHandler
+    public ResponseEntity<Object> alreadyRemoveUser(AlreadyRemoveUserException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return handleExceptionInternal(errorCode);
+    }
+
     private ResponseEntity<Object> handleExceptionInternal(ErrorCode errorCode) {
         return ResponseEntity
                 .status(errorCode.getHttpStatus())

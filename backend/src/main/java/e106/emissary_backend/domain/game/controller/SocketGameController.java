@@ -64,7 +64,7 @@ public class SocketGameController {
 
     @MessageMapping("/kill/{roomId}/{targetId}")
     public void kill(@DestinationVariable Long roomId, @DestinationVariable Long targetId) {
-
+        gameService.kill(roomId, targetId);
     }
 
     // 변절자 만들기

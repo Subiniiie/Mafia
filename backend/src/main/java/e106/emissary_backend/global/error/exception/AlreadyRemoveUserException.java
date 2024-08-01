@@ -6,6 +6,6 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class AlreadyUseAppeaseException extends RuntimeException{
+public class AlreadyRemoveUserException extends RuntimeException{
     final ErrorCode errorCode;
 }

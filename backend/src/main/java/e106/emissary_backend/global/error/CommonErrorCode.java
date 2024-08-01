@@ -15,8 +15,8 @@ public enum CommonErrorCode implements ErrorCode{
     NOT_FOUND_GAME_EXCEPTION(HttpStatus.NO_CONTENT, "Game Not Found Error"),
     ALREADY_EXIST_USER_EXCEPTION(HttpStatus.CONFLICT, "Already Exist User Error"),
     ALREADY_USE_APPEASE_EXCEPTION(HttpStatus.CONFLICT, "Already Use Appease Error"),
+    ALREADY_REMOVE_USER_EXCEPTION(HttpStatus.CONFLICT, "Already Remove User Error"),
     GAME_FULL_EXCEPTION(HttpStatus.CONFLICT, "Game Not Found Error");
-
 
     private final HttpStatus httpStatus;
     private String message;
