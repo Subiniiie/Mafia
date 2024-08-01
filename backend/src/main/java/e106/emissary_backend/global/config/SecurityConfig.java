@@ -99,7 +99,7 @@ public class SecurityConfig {
         //경로별 인가 작업 (/login 페이지와 루트 페이지, 회원가입페이지는 비로그인한 사람에게 접근 허용)
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login","/", "/api/user", "/api/mail", "/api/reissue", "/api/login").permitAll()
+                        .requestMatchers("/login","/", "/api/user", "/api/mail", "/api/reissue", "/api/login", "/**").permitAll()
                         .anyRequest().authenticated());
 //                                .anyRequest().permitAll());
 
@@ -128,10 +128,10 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
-        configuration.addAllowedOrigin("http://localhost:5173");
+//        configuration.addAllowedOrigin("http://localhost:5173");
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:5500"));
 //        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
