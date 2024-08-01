@@ -1,5 +1,7 @@
 package e106.emissary_backend.domain.security.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.*;
@@ -10,7 +12,9 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.Date;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -41,12 +45,27 @@ public class JWTUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
     }
 
-    public String createJwt(String category,Long userId, String username ,String role, Long expiredMs) {
+    public String getEmail(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("email", String.class);
+    }
+
+    public String getGender(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("gender", String.class);
+    }
+
+    public String getBirth(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("birth", LocalDate.class).toString();
+    }
+
+    public String createJwt(String category, Long userId, String username, String email , String gender, String birth, String role, Long expiredMs) {
 
         return Jwts.builder()
                 .claim("category", category)
                 .claim("userId", String.valueOf(userId))
                 .claim("username", username)
+                .claim("email", email)
+                .claim("gender",gender)
+                .claim("birth", birth)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiredMs))

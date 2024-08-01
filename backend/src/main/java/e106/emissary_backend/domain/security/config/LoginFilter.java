@@ -20,12 +20,12 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 
 
-@RequiredArgsConstructor
 @Slf4j
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
@@ -33,6 +33,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final JWTUtil jwtUtil;
     private final RefreshRepository refreshRepository;
     private final AccessRepository accessRepository;
+
+    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, RefreshRepository refreshRepository, AccessRepository accessRepository, String loginProcessingUrl){
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
+        this.refreshRepository = refreshRepository;
+        this.accessRepository = accessRepository;
+        setFilterProcessesUrl(loginProcessingUrl);
+    }
 
     @Override
     public Authentication attemptAuthentication(final HttpServletRequest request, final HttpServletResponse response) throws AuthenticationException {
@@ -51,14 +59,17 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         Long userId = customUserDetails.getUser().getUserId();
         String username = customUserDetails.getUsername();
+        String email = customUserDetails.getEmail();
+        String gender = customeUserDetails.getGender();
+        String birth = customeUserDetails.getBirth();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth  = iterator.next();
         String role = auth.getAuthority();
 
-        String access = jwtUtil.createJwt("Access", userId, username, role, 600000L);
-        String refresh = jwtUtil.createJwt("Refresh", userId, username, role, 86400000L);
+        String access = jwtUtil.createJwt("Access", userId, username, email, gender, birth, role, 600000L);
+        String refresh = jwtUtil.createJwt("Refresh", userId, username, email, gender, birth, role, 86400000L);
 
         addAccess(userId,username, access, 60000L);
         addRefresh(userId,username, refresh, 86400000L);
