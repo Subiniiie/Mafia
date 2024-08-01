@@ -16,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Controller
@@ -27,7 +28,7 @@ public class ReIssueController {
     private final AccessRepository accessRepository;
     private final RefreshRepository refreshRepository;
 
-    @PostMapping("/reissue")
+    @PostMapping("/api/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
         String refresh = null;
         String access = null;
@@ -69,10 +70,13 @@ public class ReIssueController {
 
         String username = jwtUtil.getUsername(refresh);
         String userId = jwtUtil.getUserId(refresh);
+        String email = jwtUtil.getEmail(refresh);
+        String gender = jwtUtil.getGender(refresh);
+        String birth = jwtUtil.getBirth(refresh);
         String role = jwtUtil.getRole(refresh);
 
-        String newAccess = jwtUtil.createJwt("Access", Long.parseLong(userId), username,role, 600000L);
-        String newRefresh = jwtUtil.createJwt("Refresh", Long.parseLong(userId), username,role, 86400000L);
+        String newAccess = jwtUtil.createJwt("Access", Long.parseLong(userId), username, email, gender, birth, role, 600000L);
+        String newRefresh = jwtUtil.createJwt("Refresh", Long.parseLong(userId), username, email, gender, birth, role, 86400000L);
 
         jwtService.deleteByRefresh(refresh);
         addAccessEntity(username, newAccess, 600000L);

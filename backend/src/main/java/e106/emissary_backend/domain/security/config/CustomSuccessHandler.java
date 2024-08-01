@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -38,6 +39,9 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
 
         String username = customUserDetails.getAttribute("name");
+        String email = customUserDetails.getAttribute("email");
+        String gender = customUserDetails.getAttribute("gender");
+        String birth = customUserDetails.getAttribute("birth");
         Long userId = customUserDetails.getUserId();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
@@ -45,8 +49,8 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
-        String access = jwtUtil.createJwt("Access", userId, username, role, 600000L);
-        String refresh = jwtUtil.createJwt("Refresh", userId, username, role, 86400000L);
+        String access = jwtUtil.createJwt("Access", userId, username, email, gender, birth, role, 600000L);
+        String refresh = jwtUtil.createJwt("Refresh", userId, username, email, gender, birth, role, 86400000L);
 
         addAccess(username, access, 600000L);
         addRefresh(username, refresh, 86400000L);

@@ -14,6 +14,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Slf4j
@@ -50,6 +51,8 @@ public class  CustomOAuth2UserService extends DefaultOAuth2UserService {
         return User.builder()
                 .email(userEmail)
                 .nickname(username)
+                .gender("N")
+                .birth(LocalDate.of( 1945, 8, 15 ))
                 .password(passwordEncoder.encode("qkrtnqls"))
                 .build();
     }

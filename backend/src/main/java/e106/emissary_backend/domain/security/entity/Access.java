@@ -14,6 +14,7 @@ public class Access {
 
     private Long userId;
     private String username;
+    private String email;
     @Id
     private String access;
     private String expiration;
