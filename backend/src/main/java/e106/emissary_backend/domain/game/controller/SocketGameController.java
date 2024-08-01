@@ -4,6 +4,7 @@ package e106.emissary_backend.domain.game.controller;
 import e106.emissary_backend.domain.game.model.ConfirmVoteRequestDTO;
 import e106.emissary_backend.domain.game.model.VoteRequestDTO;
 import e106.emissary_backend.domain.game.service.GameService;
+import e106.emissary_backend.domain.user.dto.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -30,7 +31,7 @@ public class SocketGameController {
 
     // Ready는 프론트에서 처리한다고 하여서 안함.
     @MessageMapping("/start/{roomId}")
-    public void start(@AuthenticationPrincipal UserDetails userDetails, @DestinationVariable Long roomId) {
+    public void start(@AuthenticationPrincipal CustomUserDetails userDetails, @DestinationVariable Long roomId) {
         // todo : 한번 JWT로 요청해보고 안되면 고치기
         long userId = Long.parseLong(userDetails.getUsername());
 
@@ -38,7 +39,7 @@ public class SocketGameController {
     }
 
     @MessageMapping("/vote/{roomId}")
-    public void vote(@AuthenticationPrincipal UserDetails userDetails
+    public void vote(@AuthenticationPrincipal CustomUserDetails userDetails
             , @DestinationVariable Long roomId
             , @Payload VoteRequestDTO request) {
         long userId = Long.parseLong(userDetails.getUsername());
@@ -49,7 +50,7 @@ public class SocketGameController {
     }
 
     @MessageMapping("/confirm/{roomId}")
-    public void confirmVote(@AuthenticationPrincipal UserDetails userDetails,
+    public void confirmVote(@AuthenticationPrincipal CustomUserDetails userDetails,
                             @DestinationVariable Long roomId,
                             @Payload ConfirmVoteRequestDTO request) {
         long userId = Long.parseLong(userDetails.getUsername());
