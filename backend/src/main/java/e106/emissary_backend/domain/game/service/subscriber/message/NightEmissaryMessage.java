@@ -7,6 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NightEmissaryMessage {
+    private Long gameId;
     private Long targetId;
     private String result;
 }

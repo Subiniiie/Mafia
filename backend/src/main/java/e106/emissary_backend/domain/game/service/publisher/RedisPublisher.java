@@ -32,4 +32,8 @@ public class RedisPublisher {
     public void publish(ChannelTopic topic, EndConfirmMessage message) {
         redisTemplate.convertAndSend(topic.getTopic(), message);
     }
+
+    public void publish(ChannelTopic topic, NightEmissaryMessage message) {
+        redisTemplate.convertAndSend(topic.getTopic(), message);
+    }
 }

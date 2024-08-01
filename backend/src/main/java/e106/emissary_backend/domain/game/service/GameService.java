@@ -12,6 +12,7 @@ import e106.emissary_backend.domain.game.service.publisher.RedisPublisher;
 import e106.emissary_backend.domain.game.service.subscriber.message.DayMessage;
 import e106.emissary_backend.domain.game.service.subscriber.message.EndConfirmMessage;
 import e106.emissary_backend.domain.game.service.subscriber.message.EndVoteMessage;
+import e106.emissary_backend.domain.game.service.subscriber.message.NightEmissaryMessage;
 import e106.emissary_backend.domain.game.service.timer.SchedulerService;
 import e106.emissary_backend.domain.game.service.timer.task.EndConfirmTask;
 import e106.emissary_backend.domain.game.service.timer.task.StartConfirmTask;
@@ -22,10 +23,8 @@ import e106.emissary_backend.domain.room.entity.Room;
 import e106.emissary_backend.domain.room.enumType.RoomState;
 import e106.emissary_backend.domain.room.repository.RoomRepository;
 import e106.emissary_backend.global.error.CommonErrorCode;
-import e106.emissary_backend.global.error.exception.AlreadyRemoveUserException;
-import e106.emissary_backend.global.error.exception.AlreadyUseAppeaseException;
-import e106.emissary_backend.global.error.exception.NotFoundGameException;
-import e106.emissary_backend.global.error.exception.NotFoundRoomException;
+import e106.emissary_backend.global.error.exception.*;
+import io.jsonwebtoken.lang.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisKeyValueTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -33,9 +32,7 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -58,6 +55,8 @@ public class GameService {
 
     private final StartConfirmTask startConfirmTask;
     private final ChannelTopic endConfirmTopic;
+
+    private final ChannelTopic nightEmissaryTopic;
 
     public void update(GameDTO gameDTO){
         Game game = gameDTO.toDao();
@@ -214,22 +213,57 @@ public class GameService {
         GameDTO gameDTO = GameDTO.toDto(game);
         Player targetPlayer = gameDTO.getPlayerMap().get(targetId);
 
-        if(targetPlayer.isAlive()){
+        if(!targetPlayer.isAlive()){
             throw new AlreadyRemoveUserException(CommonErrorCode.ALREADY_REMOVE_USER_EXCEPTION);
         }
 
         targetPlayer.setAlive(false);
 
+        update(gameDTO);
+
         // todo : Redis에 발행해야함
-        publisher.publish();
+        publisher.publish(nightEmissaryTopic, NightEmissaryMessage.builder()
+                        .gameId(gameId)
+                        .targetId(targetId)
+                        .result("success")
+                        .build());
     }
 
     public void appease(Long gameId, Long targetId) {
         Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
                 () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
 
-        Optional.ofNullable(game.getEmissary()).ifPresent( emissary -> {
-                throw new AlreadyUseAppeaseException(CommonErrorCode.ALREADY_USE_APPEASE_EXCEPTION);
-        });
+        if(!Objects.isEmpty(game.getEmissary()))
+            throw new AlreadyUseAppeaseException(CommonErrorCode.ALREADY_USE_APPEASE_EXCEPTION);
+
+        GameDTO gameDTO = GameDTO.toDto(game);
+        Map<Long, Player> playerMap = gameDTO.getPlayerMap();
+        Player targetPlayer = playerMap.get(targetId);
+
+        if(!targetPlayer.isAlive()){
+            throw new AlreadyRemoveUserException(CommonErrorCode.ALREADY_REMOVE_USER_EXCEPTION);
+        }
+
+        if(targetPlayer.getRole() == GameRole.EMISSARY){
+            throw new EmissaryAppeaseEmissaryException(CommonErrorCode.EMISSARY_APPEASE_EMISSARY);
+        }
+
+        // todo : game안에 Player상태 변경
+        if (targetPlayer.getRole() == GameRole.POLICE) {
+            targetPlayer.setRole(GameRole.BETRAYER);
+
+            // 살아있는 PERSON 중 무작위로 한 명을 선택하여 POLICE로 변경
+            List<Player> alivePerson = playerMap.values().stream()
+                    .filter(player -> player.isAlive() && player.getRole() == GameRole.PERSON)
+                    .collect(Collectors.toList());
+
+            if (!alivePerson.isEmpty()) {
+                Random random = new Random();
+                Player newPolice = alivePerson.get(random.nextInt(alivePerson.size()));
+                newPolice.setRole(GameRole.POLICE);
+            }
+        }else {
+            targetPlayer.setRole(GameRole.BETRAYER);
+        }
     }
 }

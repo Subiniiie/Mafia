@@ -1,10 +1,7 @@
 package e106.emissary_backend.global.config;
 
 import e106.emissary_backend.domain.game.entity.Game;
-import e106.emissary_backend.domain.game.service.subscriber.DaySubscriber;
-import e106.emissary_backend.domain.game.service.subscriber.EndVoteSubscriber;
-import e106.emissary_backend.domain.game.service.subscriber.StartConfirmSubscriber;
-import e106.emissary_backend.domain.game.service.subscriber.StartVoteSubscriber;
+import e106.emissary_backend.domain.game.service.subscriber.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -65,7 +62,8 @@ public class RedisConfig {
                                                                        MessageListenerAdapter startVoteAdapter, ChannelTopic startVoteTopic,
                                                                        MessageListenerAdapter endVoteAdapter, ChannelTopic endVoteTopic,
                                                                        MessageListenerAdapter startConfirmAdapter, ChannelTopic startConfirmTopic,
-                                                                       MessageListenerAdapter endConfirmAdapter, ChannelTopic endConfirmTopic) {
+                                                                       MessageListenerAdapter endConfirmAdapter, ChannelTopic endConfirmTopic,
+                                                                       MessageListenerAdapter nightEmissaryAdapter, ChannelTopic nightEmissaryTopic) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         // subscriber, topic
@@ -74,6 +72,7 @@ public class RedisConfig {
         container.addMessageListener(endVoteAdapter, endVoteTopic);
         container.addMessageListener(startConfirmAdapter, startConfirmTopic);
         container.addMessageListener(endConfirmAdapter, endConfirmTopic);
+        container.addMessageListener(nightEmissaryAdapter, nightEmissaryTopic);
 
         return container;
     }
@@ -127,4 +126,16 @@ public class RedisConfig {
     public ChannelTopic endConfirmTopic() {
         return new ChannelTopic("END_CONFIRM");
     }
+
+
+    @Bean
+    public MessageListenerAdapter nightEmissaryAdapter(NightEmissarySubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "sendMessage");
+    }
+
+    @Bean
+    public ChannelTopic nightEmissaryTopic() {
+        return new ChannelTopic("NIGHT_EMISSARY");
+    }
+
 }
