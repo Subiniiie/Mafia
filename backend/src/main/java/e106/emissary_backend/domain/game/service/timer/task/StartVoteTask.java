@@ -1,16 +1,13 @@
 package e106.emissary_backend.domain.game.service.timer.task;
 
 import e106.emissary_backend.domain.game.service.GameService;
-import e106.emissary_backend.domain.game.service.VoteService;
 import e106.emissary_backend.domain.game.service.publisher.RedisPublisher;
 import e106.emissary_backend.domain.game.service.subscriber.message.StartVoteMessage;
 import e106.emissary_backend.domain.game.service.timer.SchedulerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.listener.ChannelTopic;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -19,6 +16,7 @@ public class StartVoteTask implements GameTask {
     private Long gameId;
 
     private final RedisPublisher publisher;
+    private final GameService gameService;
 
     private final ChannelTopic startVoteTopic;
     private final SchedulerService scheduler;

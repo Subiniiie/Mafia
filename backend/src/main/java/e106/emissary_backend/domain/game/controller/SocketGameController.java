@@ -45,7 +45,7 @@ public class SocketGameController {
         // todo : 닉네임으로 넘어오면 roomService에서 닉네임으로 Id찾아오기
         long targetId = request.getTargetId();
 
-        gameService.vote(roomId, userId, targetId);
+        gameService.startVote(roomId, userId, targetId);
     }
 
     @MessageMapping("/confirm/{roomId}")

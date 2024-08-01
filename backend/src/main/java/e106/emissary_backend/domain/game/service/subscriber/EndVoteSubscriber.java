@@ -3,6 +3,7 @@ package e106.emissary_backend.domain.game.service.subscriber;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import e106.emissary_backend.domain.game.enumType.GameState;
+import e106.emissary_backend.domain.game.service.subscriber.message.EndVoteMessage;
 import e106.emissary_backend.domain.game.service.subscriber.message.StartVoteMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -16,11 +17,10 @@ public class EndVoteSubscriber {
 
     public void sendMessage(String message){
         try {
-            StartVoteMessage startVoteMessage = objectMapper.readValue(message, StartVoteMessage.class);
-            long gameId = startVoteMessage.getGameId();
+            EndVoteMessage endVoteMessage = objectMapper.readValue(message, EndVoteMessage.class);
             // Message를 통으로 내려보내자? or 결과만 꺼내서 내려보내자
 
-            simpMessagingTemplate.convertAndSend("/sub/" + gameId, GameState.VOTE_END);
+            simpMessagingTemplate.convertAndSend("/sub/" + endVoteMessage.getGameId(), endVoteMessage);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

@@ -48,15 +48,15 @@ public class GameService {
     private final ChannelTopic dayTopic;
     private final ChannelTopic startVoteTopic;
     private final StartVoteTask startVoteTask;
-
     private final ChannelTopic endVoteTopic;
 
     private final StartConfirmTask startConfirmTask;
+    private final ChannelTopic endConfirmTopic;
 
     public void update(GameDTO gameDTO){
         Game game = gameDTO.toDao();
         redisKeyValueTemplate.update(game);
-    }
+    } // end of update
 
     public GameResponseDTO findGameById(Long roomId) {
         Game game = redisGameRepository.findByGameId(roomId).orElseThrow(
@@ -84,6 +84,7 @@ public class GameService {
         // 레디스에 저장하기
         update(gameDTO);
 
+        // 타이머 - 토론시간임.
         startVoteTask.setGameId(roomId);
         scheduler.schedule(startVoteTask, 2, TimeUnit.MINUTES);
 
@@ -98,40 +99,33 @@ public class GameService {
         room.changeState(RoomState.STARTED);
     } // end of startGame
 
+    public void startVote(long gameId, long userId, long targetId) {
+        Map<Long, Player> playerMap = getPlayerMap(gameId);
 
-    public void vote(long gameId, long userId, long targetId) {
+        String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
+
+        // 현재 투표 상태 가져와서 투표
+        HashMap<Long, Integer> voteMap = getVoteMapFromRedis(voteKey);
+        voteMap.put(targetId, voteMap.getOrDefault(targetId, 0) + 1);
+        voteRedisTemplate.opsForValue().set(voteKey, voteMap);
+
+        // 모든 플레이어가 투표했는지 확인
+        if (voteMap.values().stream().mapToInt(Integer::intValue).sum() == playerMap.size()) {
+            // todo : 만약 여기서 바로 이걸 타면 endVote타이머 종료해야함.
+            EndVoteMessage endVoteMessage = EndVoteMessage.builder().gameId(gameId).voteMap(voteMap).build();
+            endVote(endVoteMessage);
+        }
+    } // end of startVote
+
+    private Map<Long, Player> getPlayerMap(long gameId) {
         Game game = redisGameRepository.findById(gameId).orElseThrow(
                 () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
 
         GameDTO gameDTO = GameDTO.toDto(game);
         Map<Long, Player> playerMap = gameDTO.getPlayerMap();
 
-
-        // todo : 만약 꺼내서 결과를 넣어주는데 모두가 투표한 상황이라면 scheduler 예약한거 끄고
-        // todo : 바로 내려보내줘야함.
-        // Redis에 투표 결과 저장
-        String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
-
-        // 현재 투표 상태 가져오기
-        HashMap<Long, Integer> voteMap = getVoteMapFromRedis(voteKey);
-
-        // 투표 결과 업데이트
-        voteMap.put(targetId, voteMap.getOrDefault(targetId, 0) + 1);
-
-        // 업데이트된 투표 결과 저장
-        voteRedisTemplate.opsForValue().set(voteKey, voteMap);
-
-        // 모든 플레이어가 투표했는지 확인
-        if (voteMap.values().stream().mapToInt(Integer::intValue).sum() == playerMap.size()) {
-            // todo : 만약 여기서 바로 이걸 타면 타이머 종료해야함.
-            // 모든 투표가 완료된 경우 처리
-            EndVoteMessage endVoteMessage = EndVoteMessage.builder().gameId(gameId).voteMap(voteMap).build();
-            endVote(endVoteMessage);
-
-            // 투표 결과 처리 후 Redis에서 해당 게임의 투표 데이터 삭제
-            voteRedisTemplate.delete(voteKey);
-        }
-    }
+        return playerMap;
+    } // end of getPlayerMap
 
     public HashMap<Long, Integer> getVoteMapFromRedis(String voteKey) {
         HashMap<Long, Integer> voteMap = voteRedisTemplate.opsForValue().get(voteKey);
@@ -139,36 +133,56 @@ public class GameService {
             voteMap = new HashMap<>();
         }
         return voteMap;
-    }
+    } // end of getVoteMapFromRedis
 
     public void endVote(EndVoteMessage message) {
+        // 무승부의 경우 재투표로 설정
+        message.organizeVote();
 
-        // todo 1: 이제 최후변론 타이머를 돌리자 및 게임상태 변경
-        startConfirmTask.setGameId(message.getGameId());
-        // 2분뒤 실행
+        // todo : 게임상태 변경 해야함
+        // 타이머 - 최후변론 시간 주고 최종투표 안내.
+        long gameId = message.getGameId();
+        startConfirmTask.setGameId(gameId);
         scheduler.schedule(startConfirmTask, 2, TimeUnit.MINUTES);
 
-
-        // todo 2: endVoteMessage에 결과를 담아서 프론트로 보내자.
-        // todo 3 : endVoteMessage를 이상한데 써버림...
+        // subscriber에게 메시지 발행
         publisher.publish(endVoteTopic, message);
-    }
 
-    public void startConfirm(Long roomId, long userId, boolean confirm) {
-        Game game = redisGameRepository.findById(roomId).orElseThrow(
-                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+        // 투표 결과 처리 후 Redis에서 해당 게임의 투표 데이터 삭제
+        String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
+        voteRedisTemplate.delete(voteKey);
+    } // end of endVote
 
-        GameDTO dto = GameDTO.toDto(game);
+    public void startConfirm(Long gameId, long userId, boolean confirm) {
+        Map<Long, Player> playerMap = getPlayerMap(gameId);
 
-        // todo : 얘도 마찬가지. 꺼내서 결과를 넣어주다가 모두가 투표한 상황이라면 scheduler 예약한거 끄고
-        // todo : 바로 내려보내줘야함.
+        String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
 
-    }
+        // 투표 및 저장 ( userId : 1(승낙) 0(거절) )
+        HashMap<Long, Integer> voteMap = getVoteMapFromRedis(voteKey);
+        voteMap.put(userId, confirm ? 1 : 0);
+        voteRedisTemplate.opsForValue().set(voteKey, voteMap);
+
+        if (voteMap.values().stream().mapToInt(Integer::intValue).sum() == playerMap.size()) {
+            // todo : 얘도 이거 타면 end confirm 타이머 끄는게 필요함
+            EndConfirmMessage endConfirmMessage = EndConfirmMessage.builder().gameId(gameId).voteMap(voteMap).build();
+            endConfirm(endConfirmMessage);
+        }
+    } // end of startConfirm
 
     public void endConfirm(EndConfirmMessage message) {
         // todo : endConfirmMessage에 결과를 담아서 프론트로 보내자.
         // 여기서 플레이어를 하나 죽이는게 좋나? remove 메서드를 하나 만들자 <- 이건 마피아 능력으로도 쓸수있으니까!
-    }
+        message.organizeVote();
+
+        publisher.publish(endConfirmTopic, message);
+
+        // 레디스에 결과 삭제
+        String voteKey = GameConstant.VOTE_KEY_PREFIX + message.getGameId();
+        voteRedisTemplate.delete(voteKey);
+
+        // 이제 죽여야겠지?
+    } // end of endConfirm
 
     /**
      제거하는 로직
