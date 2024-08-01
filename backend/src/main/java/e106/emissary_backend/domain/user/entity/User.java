@@ -1,8 +1,12 @@
 package e106.emissary_backend.domain.user.entity;
 
+import e106.emissary_backend.domain.achievement.entity.AchievementUsers;
 import e106.emissary_backend.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 @Data
@@ -24,8 +28,14 @@ public class User extends BaseTimeEntity{
     @Column(name = "nickname", unique = false, nullable = false, length = 200)
     private String nickname;
 
-    @Column(name = "password", /*nullable = false,*/ length = 200)
+    @Column(name = "password", nullable = false, length = 200)
     private String password;
+
+    @Column(name = "gender", length = 1)
+    private String gender;
+
+    @Column(name = "birth")
+    private LocalDate birth;
 
     @Column(name = "skin_img_url", length = 30)
     private String skinImgUrl; // img url 추가
@@ -69,5 +79,8 @@ public class User extends BaseTimeEntity{
     @Builder.Default
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
+
+    @OneToMany(mappedBy = "user")
+    private Set<AchievementUsers> achievementUsers;
 
 }

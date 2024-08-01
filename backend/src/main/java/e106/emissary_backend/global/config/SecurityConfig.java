@@ -87,15 +87,15 @@ public class SecurityConfig {
         //경로별 인가 작업 (/login 페이지와 루트 페이지, 회원가입페이지는 비로그인한 사람에게 접근 허용)
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login","/", "/api/user", "/mail", "/reissue").permitAll()
-                        //.anyRequest().authenticated());
-                                .anyRequest().permitAll());
+                        .requestMatchers("/login","/", "/api/user", "/api/mail", "/api/reissue").permitAll()
+                        .anyRequest().authenticated());
+//                                .anyRequest().permitAll());
 
         http
                 .addFilterBefore(new JWTFilter(jwtUtil, "COMMON"), UsernamePasswordAuthenticationFilter.class);
 
         http
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil,refreshRepository,accessRepository), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil,refreshRepository,accessRepository,"/api/login"), UsernamePasswordAuthenticationFilter.class);
 
         http
                 .addFilterBefore(new CustomLogoutFilter(jwtUtil, jwtService), LogoutFilter.class);
