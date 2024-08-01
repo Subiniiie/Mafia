@@ -9,7 +9,6 @@ import ProfilePage from './pages/ProfilePage'
 import './App.css'
 import PrivateRoute from "./routes/PrivateRoute.jsx";
 
-
 function App() {
   // const [isLoggedIn] = useState(false);  // 로그인 상태를 여기에 맞게 설정하세요
   const [isLoggedIn, setIsLoggedIn] = useState(true);  // 로그인 상태를 여기에 맞게 설정하세요

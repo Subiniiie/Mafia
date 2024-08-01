@@ -1,21 +1,26 @@
-import React, {Component} from 'react';
+import React, {useEffect, useState} from "react";
 import OpenViduVideoComponnet from "./OvVideo";
+import axios from "axios";
 
-export default class UserVideoComponent extends Component {
-    getNicknameTag() {
-        return JSON.parse(this.props.streamManager.stream.connection.data).clientData;
-    }
+import styles from "./UserVideoComponent.css";
 
-    render(){
-        return (
-            <>
-                {this.props.streamManager !== undefined ? (
-                    <div className="streamcomponent">
-                        <OpenViduVideoComponnet streamManager={this.props.streamManager} />
-                        <div><p>{this.getNicknameTag()}</p></div>
-                    </div>
-                ):null}
-            </>
-        );
-    }
-}
+const UserVideoComponent = ({streamManager, sub, ownerId}) => {
+    const nicknameTag = JSON.parse(streamManager.stream.connection.data).nickname;
+    const id = JSON.parse(streamManager.stream.connection.data).id;
+
+    return (
+        <>
+            {streamManager !== undefined ? (
+                <div className="streamcomponent">
+                    <OpenViduVideoComponnet
+                        streamManager={streamManager}
+                        id={id}
+                    />
+                    <span>{nicknameTag}</span>
+                </div>
+            ):null}
+        </>
+    );
+};
+
+export default UserVideoComponent;

@@ -1,5 +1,6 @@
 import GameRoomCard from "./GameRoomCard";
 import styles from "./GLMain.module.css";
+import axios from "axios";
 
 const GLMain = () => {
     return (
