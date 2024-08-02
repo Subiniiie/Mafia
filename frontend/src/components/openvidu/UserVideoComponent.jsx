@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import OpenViduVideoComponnet from "./OvVideo";
 import axios from "axios";
 
-import styles from "./UserVideoComponent.css";
+import styles from "./UserVideo.module.css";
 
 const UserVideoComponent = ({streamManager, sub, ownerId}) => {
     const nicknameTag = JSON.parse(streamManager.stream.connection.data).nickname;

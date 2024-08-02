@@ -5,8 +5,6 @@ import styles from "./GamePageMain.module.css"
 import UserVideoComponent from "../openvidu/UserVideoComponent.jsx";
 import {useParams} from "react-router-dom";
 
-const APPLICATION_SERVER_URL = "https://i11e106.p.ssafy.io/openvidu/text-chat/api/session/join";
-
 class GamePageMain extends Component {
     constructor(props) {
         super(props);

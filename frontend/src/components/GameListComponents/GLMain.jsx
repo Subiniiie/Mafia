@@ -1,12 +1,31 @@
 import GameRoomCard from "./GameRoomCard";
 import styles from "./GLMain.module.css";
 import axios from "axios";
+import React, {useEffect, useState ,useRef} from "react";
 
-const GLMain = () => {
+const GLMain = ({setToken}) => {
+
+    const getGameList = (maxPlayer, isPublic) => {
+      axios.get("https://i11e106.p.ssafy.io/api/game",{
+        headers: { Authorization: `Bearer accessToken`},
+        params: {maxPlayer: maxPlayer, maxPlayerId: maxPlayer},
+      })
+        .then(({data}) => {
+          console.log(data);
+        })
+        .catch(({response}) => {
+          // err
+        });
+    };
+
+    useEffect(() => {
+      // getGameList(); //ToDo: 로그인 완료 시 살리기
+    }, [])
+
     return (
         <div className={styles.container}>
             <div className={styles.cardWrapper}>
-                <GameRoomCard id="1" title="고국으로" leader="강진" progress={7} isInProgress={false} />
+                <GameRoomCard id="1" title="고국으로" leader="강진" progress={7} isInProgress={false} setToken={setToken}/>
             </div>
             <div className={styles.cardWrapper}>
                 <GameRoomCard id="2" title="대한의 독립을 위하여" leader="수빈" progress={6} isInProgress={false} />

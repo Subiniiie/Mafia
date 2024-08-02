@@ -15,11 +15,13 @@ const LoginModal = ({ isOpen, openModal }) => {
     const [password, setPassword] = useState('')
 
     const handleLogin = async () => {
+        const formData = new FormData();
+        formData.append('username',email);
+        formData.append('password',password);
         try {
-            const response = await axios.post('https://i11e106.p.ssafy.io/api/login', {
-                email: email,
-                password: password
-            });
+            const response = await axios.post('https://i11e106.p.ssafy.io/api/login', formData,
+              {withCredentials: true}
+            );
             console.log(response.data);
             // 로그인 성공 시 처리 로직
         } catch (error) {

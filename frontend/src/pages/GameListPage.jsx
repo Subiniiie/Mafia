@@ -4,12 +4,12 @@ import GLFooter from "../components/GameListComponents/GLFooter";
 import styles from "./GameListPage.module.css";
 
 
-function GameListPage() {
+function GameListPage({setToken}) {
     return (
         <div className={styles.layout}>
             <GLHeader />
             <main className={styles.main}>
-                <GLMain />
+                <GLMain setToken={setToken}/>
             </main>
             <GLFooter />
         </div>

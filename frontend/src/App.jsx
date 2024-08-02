@@ -10,17 +10,18 @@ import './App.css'
 import PrivateRoute from "./routes/PrivateRoute.jsx";
 
 function App() {
-  // const [isLoggedIn] = useState(false);  // 로그인 상태를 여기에 맞게 설정하세요
-  const [isLoggedIn, setIsLoggedIn] = useState(true);  // 로그인 상태를 여기에 맞게 설정하세요
+  const [isLoggedIn] = useState(false);  // 로그인 상태를 여기에 맞게 설정하세요
+  // const [isLoggedIn, setIsLoggedIn] = useState(true);  // 로그인 상태를 여기에 맞게 설정하세요
   const username = "이현규";  // 로그인된 사용자의 이름
+  const [token, setToken] = useState("");
   return (
     <>
       <Navbar isLoggedIn={isLoggedIn} username={username} />
 
       <Routes>
         <Route path='/' element={<MainPage />}></Route>
-        <Route path='/game-list' element={<GameListPage />}></Route>
-        <Route path={'/game-room/:id'} element={<GamePage />}></Route>
+        <Route path='/game-list' element={<GameListPage setToken={setToken}/>}></Route>
+        <Route path={'/game-room/:id'} element={<GamePage  token={token}/>}></Route>
         <Route path='/achievements' element={<AchievementsPage />}></Route>
         <Route path='/profile' element={<ProfilePage />}></Route>
       </Routes>
