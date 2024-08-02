@@ -9,6 +9,12 @@
     color: white;
 }
 
+.roomTitle {
+    font-family: 'KimjungchulMyungjo-Bold';
+    font-size: 28px;
+    margin-left: 10px;
+}
+
 .right {
     margin: 0;
     display: flex;
