@@ -32,6 +32,13 @@ public class GlobalExceptionAdvice {
         return handleExceptionInternal(errorCode);
     }
 
+
+    @ExceptionHandler
+    public ResponseEntity<Object> alreadyUserInRoom(AlreadyUserInRoomException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return handleExceptionInternal(errorCode);
+    }
+
     @ExceptionHandler
     public ResponseEntity<Object> gameFull(GameFullException e) {
         ErrorCode errorCode = e.getErrorCode();

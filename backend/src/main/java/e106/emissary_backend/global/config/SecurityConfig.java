@@ -131,7 +131,7 @@ public class SecurityConfig {
 //        configuration.addAllowedOrigin("http://localhost:5173");
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:5500"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:5500", "http://127.0.0.1:5500"));
 //        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

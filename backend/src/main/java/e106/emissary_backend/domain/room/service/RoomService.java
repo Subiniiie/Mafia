@@ -18,6 +18,7 @@ import e106.emissary_backend.domain.userInRoom.repository.UserInRoomRepository;
 import e106.emissary_backend.global.common.CommonResponseDto;
 import e106.emissary_backend.global.error.CommonErrorCode;
 import e106.emissary_backend.global.error.exception.*;
+import io.jsonwebtoken.lang.Objects;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -89,6 +91,9 @@ public class RoomService {
 
 
     public RoomOptionDto makeRoom(long userId, RoomRequestDto roomRequestDto) {
+        if(!userInRoomRepository.findByPk_UserId(userId).isEmpty())
+            throw new AlreadyUserInRoomException(CommonErrorCode.ALREADY_USER_IN_ROOM_EXCEPTION);
+
         Room room = Room.builder()
                 .title(roomRequestDto.getTitle())
                 .password(roomRequestDto.getPassword())
@@ -98,6 +103,7 @@ public class RoomService {
                 .roomState(RoomState.WAIT)
                 .build();
         User user = userRepository.findByUserId(userId).orElseThrow(() -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION));
+        log.info("user = {}",user.getNickname());
 
         Room savedRoom = roomRepository.save(room);
 
