@@ -1,7 +1,13 @@
-.moniters {
+.monitors {
     max-width: 100%;
     height: 70vh;
     border: 1px solid white;
     background-color: #12151D;
     color: white;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    align-items: center;
 }
+
