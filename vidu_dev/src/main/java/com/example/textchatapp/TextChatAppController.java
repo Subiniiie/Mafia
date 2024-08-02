@@ -6,7 +6,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
+import java.util.Base64;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,6 +21,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TextChatAppController {
 
     private final OpenVidu openVidu;
+    private final WebClient webClient;
+
+    private final String OPENVIDU_URL;
+    private final String OPENVIDU_SECRET;
 
     // <sessionNo, Session>
     private final Map<String, Session> mapSessions = new ConcurrentHashMap<>();
@@ -25,6 +34,9 @@ public class TextChatAppController {
     public TextChatAppController(@Value("${OPENVIDU_URL}") String OPENVIDU_URL,
                                  @Value("${OPENVIDU_SECRET}") String OPENVIDU_SECRET) {
         this.openVidu = new OpenVidu(OPENVIDU_URL, OPENVIDU_SECRET);
+        this.webClient = WebClient.builder().baseUrl(OPENVIDU_URL).build();
+        this.OPENVIDU_URL = OPENVIDU_URL;
+        this.OPENVIDU_SECRET = OPENVIDU_SECRET;
     }
 
     // params => { 'sessionId':'~', 'userId':'~' }
@@ -98,8 +110,8 @@ public class TextChatAppController {
         }
     }
 
-    @PostMapping("/users/roles")
-    public ResponseEntity<JsonObject> getRoles(@RequestBody Map<String, Object> params) {
+    @PostMapping("/users/session-roles")
+    public ResponseEntity<JsonObject> getSessionRoles(@RequestBody Map<String, Object> params) {
         String sessionId = params.get("sessionId").toString();
         String token = params.get("token").toString();
 
@@ -145,8 +157,44 @@ public class TextChatAppController {
         return ResponseEntity.ok(json);
     }
 
+    @PostMapping("/session/time/night")
+    public ResponseEntity<JsonObject> changeTimeToNight(@RequestBody Map<String, Object> params) {
+        String sessionNo = params.get("sessionNo").toString();
+        Session session = mapSessions.get(sessionNo);
+
+        String sessionId = session.getSessionId();
+        String type = "signal:night";
+        String body = "It's night";
+
+        Mono<String> sendRes = sendSignalToSession(sessionId, type, body);
+        sendRes.block();
+
+        JsonObject json = new JsonObject();
+        json.addProperty("result", "success");
+
+        return ResponseEntity.ok(json);
+    }
+
+    @PostMapping("/session/time/day")
+    public ResponseEntity<JsonObject> changeTimeToDay(@RequestBody Map<String, Object> params) {
+        String sessionNo = params.get("sessionNo").toString();
+        Session session = mapSessions.get(sessionNo);
+
+        String sessionId = session.getSessionId();
+        String type = "signal:day";
+        String body = "It's day";
+
+        Mono<String> sendRes = sendSignalToSession(sessionId, type, body);
+        sendRes.block();
+
+        JsonObject json = new JsonObject();
+        json.addProperty("result", "success");
+
+        return ResponseEntity.ok(json);
+    }
+
     // TODO: 코드 갈아엎고 다시 짜야함
-    @PostMapping("/session/changeOwner")
+    @PostMapping("/session/change-owner")
     public ResponseEntity<JsonObject> changeSessionOwner(@RequestBody Map<String, Object> params) throws OpenViduJavaClientException, OpenViduHttpException {
         String sessionNo = params.get("sessionNo").toString();
         Session session = mapSessions.get(sessionNo);
@@ -171,6 +219,31 @@ public class TextChatAppController {
 
     public void closeSession(Session session) throws OpenViduJavaClientException, OpenViduHttpException {
         session.close();
+    }
+
+    public Mono<String> sendSignalToSession(String sessionId, String type, String data) {
+        String url = OPENVIDU_URL + "/openvidu/api/signal";
+
+        // Basic 인증 헤더 생성
+        String auth = "OPENVIDUAPP:" + OPENVIDU_SECRET;
+        String authHeader = "Basic " + Base64.getEncoder().encodeToString(auth.getBytes());
+
+        // 요청 본문 설정
+        Map<String, Object> body = new HashMap<>();
+        body.put("session", sessionId);
+        body.put("type", type);
+        body.put("data", data);
+        body.put("to", Collections.emptyList());  // 모든 참가자에게 전송
+
+        return webClient.post()
+                .uri(url)
+                .header("Authorization", authHeader)
+                .header("Content-Type", "application/json")
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(String.class)
+                .doOnSuccess(response -> System.out.println("Signal sent successfully"))
+                .doOnError(error -> System.err.println("Failed to send signal: " + error.getMessage()));
     }
 
     public ResponseEntity<JsonObject> getErrorResponse(Exception e) {
