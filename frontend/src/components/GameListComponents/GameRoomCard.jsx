@@ -1,32 +1,38 @@
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 import styles from "./GameRoomCard.module.css";
 import axios from "axios";
 
 const GameRoomCard = ({ title, leader, progress, isInProgress, id , setToken}) => {
 
-    const handleClickRoom = () => {
+    const navigate = useNavigate();
+    const naviateToRoom = () => {
+      navigate(`/game-room/${id}`);
+    }
+
+    const handleClickRoom = (event) => {
+      event.preventDefault();
       enterRoom();
     }
 
     const enterRoom = () => {
         // 게임 진행중일 때 return
-
       getToken();
     }
 
-    const getToken = () => {
-        axios
+    const getToken = async () => {
+        await axios
             .post("https://i11e106.p.ssafy.io/openvidu/text-chat/api/session/join",
               JSON.stringify({userId: "ssafy", sessionNo: id}),
               {headers: {'Content-type': 'application/json'}
                 })
             .then((response) => {
-                console.log("Successfully Getting Token");
-                setToken(response.data.token);
+              setToken(response.data.token);
+              console.log(response.data.token);
+              console.log("Successfully Getting Token");
+              naviateToRoom();
             })
             .catch((error) => {
               console.log(error);
-                // window.location.reload();
             });
     };
 
