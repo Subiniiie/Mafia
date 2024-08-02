@@ -159,7 +159,8 @@ function sendChatMessage() {
     if (message && connectionHandler.session) {
         connectionHandler.session.signal({
             data: JSON.stringify({ userId: userId, message: message }),
-            type: 'chat'
+            type: connectionHandler.textChatMode,
+            to: connectionHandler.specificUsers
         }).then(() => {
             console.log('Message successfully sent');
             chatInput.value = '';
