@@ -82,13 +82,24 @@ class OpenViduConnectionHandler {
         console.log('[handleNightSignal]');
         console.log(event.target)
 
-        const publisher =
-            this.session.streamManagers.find(streamManager => !streamManager.remote);
+        const publisherIdx =
+            this.session.streamManagers.findIndex(streamManager => !streamManager.remote);
 
-        console.log(publisher);
+        if (publisherIdx > 1) {
+            const publisher = this.session.streamManagers[publisherIdx];
 
-        publisher.publishVideo(false);
-        publisher.publishAudio(false);
+            console.log(publisher);
+
+            publisher.publishVideo(false);
+            publisher.publishAudio(false);
+
+            this.session.streamManagers.forEach((streamManager) => {
+                if (streamManager.remote) {
+                    streamManager.subscribeToVideo(false);
+                    streamManager.subscribeToAudio(false);
+                }
+            })
+        }
     }
 
     handleDaySignal(event) {
@@ -102,6 +113,13 @@ class OpenViduConnectionHandler {
 
         publisher.publishVideo(true);
         publisher.publishAudio(true);
+
+        this.session.streamManagers.forEach((streamManager) => {
+            if (streamManager.remote) {
+                streamManager.subscribeToVideo(true);
+                streamManager.subscribeToAudio(true);
+            }
+        })
     }
 
     finalizeDisconnection(connectionId) {
