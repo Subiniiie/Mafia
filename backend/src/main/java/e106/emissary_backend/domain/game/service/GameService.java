@@ -22,6 +22,7 @@ import e106.emissary_backend.global.error.CommonErrorCode;
 import e106.emissary_backend.global.error.exception.*;
 import io.jsonwebtoken.lang.Objects;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisKeyValueTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
@@ -33,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GameService {
@@ -78,6 +80,8 @@ public class GameService {
         gameDTO.setDay(0);
         gameDTO.setStartAt(LocalDateTime.now());
         gameDTO.setTimer(LocalDateTime.now());
+
+        log.info("gameDTO = {}", gameDTO.getTitle());
 
         // 역할부여
         Map<GameRole, Integer> roles = RoleUtils.getRole(gameDTO);

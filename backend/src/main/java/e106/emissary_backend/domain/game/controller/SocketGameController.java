@@ -31,9 +31,11 @@ public class SocketGameController {
 
     // Ready는 프론트에서 처리한다고 하여서 안함.
     @MessageMapping("/start/{roomId}")
-    public void start(@AuthenticationPrincipal CustomUserDetails userDetails, @DestinationVariable Long roomId) {
-        // todo : 한번 JWT로 요청해보고 안되면 고치기
-        long userId = Long.parseLong(userDetails.getUsername());
+    public void start( @DestinationVariable Long roomId) {
+//        @AuthenticationPrincipal CustomUserDetails userDetails,
+        // todo : 한번 JWT로 요청해보고 안되면 고치기. 일단 이렇게 해놓음
+        log.info("hi");
+//        long userId = userDetails.getUserId();
 
         gameService.setGame(roomId);
     }
@@ -42,9 +44,11 @@ public class SocketGameController {
     public void vote(@AuthenticationPrincipal CustomUserDetails userDetails
             , @DestinationVariable Long roomId
             , @Payload VoteRequestDTO request) {
-        long userId = Long.parseLong(userDetails.getUsername());
-        // todo : 닉네임으로 넘어오면 roomService에서 닉네임으로 Id찾아오기
-        long targetId = request.getTargetId();
+//        long userId = userDetails.getUserId();
+//        long targetId = request.getTargetId();
+
+        long userId = 1L;
+        long targetId = 2L;
 
         gameService.startVote(roomId, userId, targetId);
     }
@@ -53,7 +57,8 @@ public class SocketGameController {
     public void confirmVote(@AuthenticationPrincipal CustomUserDetails userDetails,
                             @DestinationVariable Long roomId,
                             @Payload ConfirmVoteRequestDTO request) {
-        long userId = Long.parseLong(userDetails.getUsername());
+//        long userId = Long.parseLong(userDetails.getUsername());
+        long userId = 1L;
 
         gameService.startConfirm(roomId, userId, request.isConfirm());
     }

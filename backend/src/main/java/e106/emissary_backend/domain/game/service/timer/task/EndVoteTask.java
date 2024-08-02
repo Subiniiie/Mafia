@@ -6,13 +6,16 @@ import e106.emissary_backend.domain.game.service.publisher.RedisPublisher;
 import e106.emissary_backend.domain.game.service.subscriber.message.EndVoteMessage;
 import e106.emissary_backend.domain.game.service.timer.SchedulerService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EndVoteTask implements GameTask {
@@ -28,6 +31,7 @@ public class EndVoteTask implements GameTask {
 
     @Override
     public void run() {
+        log.info("EndVoteTask Started : {}", LocalDateTime.now());
         execute(gameId);
     }
 

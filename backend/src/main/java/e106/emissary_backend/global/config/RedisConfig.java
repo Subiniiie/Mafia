@@ -1,5 +1,9 @@
 package e106.emissary_backend.global.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import e106.emissary_backend.domain.game.entity.Game;
 import e106.emissary_backend.domain.game.service.subscriber.*;
 import org.springframework.context.annotation.Bean;
@@ -28,13 +32,26 @@ public class RedisConfig {
         return container;
     }
 
+    @Bean public ObjectMapper objectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); // timestamp 형식 안따르도록 설정
+        mapper.registerModules(new JavaTimeModule(), new Jdk8Module()); // LocalDateTime 매핑을 위해 모듈 활성화
+        return mapper;
+    }
+
     @Bean
-    public RedisTemplate<Long, Game> redisTemplate(RedisConnectionFactory connectionFactory) {
+    public RedisTemplate<Long, Game> redisTemplate(RedisConnectionFactory connectionFactory, ObjectMapper objectMapper) {
         RedisTemplate<Long, Game> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);
         redisTemplate.setKeySerializer(new GenericToStringSerializer<>(Long.class));
         redisTemplate.setHashKeySerializer(new GenericToStringSerializer<>(Long.class));
-        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(Game.class)); // Game으로 변경
+
+        Jackson2JsonRedisSerializer<Game> serializer = new Jackson2JsonRedisSerializer<>(objectMapper, Game.class);
+        redisTemplate.setValueSerializer(serializer);
+        redisTemplate.setHashValueSerializer(serializer);
+        redisTemplate.afterPropertiesSet();
+
+//        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(Game.class)); // Game으로 변경
         return redisTemplate;
     }
 
