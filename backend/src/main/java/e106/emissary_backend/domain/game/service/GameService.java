@@ -11,9 +11,7 @@ import e106.emissary_backend.domain.game.repository.RedisGameRepository;
 import e106.emissary_backend.domain.game.service.publisher.RedisPublisher;
 import e106.emissary_backend.domain.game.service.subscriber.message.*;
 import e106.emissary_backend.domain.game.service.timer.SchedulerService;
-import e106.emissary_backend.domain.game.service.timer.task.StartConfirmTask;
-import e106.emissary_backend.domain.game.service.timer.task.StartVoteTask;
-import e106.emissary_backend.domain.game.service.timer.task.TaskName;
+import e106.emissary_backend.domain.game.service.timer.task.*;
 import e106.emissary_backend.domain.game.util.RoleUtils;
 import e106.emissary_backend.domain.room.entity.Room;
 import e106.emissary_backend.domain.room.enumType.RoomState;
@@ -51,11 +49,13 @@ public class GameService {
     private final StartVoteTask startVoteTask;
     private final ChannelTopic endVoteTopic;
 
+    private final EndVoteTask endVoteTask;
     private final StartConfirmTask startConfirmTask;
     private final ChannelTopic endConfirmTopic;
 
     private final ChannelTopic nightEmissaryTopic;
     private final ChannelTopic nightPoliceTopic;
+    private final EndConfirmTask endConfirmTask;
 
     public void update(GameDTO gameDTO){
         Game game = gameDTO.toDao();
@@ -92,7 +92,7 @@ public class GameService {
 
         // 타이머 - 토론시간임.
         startVoteTask.setGameId(roomId);
-        scheduler.scheduleTask(roomId, TaskName.START_VOTE_TASK, startVoteTask, 2, TimeUnit.MINUTES);
+        scheduler.scheduleTask(roomId, TaskName.START_VOTE_TASK, startVoteTask, 15, TimeUnit.SECONDS);
 
         publisher.publish(dayTopic, DayMessage.builder()
                 .gameId(roomId)
@@ -119,8 +119,9 @@ public class GameService {
         if (voteMap.values().stream().mapToInt(Integer::intValue).sum() == playerMap.size()) {
             // todo : 만약 여기서 바로 이걸 타면 endVote타이머 종료해야함.
             // todo : 예약된 Task를 종료하고 Task를 직접 실행하자.
-            EndVoteMessage endVoteMessage = EndVoteMessage.builder().gameId(gameId).voteMap(voteMap).build();
-            endVote(endVoteMessage);
+            endVoteTask.execute(gameId);
+//            EndVoteMessage endVoteMessage = EndVoteMessage.builder().gameId(gameId).voteMap(voteMap).build();
+//            endVote(endVoteMessage);
         }
     } // end of startVote
 
@@ -174,8 +175,9 @@ public class GameService {
 
         if (voteMap.values().stream().mapToInt(Integer::intValue).sum() == playerMap.size()) {
             // todo : 얘도 이거 타면 end confirm 타이머 끄는게 필요함
-            EndConfirmMessage endConfirmMessage = EndConfirmMessage.builder().gameId(gameId).voteMap(voteMap).build();
-            endConfirm(endConfirmMessage);
+            endConfirmTask.execute(gameId);
+//            EndConfirmMessage endConfirmMessage = EndConfirmMessage.builder().gameId(gameId).voteMap(voteMap).build();
+//            endConfirm(endConfirmMessage);
         }
     } // end of startConfirm
 

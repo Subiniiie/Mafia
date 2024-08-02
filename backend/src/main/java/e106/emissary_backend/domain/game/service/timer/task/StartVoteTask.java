@@ -27,12 +27,13 @@ public class StartVoteTask implements GameTask {
 
     @Override
     public void run() {
-        log.info("StartVoteTask started : {}", LocalDateTime.now());
         execute(gameId);
     }
 
     @Override
     public void execute(Long gameId) {
+        log.info("StartVoteTask started : {}", LocalDateTime.now());
+
         //todo : vote 시작했다고 publish -> sub에서 프론트에게 알림
         publisher.publish(startVoteTopic, StartVoteMessage.builder()
                 .gameId(gameId)
@@ -40,8 +41,7 @@ public class StartVoteTask implements GameTask {
         
         // 2분뒤 투표종료 안내
         endVoteTask.setGameId(gameId);
-        ScheduledFuture<?> future = scheduler.scheduleTask(gameId, TaskName.END_VOTE_TASK, endVoteTask, 2, TimeUnit.MINUTES);
-
+        ScheduledFuture<?> future = scheduler.scheduleTask(gameId, TaskName.END_VOTE_TASK, endVoteTask, 10, TimeUnit.SECONDS);
     }
 
     public void setGameId(long gameId){
