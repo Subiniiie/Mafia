@@ -1,12 +1,14 @@
 package e106.emissary_backend.domain.user.entity;
 
 import e106.emissary_backend.domain.achievement.entity.AchievementUsers;
+import e106.emissary_backend.domain.friends.entity.Friends;
 import e106.emissary_backend.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -91,4 +93,31 @@ public class User extends BaseTimeEntity{
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<AchievementUsers> achievementUsers = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "user1")
+    private Set<Friends> friendsAsUser1 = new HashSet<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user2")
+    private Set<Friends> friendsAsUser2 = new HashSet<>();
+
+    @Transient
+    private Set<User> friends;
+
+    public Set<User> getFriends() {
+        if(friends == null) {
+            friends = new HashSet<>();
+            for(Friends friend : friendsAsUser1){
+                if("Y".equals(friend.getIsAccepted())){
+                    friends.add(friend.getUser2());
+                }
+            }
+            for(Friends friend : friendsAsUser2){
+                if("Y".equals(friend.getIsAccepted())){
+                    friends.add(friend.getUser1());
+                }
+            }
+        }
+        return friends;
+    }
 }

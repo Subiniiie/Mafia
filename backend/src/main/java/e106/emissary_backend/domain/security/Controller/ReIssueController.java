@@ -15,9 +15,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.http.ResponseCookie;
 
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @ResponseBody
@@ -29,7 +32,7 @@ public class ReIssueController {
     private final RefreshRepository refreshRepository;
 
     @PostMapping("/api/reissue")
-    public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<Map<String, Object>> reissue(HttpServletRequest request, HttpServletResponse response) {
         String refresh = null;
         String access = null;
         Cookie[] cookies = request.getCookies();
@@ -41,23 +44,20 @@ public class ReIssueController {
                 access = cookie.getValue();
             }
         }
+        Map<String, Object> map = new HashMap<>();
 
-        if(refresh == null) {
-            return new ResponseEntity<>("refresh token null", HttpStatus.BAD_REQUEST);
+        if(refresh == null || jwtUtil.validateToken(refresh)) {
+            map.put("status", "fail");
+            return ResponseEntity.ok(map);
         }
-
-        if(jwtUtil.validateToken(refresh)){
-            return new ResponseEntity<>("refresh token expired", HttpStatus.BAD_REQUEST);
-        }
-
         String category = jwtUtil.getCategory(refresh);
-
         if(!category.equals("Refresh")){
-            return new ResponseEntity<>("refresh token invalid", HttpStatus.BAD_REQUEST);
+            map.put("status", "fail");
+            return ResponseEntity.ok(map);
         }
-
         if(jwtService.findByRefresh(refresh).isEmpty()){
-            return new ResponseEntity<>("refresh token invalid12", HttpStatus.BAD_REQUEST);
+            map.put("status", "fail");
+            return ResponseEntity.ok(map);
         }
 
         System.out.println(access);
@@ -67,16 +67,16 @@ public class ReIssueController {
             System.out.println(jwtService.findByAccess(access).isEmpty());
             System.out.println(!jwtUtil.validateToken(access));
         }
-
         String username = jwtUtil.getUsername(refresh);
         String userId = jwtUtil.getUserId(refresh);
         String email = jwtUtil.getEmail(refresh);
         String gender = jwtUtil.getGender(refresh);
-        String birth = jwtUtil.getBirth(refresh);
+//        String birth = jwtUtil.getBirth(refresh);
+//        System.out.println(birth);
         String role = jwtUtil.getRole(refresh);
 
-        String newAccess = jwtUtil.createJwt("Access", Long.parseLong(userId), username, email, gender, birth, role, 600000L);
-        String newRefresh = jwtUtil.createJwt("Refresh", Long.parseLong(userId), username, email, gender, birth, role, 86400000L);
+        String newAccess = jwtUtil.createJwt("Access", Long.parseLong(userId), username, email, gender, /*birth,*/ role, 600000L);
+        String newRefresh = jwtUtil.createJwt("Refresh", Long.parseLong(userId), username, email, gender, /*birth,*/ role, 86400000L);
 
         jwtService.deleteByRefresh(refresh);
         addAccessEntity(username, newAccess, 600000L);
@@ -84,8 +84,10 @@ public class ReIssueController {
 
         response.addCookie(createCookie("Access",newAccess));
         response.addCookie(createCookie("Refresh",newRefresh));
-
-        return new ResponseEntity<>(HttpStatus.OK);
+        map.put("refresh", newRefresh);
+        map.put("access", newAccess);
+        map.put("status", "success");
+        return ResponseEntity.ok(map);
     }
 
     private Cookie createCookie(String key, String value) {
@@ -94,6 +96,8 @@ public class ReIssueController {
         cookie.setMaxAge(60*60*60);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
+//        cookie.setSecure(true);
+//        cookie.setAttribute("SameSite", "None");
 
         return cookie;
     }
