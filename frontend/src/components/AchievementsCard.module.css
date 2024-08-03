@@ -62,7 +62,7 @@
     flex-direction: column;
     align-items: center;
     padding: 10px;
-    transition: height 0.6s;
+    transition: height 0.4s;
 }
 
 .content:hover {
@@ -78,9 +78,12 @@
 }
 
 .content > button {
+    color: black;
+    border: 10x solid black;
     margin-top: auto;
     cursor: pointer;
     z-index: 1;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .back {
