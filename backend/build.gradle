@@ -60,6 +60,9 @@ dependencies {
 
     // LocalDateTime Serializer
     implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.17.2'
+    // swagger
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.8.0'
+
 }
 
 tasks.named('test') {
