@@ -49,5 +49,4 @@ public class UserInRoom extends BaseTimeEntity {
         @Column(name = "user_id")
         private Long userId;
     }
-
 }

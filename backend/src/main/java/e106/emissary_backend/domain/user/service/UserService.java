@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -36,6 +37,8 @@ public class UserService implements UserDetailsService {
                     .nickname(request.getNickname())
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
+                    .gender(Optional.ofNullable(request.getGender()).orElse("N"))
+                    .birth(Optional.ofNullable(request.getBirth()).orElse(LocalDate.of(1945,8,15)))
                     .build();
             userRepository.save(newUser);
             return 1;
@@ -89,8 +92,9 @@ public class UserService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Optional<User> present = userRepository.findByEmail(email);
+    public UserDetails loadUserByUsername(String nickname) throws UsernameNotFoundException {
+        Optional<User> present = userRepository.findByNickname(nickname);
+        System.out.println(present);
         if(present.isPresent()){
             return new CustomUserDetails(present.get());
         } else{
@@ -100,6 +104,7 @@ public class UserService implements UserDetailsService {
 
     public String emailExists(CheckRequest request){
         Optional<User> res = userRepository.findByEmail(request.getData());
+        System.out.println(request.getData());
         if(res.isPresent()){
             throw new RuntimeException(("이미 존재하는 이메일 입니다."));
         } else {

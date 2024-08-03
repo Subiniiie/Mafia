@@ -2,11 +2,14 @@ package e106.emissary_backend.domain.game.controller;
 
 
 import e106.emissary_backend.domain.game.service.GameService;
+import e106.emissary_backend.domain.game.service.GameService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -49,6 +52,6 @@ public class SocketGameController {
     public void start(@AuthenticationPrincipal UserDetails userDetails, @DestinationVariable Long roomId){
         long userId = Long.parseLong(userDetails.getUsername());
 
-        gameService.startGame(roomId);
+        gameService.setGame(roomId);
     }
 }

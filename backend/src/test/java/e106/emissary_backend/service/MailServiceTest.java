@@ -42,7 +42,7 @@ class MailServiceTest {
 
         String jsonRequest = objectMapper.writeValueAsString(mailRequest);
 
-        MvcResult result = mockMvc.perform(post("/mail")
+        MvcResult result = mockMvc.perform(post("/api/mail")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
                 .andExpect(status().isOk())

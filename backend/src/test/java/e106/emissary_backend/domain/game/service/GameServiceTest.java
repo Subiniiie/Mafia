@@ -2,7 +2,6 @@ package e106.emissary_backend.domain.game.service;
 
 import e106.emissary_backend.domain.game.entity.Game;
 import e106.emissary_backend.domain.game.enumType.GameState;
-import e106.emissary_backend.domain.game.mapper.GameMapper;
 import e106.emissary_backend.domain.game.model.GameDTO;
 import e106.emissary_backend.domain.game.model.GameResponseDTO;
 import e106.emissary_backend.domain.game.repository.RedisGameRepository;
@@ -10,19 +9,15 @@ import e106.emissary_backend.domain.room.entity.Room;
 import e106.emissary_backend.domain.room.enumType.RoomState;
 import e106.emissary_backend.domain.room.repository.RoomRepository;
 import e106.emissary_backend.global.error.exception.NotFoundGameException;
-import e106.emissary_backend.global.error.exception.NotFoundRoomException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisKeyValueTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 
-import java.util.HashMap;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -118,10 +113,10 @@ class GameServiceTest {
 //    }
 
     @Test
-    void startGame_GameNotFound() {
+    void setGame_GameNotFound() {
         when(redisGameRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundGameException.class, () -> gameService.startGame(1L));
+        assertThrows(NotFoundGameException.class, () -> gameService.setGame(1L));
     }
 
 //    @Test
