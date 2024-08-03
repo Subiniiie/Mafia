@@ -34,7 +34,7 @@ public class AchievementService {
             extracted(user, 9L, user.getMafiaWinCnt() + user.getTurncoatWinCnt() + user.getTurncoatSingleWinCnt(), 30);
             extracted(user, 10L, user.getAchievementUsers().size(), 9);
         }else {
-            throw new RuntimeException("업적 업데이트에 실패하였습니다.");
+            ;
         }
 
     }

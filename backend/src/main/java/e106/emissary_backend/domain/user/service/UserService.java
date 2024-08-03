@@ -44,7 +44,7 @@ public class UserService implements UserDetailsService {
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
                     .gender(Optional.ofNullable(request.getGender()).orElse("N"))
-                    .birth(Optional.ofNullable(request.getBirth()).orElse(LocalDate.of(1945,8,15)))
+//                    .birth(Optional.ofNullable(request.getBirth()).orElse(LocalDate.of(1945,8,15)))
                     .build();
             userRepository.save(newUser);
             return 1;
