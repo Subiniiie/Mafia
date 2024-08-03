@@ -1,0 +1,25 @@
+.containerStyle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.labelStyle {
+    width: 55px;
+    font-size: 16px;
+    line-height: 30px;
+
+}
+
+.inputStyle {
+    width: 295px;
+    height: 45px;
+    padding: 8px;
+    color: black;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.inputStyle::placeholder {
+    font-size: 12px;
+}
