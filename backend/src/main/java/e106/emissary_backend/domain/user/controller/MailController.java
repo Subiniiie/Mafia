@@ -15,7 +15,7 @@ public class MailController {
     private final UserService mailService;
 
     @ResponseBody
-    @PostMapping("/mail")
+    @PostMapping("/api/mail")
     public String MailSend(@RequestBody MailRequest request){
         return mailService.sendMail(request);
     }

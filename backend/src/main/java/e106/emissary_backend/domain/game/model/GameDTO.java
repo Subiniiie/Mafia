@@ -72,4 +72,41 @@ public class GameDTO {
         return Optional.ofNullable(playerMap.get(nickname));
     }
 
+    public Game toDao(){
+        return Game.builder()
+                .gameId(gameId)
+                .title(title)
+                .ownerName(ownerName)
+                .maxPlayer(maxPlayer)
+                .emissary(emissary)
+                .police(police)
+                .isHaveBetrayer(isHaveBetrayer)
+                .betrayer(betrayer)
+                .playerMap(playerMap)
+                .gameState(gameState)
+                .day(day)
+                .timer(timer)
+                .startAt(startAt)
+                .finishAt(finishAt)
+                .build();
+    }
+
+    public static GameDTO toDto(Game game){
+        return GameDTO.builder()
+                .gameId(game.getGameId())
+                .title(game.getTitle())
+                .ownerName(game.getOwnerName())
+                .maxPlayer(game.getMaxPlayer())
+                .emissary(game.getEmissary())
+                .police(game.getPolice())
+                .isHaveBetrayer(game.isHaveBetrayer())
+                .betrayer(game.getBetrayer())
+                .playerMap(game.getPlayerMap())
+                .gameState(game.getGameState())
+                .day(game.getDay())
+                .timer(game.getTimer())
+                .startAt(game.getStartAt())
+                .finishAt(game.getFinishAt())
+                .build();
+    }
 }

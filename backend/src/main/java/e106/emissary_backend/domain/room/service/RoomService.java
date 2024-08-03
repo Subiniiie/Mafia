@@ -2,7 +2,6 @@ package e106.emissary_backend.domain.room.service;
 
 import e106.emissary_backend.domain.game.entity.Game;
 import e106.emissary_backend.domain.game.enumType.GameState;
-import e106.emissary_backend.domain.game.mapper.GameMapper;
 import e106.emissary_backend.domain.game.model.GameDTO;
 import e106.emissary_backend.domain.game.model.Player;
 import e106.emissary_backend.domain.game.repository.RedisGameRepository;
@@ -15,19 +14,15 @@ import e106.emissary_backend.domain.room.repository.RoomRepository;
 import e106.emissary_backend.domain.user.entity.User;
 import e106.emissary_backend.domain.user.repository.UserRepository;
 import e106.emissary_backend.domain.userInRoom.entity.UserInRoom;
-import e106.emissary_backend.domain.userInRoom.repoistory.UserInRoomRepository;
+import e106.emissary_backend.domain.userInRoom.repository.UserInRoomRepository;
 import e106.emissary_backend.global.common.CommonResponseDto;
 import e106.emissary_backend.global.error.CommonErrorCode;
-import e106.emissary_backend.global.error.exception.GameFullException;
-import e106.emissary_backend.global.error.exception.NotFoundGameException;
-import e106.emissary_backend.global.error.exception.NotFoundRoomException;
-import e106.emissary_backend.global.error.exception.NotFoundUserException;
+import e106.emissary_backend.global.error.exception.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -44,7 +39,7 @@ public class RoomService {
     private final UserInRoomRepository userInRoomRepository;
     private final UserRepository userRepository;
     private final RedisGameRepository redisGameRepository;
-    private final RedisTemplate<Long, GameDTO> redisGameTemplate;
+//    private final RedisTemplate<Long, GameDTO> redisGameTemplate;
 
     public List<RoomListDto> getRooms(Pageable pageable) {
         Slice<Room> roomList = roomRepository.findAllBy(pageable).orElseThrow(()-> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
@@ -53,7 +48,7 @@ public class RoomService {
                         .ownerName(userRepository.findNicknameByUserId(room.getOwnerId()).orElseThrow(
                                 () -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION)))
                         .maxPlayer(room.getMaxPlayer())
-                        .nowPlayer(userInRoomRepository.countPeopleByRoomId(room.getRoomId()))
+                        .nowPlayer(userInRoomRepository.countPeopleByRoom_RoomId(room.getRoomId()))
                         .build())
                 .collect(Collectors.toList());
     }
@@ -87,7 +82,7 @@ public class RoomService {
     public CommonResponseDto deleteUser(Long roomId, Long userId) {
         roomRepository.findByRoomId(roomId).orElseThrow(() -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
         userInRoomRepository.findByPk_UserId(userId).orElseThrow(() -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION));
-        userInRoomRepository.deletePeopleByPk_UserIdAndRoomId(roomId, userId);
+        userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
 
         return new CommonResponseDto("ok");
     }
@@ -127,7 +122,7 @@ public class RoomService {
         Player player = Player.createPlayer(user.getUserId(), user.getNickname());
         gameDTO.addPlayer(player);
 
-        Game game = GameMapper.INSTANCE.toGame(gameDTO);
+        Game game = gameDTO.toDao();
 
         redisGameRepository.save(game);
 
@@ -137,11 +132,16 @@ public class RoomService {
     // Todo : 분산 트랜잭션 처리 해줘야함.
     public CommonResponseDto enterRoom(Long roomId, long userId) {
         Room room = roomRepository.findByRoomId(roomId).orElseThrow(() -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
-        if(userInRoomRepository.countPeopleByRoomId(roomId) > room.getMaxPlayer()) {
+        if(userInRoomRepository.countPeopleByRoom_RoomId(roomId) > room.getMaxPlayer()) {
             throw new GameFullException(CommonErrorCode.GAME_FULL_EXCEPTION);
         }
 
         User user = userRepository.findByUserId(userId).orElseThrow(() -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION));
+
+        log.info("user : " + user.getUserId());
+        if(userInRoomRepository.findByPk_UserId(userId).isPresent()){
+            throw new AlreadyExistUserException(CommonErrorCode.ALREADY_EXIST_USER_EXCEPTION);
+        }
 
         UserInRoom userInRoom = UserInRoom.builder()
                 .pk(new UserInRoom.Pk(roomId, userId))
@@ -158,10 +158,11 @@ public class RoomService {
         Game game = redisGameRepository.findByGameId(roomId).orElseThrow(
                 () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
 
-        GameDTO gameDTO = GameMapper.INSTANCE.toGameDTO(game);
+        GameDTO gameDTO = GameDTO.toDto(game);
         gameDTO.addPlayer(player);
 
-        Game updateGame = GameMapper.INSTANCE.toGame(gameDTO);
+        Game updateGame = gameDTO.toDao();
+
         redisGameRepository.save(updateGame);
 
         return new CommonResponseDto("ok");
@@ -169,7 +170,7 @@ public class RoomService {
 
     public CommonResponseDto leaveRoom(Long roomId, long userId) {
         roomRepository.deleteById(roomId);
-        userInRoomRepository.deletePeopleByPk_UserIdAndRoomId(roomId, userId);
+        userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
 
         return new CommonResponseDto("ok");
     }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import styles from "./AchievementsPage.module.css"
 import AchievementsCard from "../components/AchievementsCard";
@@ -15,6 +15,23 @@ function AchievementsPage() {
         {id: 6, achievementName: "리액트 잘하고 싶다", achievementDate: new Date('2024-07-18'), description: "현규의 꿈은 리액트 마스터다."},
         {id: 7, achievementName: "리액트 잘하고 싶다", achievementDate: new Date('2024-07-18'), description: "현규의 꿈은 리액트 마스터다."},
     ]
+
+    // 업적 정보를 저장할 변수
+    // 서버에서 연결할 때 사용
+    // const [ myAchievementsCard, setMyAchievementsCard ] = useState([])
+
+    // const fetchAchievements = async function() {
+    //     try {
+    //         const response = await axios.get('https://i11e106.p.ssafy.io/api/honors')
+    //         setMyAchievementsCard(response.data)
+    //     } catch(error) {
+    //         console.log(error)
+    //     }
+    // }
+
+    // useEffect(() => {
+    //     fetchAchievements()
+    // }, [])
 
     return (
         <div className={styles.container}>

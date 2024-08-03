@@ -1,8 +1,16 @@
 package e106.emissary_backend.domain.user.entity;
 
+import e106.emissary_backend.domain.achievement.entity.AchievementUsers;
+import e106.emissary_backend.domain.friends.entity.Friends;
 import e106.emissary_backend.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
@@ -11,6 +19,7 @@ import lombok.*;
 @Builder
 @Table(name = "users")
 @EqualsAndHashCode(callSuper=false)
+@ToString(exclude = "achievementUsers")
 public class User extends BaseTimeEntity{
 
     @Id
@@ -24,8 +33,14 @@ public class User extends BaseTimeEntity{
     @Column(name = "nickname", unique = false, nullable = false, length = 200)
     private String nickname;
 
-    @Column(name = "password", /*nullable = false,*/ length = 200)
+    @Column(name = "password", nullable = false, length = 200)
     private String password;
+
+    @Column(name = "gender", length = 1)
+    private String gender;
+
+    @Column(name = "birth")
+    private LocalDate birth;
 
     @Column(name = "skin_img_url", length = 30)
     private String skinImgUrl; // img url 추가
@@ -36,7 +51,7 @@ public class User extends BaseTimeEntity{
 
     @Builder.Default
     @Column(name = "mafia_play_cnt")
-    private Long mafiaPlayCn = 0L;
+    private Long mafiaPlayCnt = 0L;
 
     @Builder.Default
     @Column(name = "police_win_cnt")
@@ -55,6 +70,10 @@ public class User extends BaseTimeEntity{
     private Long turncoatWinCnt = 0L;
 
     @Builder.Default
+    @Column(name = "turncoat_single_win_cnt")
+    private Long turncoatSingleWinCnt = 0L;
+
+    @Builder.Default
     @Column(name = "citizen_game_cnt")
     private Long citizenGameCnt = 0L;
 
@@ -70,4 +89,35 @@ public class User extends BaseTimeEntity{
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
 
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<AchievementUsers> achievementUsers = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user1")
+    private Set<Friends> friendsAsUser1 = new HashSet<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user2")
+    private Set<Friends> friendsAsUser2 = new HashSet<>();
+
+    @Transient
+    private Set<User> friends;
+
+    public Set<User> getFriends() {
+        if(friends == null) {
+            friends = new HashSet<>();
+            for(Friends friend : friendsAsUser1){
+                if("Y".equals(friend.getIsAccepted())){
+                    friends.add(friend.getUser2());
+                }
+            }
+            for(Friends friend : friendsAsUser2){
+                if("Y".equals(friend.getIsAccepted())){
+                    friends.add(friend.getUser1());
+                }
+            }
+        }
+        return friends;
+    }
 }

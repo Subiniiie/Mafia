@@ -11,8 +11,10 @@ import java.io.Serializable;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.redis.core.RedisHash;
 
-@RedisHash("player")
+//@RedisHash("player")
 @Slf4j
 @Getter
 @Setter
@@ -33,7 +35,8 @@ public class Player implements Serializable {
 
     private boolean isLeft;
 
-    private boolean isAlive;
+    @Builder.Default
+    private boolean isAlive = true;
 
     public static Player createPlayer(Long id, String nickname) {
         return Player.builder()
@@ -42,4 +45,3 @@ public class Player implements Serializable {
                 .build();
     }
 }
-

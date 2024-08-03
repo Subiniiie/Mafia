@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -36,4 +37,10 @@ public class CustomUserDetails implements UserDetails {
     public String getUsername() {
         return user.getNickname();
     }
+
+    public String getEmail() { return user.getEmail(); }
+
+    public String getGender() { return user.getGender(); }
+
+//    public String getBirth() { return user.getBirth().toString(); }
 }
