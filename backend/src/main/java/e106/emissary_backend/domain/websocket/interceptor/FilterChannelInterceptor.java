@@ -41,12 +41,12 @@ public class FilterChannelInterceptor implements ChannelInterceptor {
             if (jwtToken != null) {
                 try {
                     if (jwtUtil.validateToken(jwtToken)) {
-//                        String username = jwtUtil.getUsername(jwtToken);
-                        Long userId = jwtUtil.getUserId(jwtToken);
+                        String username = jwtUtil.getUsername(jwtToken);
+//                        Long userId = jwtUtil.getUserId(jwtToken);
                         String role = jwtUtil.getRole(jwtToken);
 
                         accessor.setUser(new UsernamePasswordAuthenticationToken(
-                                userId,
+                                username,
                                 null,
                                 Collections.singletonList(new SimpleGrantedAuthority(role)))
                         );

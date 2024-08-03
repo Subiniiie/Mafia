@@ -65,7 +65,7 @@ public class UserController {
     }
 
     // detailsUser(Read)
-    @GetMapping("/api/users")
+    @GetMapping(value = {"/api/users", "/api/honors"})
     @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
     public ResponseEntity<Map<String, Object>> detailsUser(Authentication authentication) {
         UserDetails res = userService.loadUserByUsername(authentication.getName());
@@ -96,7 +96,7 @@ public class UserController {
         }
     }
 
-    @PatchMapping("/updatelostpw")
+    @PatchMapping("/api/updatelostpw")
     public ResponseEntity<Map<String, Object>> findpw(@RequestBody EditRequest request) {
         Map<String, Object> map = new HashMap<>();
         try {

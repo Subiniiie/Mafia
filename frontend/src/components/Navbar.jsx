@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react"
 import { Link, NavLink, useLocation } from "react-router-dom";
+import axios from "axios"
 import LoginModal from "../modals/LoginModal";
 import SignUpModal from "../modals/SignUpModal.jsx"
-import SettingsModal from "../modals/SettingsModal.jsx"
+// import SettingsModal from "../modals/SettingsModal.jsx"
 import Friends from '../modals/Friends';
 import './Navbar.css';
 import Logo from '../assets/Logo.png'; // 이미지 파일 import
@@ -15,7 +16,7 @@ import SpeakerOffLockedButton from '../assets/Buttons/SpeakerOffLockedButton.png
 import SpeakerOnLockedButton from '../assets/Buttons/SpeakerOnLockedButton.png'
 
 
-const Navbar = ({ isLoggedIn, username }) => {
+const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
 
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
     const openLoginModal = () => setIsLoginModalOpen(!isLoginModalOpen)
@@ -50,6 +51,26 @@ const Navbar = ({ isLoggedIn, username }) => {
         }
     }, [location])
 
+
+    // token undefined 문제 해결하고 나면 할 것
+    const handleLogout = async () => {
+        console.log("나 로그아웃 버튼 눌렀어")
+        try {
+            console.log("try 들어왔어")
+            // 로그아웃 API 요청
+            await axios.post('https://i11e106.p.ssafy.io/api/logout', {}, {
+                withCredentials: true,
+            })
+            // 로그아웃 성공 시 처리 로직
+            localStorage.removeItem('token') // 로컬 스토리지에서 토큰 삭제
+            onLoginSuccess('') // 상위 컴포넌트에 로그아웃 알림
+        } catch (error) {
+            console.log("catch 들어왔어")
+            console.error("Logout failed:", error.response ? error.response.data : error.message)
+        }
+    }
+
+
     return (
         <nav className="navbar">
             <Link to="/" className="main-link">
@@ -63,9 +84,9 @@ const Navbar = ({ isLoggedIn, username }) => {
                             <div className="navbar-user-text east-sea-dokdo-regular">
                                 <div className="navbar-user-text-first-line">
                                     <span>조국 광복을 위하여,<br /></span>
-                                    <img src={LogoutButton} alt="Logout" className="navbar-logout" />
+                                    <img src={LogoutButton} alt="Logout" className="navbar-logout" onClick={handleLogout} />
                                 </div>
-                                <span><NavLink to="/" className="username">{username}</NavLink> 님, 오늘도 대한 독립 만세!</span>
+                                <span><NavLink to="/" className="name">{name}</NavLink> 님, 오늘도 대한 독립 만세!</span>
                             </div>
                         </div>
 
@@ -86,7 +107,7 @@ const Navbar = ({ isLoggedIn, username }) => {
                 ) : (
                     <>
                         <button onClick={openLoginModal}>활동하기</button>
-                        <LoginModal isOpen={isLoginModalOpen} openModal={openLoginModal} />
+                        <LoginModal isOpen={isLoginModalOpen} openModal={openLoginModal} onLoginSuccess={onLoginSuccess} />
                         <button onClick={openSignUpModal}>독립군 입단</button>
                         <SignUpModal isOpen={isSignUpModalOpen} openModal={openSignUpModal} />
                     </>
@@ -114,3 +135,4 @@ const Navbar = ({ isLoggedIn, username }) => {
 };
 
 export default Navbar
+
