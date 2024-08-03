@@ -14,6 +14,7 @@ import './App.css'
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태
   const [name, setName] = useState('') // 로그인된 사용자의 이름
+  const [token, setToken] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -49,8 +50,8 @@ function App() {
 
       <Routes>
         <Route path='/' element={<MainPage />}></Route>
-        <Route path='/game-list' element={<GameListPage />}></Route>
-        <Route path={'/game-room/:id'} element={<GamePage />}></Route>
+        <Route path='/game-list' element={<GameListPage setToken={setToken}/>}></Route>
+        <Route path={'/game-room/:id'} element={<GamePage token={token}/>}></Route>
         <Route path='/achievements' element={<AchievementsPage />}></Route>
         <Route path='/profile' element={<ProfilePage />}></Route>
       </Routes>

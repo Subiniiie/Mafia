@@ -4,7 +4,7 @@ import SearchBar from "../../components/SearchBar"
 import CreateRoomModal from "../../modals/CreateRoomModal"
 import styles from "./GLHeader.module.css"
 
-const GLHeader = () => {
+const GLHeader = ({setToken}) => {
 
     const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -22,7 +22,7 @@ const GLHeader = () => {
                 <div className={styles.buttonSection}>
                     <button onClick={openModal}>새로운 도전</button>
                     {/* <CreateRoomModal isOpen={isModalOpen} onClose={closeModal} /> */}
-                    <CreateRoomModal isOpen={isModalOpen} openModal={openModal} />
+                    <CreateRoomModal isOpen={isModalOpen} openModal={openModal} setToken={setToken}/>
                 </div>
             </div>
         </div >

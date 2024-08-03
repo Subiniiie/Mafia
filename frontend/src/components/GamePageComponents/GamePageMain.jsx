@@ -119,7 +119,7 @@ const GamePageMain = ({sessionId,token}) => {
 
     return (
       <>
-        <div id="container">
+        <div id="container" className={styles.monitors}>
             {publisher !== undefined ? (
               <div className="stream-container"
               onClick={() => handleMainVideoStream(publisher)}>

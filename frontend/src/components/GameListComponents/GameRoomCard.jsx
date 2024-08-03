@@ -5,7 +5,7 @@ import axios from "axios";
 const GameRoomCard = ({ title, leader, progress, isInProgress, id , setToken}) => {
 
     const navigate = useNavigate();
-    const naviateToRoom = () => {
+    const navigateToRoom = () => {
       navigate(`/game-room/${id}`);
     }
 
@@ -26,10 +26,11 @@ const GameRoomCard = ({ title, leader, progress, isInProgress, id , setToken}) =
               {headers: {'Content-type': 'application/json'}
                 })
             .then((response) => {
+              console.log(response.data);
               setToken(response.data.token);
               console.log(response.data.token);
               console.log("Successfully Getting Token");
-              naviateToRoom();
+              navigateToRoom();
             })
             .catch((error) => {
               console.log(error);

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import axios from "axios";
 import styles from "./GamePageHeader.module.css"
 import GameSettingsModal from "../../modals/GameSettingsModal";
 
-function GamePageHeader() {
+function GamePageHeader({sessionId, token}) {
     // 게임 리스트에서 게임 방을 클릭하면 or 방장이 새롭게 게임 방을 만들면 or 방장이 방 이름을 수정하면
     // 게임 방 정보가 나한테 들어올 거임
     // 그때 코드 수정하기 지금은 임시로 설정
@@ -24,6 +24,12 @@ function GamePageHeader() {
     // 버튼을 클릭하면 게임 설정 모달이 열림
     const [ isModalOpen, setIsModalOpen ] = useState(false)
     const [ blackBackground, setBlackBackground ] = useState(false)
+
+    const navigate = useNavigate();
+
+    const navigateToList = () => {
+        navigate("/game-list");
+    }
 
     function openModal() {
         setIsModalOpen(!isModalOpen)
@@ -58,6 +64,32 @@ function GamePageHeader() {
         }
     }, [])
 
+    const leaveSession = () => {
+
+    }
+
+    const exitHandler = async (e) => {
+        e.preventDefault();
+
+        const body = {
+            "sessionNo": sessionId,
+            "token": token
+        }
+
+        console.log(sessionId, token);
+
+        await axios.post("https://i11e106.p.ssafy.io/openvidu/text-chat/api/session/leave",
+          body)
+          .then((response) => {
+              console.log("exit!")
+              navigateToList();
+          })
+          .catch((resp) => {
+              console.log(resp);
+          })
+
+    }
+
     const roomManagerSettings = <button className={styles.settings} onClick={openModal}>게임설정</button>
     return (
         <>
@@ -68,7 +100,7 @@ function GamePageHeader() {
                     </div>
                     <div className={styles.right}>
                         {roomManager ? roomManagerSettings : null}
-                            <Link to="/game-list" className={styles.exit}>
+                            <Link to="/game-list" className={styles.exit} onClick={exitHandler}>
                                 <img src="/exit.png" alt="exit.png" className={styles.exitImage}/>
                                 나가기
                             </Link>

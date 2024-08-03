@@ -13,7 +13,7 @@ function GamePage({token}) {
     return (
         <>
             <div className={styles.container}>
-                <GamePageHeader />
+                <GamePageHeader sessionId={id} token={token}/>
                 <GamePageMain sessionId={id} token={token}/>
                 <GamePageFooter />
             </div>

@@ -7,7 +7,7 @@ import styles from "./GameListPage.module.css";
 function GameListPage({setToken}) {
     return (
         <div className={styles.layout}>
-            <GLHeader />
+            <GLHeader setToken={setToken} />
             <main className={styles.main}>
                 <GLMain setToken={setToken}/>
             </main>
