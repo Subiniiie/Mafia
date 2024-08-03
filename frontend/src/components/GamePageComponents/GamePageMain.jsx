@@ -121,7 +121,7 @@ const GamePageMain = ({sessionId,token}) => {
       <>
         <div id="container" className={styles.monitors}>
             {publisher !== undefined ? (
-              <div className="stream-container"
+              <div className={styles.streamContainer}
               onClick={() => handleMainVideoStream(publisher)}>
                   <UserVideoComponent
                       streamManager={publisher}
@@ -130,7 +130,7 @@ const GamePageMain = ({sessionId,token}) => {
             ):null}
             {subscribers.map((sub,i) => (
               <div key={i}
-              className="stream-container"
+              className={styles.streamContainer}
               onClick={() => handleMainVideoStream(sub)}>
                   <UserVideoComponent streamManager={sub} />
               </div>
