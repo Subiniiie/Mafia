@@ -2,6 +2,8 @@
 const nicknameInput = document.querySelector('input[placeholder="닉네임"]');
 const sessionInput = document.querySelector('input[placeholder="세션 번호"]');
 const connectButton = document.getElementById('connectButton');
+const nightModeButton = document.getElementById('nightModeButton');
+const dayModeButton = document.getElementById('dayModeButton');
 const leaveSessionButton = document.getElementById('leaveSessionButton');
 const chatInput = document.getElementById('chatInput');
 const sendButton = document.getElementById('sendButton');
@@ -29,6 +31,36 @@ connectButton.addEventListener('click', async () => {
         console.error('세션 연결 중 오류 발생:', error);
         alert('접속 중 오류가 발생했습니다. 다시 시도해주세요.');
     }
+});
+
+nightModeButton.addEventListener('click', async () => {
+    nightModeButton.style.display = 'none';
+    dayModeButton.style.display = 'inline-block';
+
+    const sessionNo = sessionInput.value;
+
+    const response = await fetch('http://192.168.30.134:5000/text-chat/api/session/time/night', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionNo }),
+    });
+});
+
+dayModeButton.addEventListener('click', async () => {
+    dayModeButton.style.display = 'none';
+    nightModeButton.style.display = 'inline-block';
+
+    const sessionNo = sessionInput.value;
+
+    const response = await fetch('http://192.168.30.134:5000/text-chat/api/session/time/day', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionNo }),
+    });
 });
 
 // 나가기 버튼 클릭 이벤트 리스너
@@ -127,7 +159,8 @@ function sendChatMessage() {
     if (message && connectionHandler.session) {
         connectionHandler.session.signal({
             data: JSON.stringify({ userId: userId, message: message }),
-            type: 'chat'
+            type: connectionHandler.textChatMode,
+            to: connectionHandler.specificUsers
         }).then(() => {
             console.log('Message successfully sent');
             chatInput.value = '';

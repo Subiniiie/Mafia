@@ -6,6 +6,8 @@ class OpenViduConnectionHandler {
         this.parentMap = new Map();
         this.streamManagers = [];
         this.setupEventListeners();
+        this.specificUsers = [];
+        this.textChatMode = 'chat'
     }
 
     setupEventListeners() {
@@ -13,6 +15,9 @@ class OpenViduConnectionHandler {
         this.session.on('streamCreated', (event) => this.handleStreamCreated(event));
         this.session.on('sessionDisconnected', (event) => this.handleSessionDisconnected(event));
         this.session.on('signal:chat', (event) => this.handleChatSignal(event));
+        this.session.on('signal:secretChat', (event) => this.handleSecretChatSignal(event));
+        this.session.on('signal:night', (event) => this.handleNightSignal(event));
+        this.session.on('signal:day', (event) => this.handleDaySignal(event));
     }
 
     handleConnectionDestroyed(event) {
@@ -74,6 +79,73 @@ class OpenViduConnectionHandler {
         addMessageToChat(chatData.userId === userId ? 'You' : chatData.userId, chatData.message);
     }
 
+    handleSecretChatSignal(event) {
+        const chatData = JSON.parse(event.data);
+        const from = event.from.connectionId;
+
+        const fromIndex =
+            this.session.streamManagers
+                .findIndex(streamManager => streamManager.stream.connection.connectionId === from);
+
+        if (fromIndex <= 1) {
+            addMessageToChat(chatData.userId === userId ? 'You' : chatData.userId, chatData.message);
+        }
+    }
+
+    handleNightSignal(event) {
+        // 서버에서 보낸 signal이므로 event.target은 undefined 이다.
+        // 디버깅해서 확인해보니 session이 나옴. 블로그가 개구라침
+        console.log('[handleNightSignal]');
+        console.log(event.target)
+
+        this.specificUsers =
+            [this.streamManagers[0].stream.connection, this.streamManagers[1].stream.connection];
+
+        const publisherIdx =
+            this.session.streamManagers.findIndex(streamManager => !streamManager.remote);
+
+        if (publisherIdx > 1) {
+            const publisher = this.session.streamManagers[publisherIdx];
+
+            console.log(publisher);
+
+            publisher.publishVideo(false);
+            publisher.publishAudio(false);
+
+            this.session.streamManagers.forEach((streamManager) => {
+                if (streamManager.remote) {
+                    streamManager.subscribeToVideo(false);
+                    streamManager.subscribeToAudio(false);
+                }
+            })
+        }
+
+        this.textChatMode = 'secretChat';
+    }
+
+    handleDaySignal(event) {
+        console.log('[handleDaySignal]');
+        console.log(event.target)
+        
+        const publisher =
+            this.session.streamManagers.find(streamManager => !streamManager.remote);
+
+        console.log(publisher);
+
+        publisher.publishVideo(true);
+        publisher.publishAudio(true);
+
+        this.session.streamManagers.forEach((streamManager) => {
+            if (streamManager.remote) {
+                streamManager.subscribeToVideo(true);
+                streamManager.subscribeToAudio(true);
+            }
+        })
+
+        this.textChatMode = 'chat';
+        this.specificUsers = [];
+    }
+
     finalizeDisconnection(connectionId) {
         console.log('[finalizeDisconnection] disconnectedUser 배열');
         console.log(this.disconnectedUsers);
@@ -109,7 +181,7 @@ class OpenViduConnectionHandler {
             return;
         }
 
-        console.log('전시발');
+        console.log('[cleanupResources] 호출');
         console.log(this.streamManagers);
 
         this.streamManagers.splice(removeIdx, 1);
