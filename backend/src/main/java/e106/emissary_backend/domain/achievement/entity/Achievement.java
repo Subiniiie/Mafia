@@ -1,10 +1,7 @@
 package e106.emissary_backend.domain.achievement.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Data
@@ -12,10 +9,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Table(name  = "achievements")
+@ToString(exclude = "achievementUsers")
 public class Achievement {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "achieve_id")
     private Long achieveId;
 

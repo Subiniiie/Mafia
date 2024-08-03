@@ -53,11 +53,12 @@ public class JWTUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("gender", String.class);
     }
 
-    public String getBirth(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("birth", LocalDate.class).toString();
+    public LocalDate  getBirth(String token) {
+        String birthString =  Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("birth", LocalDate.class).toString();
+        return LocalDate.parse(birthString);
     }
 
-    public String createJwt(String category, Long userId, String username, String email , String gender, String birth, String role, Long expiredMs) {
+    public String createJwt(String category, Long userId, String username, String email , String gender, /*String birth,*/ String role, Long expiredMs) {
 
         return Jwts.builder()
                 .claim("category", category)
@@ -65,7 +66,7 @@ public class JWTUtil {
                 .claim("username", username)
                 .claim("email", email)
                 .claim("gender",gender)
-                .claim("birth", birth)
+//                .claim("birth", birth)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiredMs))

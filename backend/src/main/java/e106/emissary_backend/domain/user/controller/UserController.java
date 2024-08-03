@@ -58,6 +58,7 @@ public class UserController {
         int ret = userService.registerUser(request);
         if (ret > 0) {
             map.put("status", "success");
+            userService.firstHonor(request);
         } else {
             map.put("status", "fail");
         }

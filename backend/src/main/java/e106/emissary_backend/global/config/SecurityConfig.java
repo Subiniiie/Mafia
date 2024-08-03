@@ -84,9 +84,16 @@ public class SecurityConfig {
         //HTTP Basic 인증 방식 disable
         http
                 .httpBasic((auth) -> auth.disable());
+
+        //경로별 인가 작업 (/login 페이지와 루트 페이지, 회원가입페이지는 비로그인한 사람에게 접근 허용)
+        http
+                .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers("/api/login","/", "/api/user", "/api/mail", "/api/reissue", "/api/logout", "/api/oauth/token", "api/oauth/login").permitAll()
+                        .anyRequest().authenticated());
+
         //JWTFilter 추가
         http
-                .addFilterAfter(new JWTFilter(jwtUtil, "OAUTH"), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JWTFilter(jwtUtil, "OAUTH"), UsernamePasswordAuthenticationFilter.class);
         //oauth2
         http
                 .oauth2Login((oauth2) -> oauth2
@@ -95,19 +102,11 @@ public class SecurityConfig {
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
                                 .userService(oAuth2UserService))
                         .successHandler(customSuccessHandler));
-
-        //경로별 인가 작업 (/login 페이지와 루트 페이지, 회원가입페이지는 비로그인한 사람에게 접근 허용)
-        http
-                .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login","/", "/api/user", "/api/mail", "/api/reissue", "/api/login").permitAll()
-                        .anyRequest().authenticated());
-//                                .anyRequest().permitAll());
-
         http
                 .addFilterBefore(new JWTFilter(jwtUtil, "COMMON"), UsernamePasswordAuthenticationFilter.class);
 
-        http
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil,refreshRepository,accessRepository,"/api/login"), UsernamePasswordAuthenticationFilter.class);
+//        http
+//                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil,refreshRepository,accessRepository,"/api/login"), UsernamePasswordAuthenticationFilter.class);
 
         http
                 .addFilterBefore(new CustomLogoutFilter(jwtUtil, jwtService), LogoutFilter.class);
@@ -131,7 +130,7 @@ public class SecurityConfig {
         configuration.addAllowedOrigin("http://localhost:5173");
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://127.0.0.1:5500"));
 //        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

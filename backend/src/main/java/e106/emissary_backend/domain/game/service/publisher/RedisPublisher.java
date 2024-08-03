@@ -1,8 +1,7 @@
 package e106.emissary_backend.domain.game.service.publisher;
 
 import e106.emissary_backend.domain.game.entity.Game;
-import e106.emissary_backend.domain.game.service.subscriber.message.DayMessage;
-import e106.emissary_backend.domain.game.service.subscriber.message.StartVoteMessage;
+import e106.emissary_backend.domain.game.service.subscriber.message.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
@@ -19,6 +18,18 @@ public class RedisPublisher {
     }
 
     public void publish(ChannelTopic topic, StartVoteMessage message) {
+        redisTemplate.convertAndSend(topic.getTopic(), message);
+    }
+
+    public void publish(ChannelTopic topic, EndVoteMessage message) {
+        redisTemplate.convertAndSend(topic.getTopic(), message);
+    }
+
+    public void publish(ChannelTopic topic, StartConfirmMessage message) {
+        redisTemplate.convertAndSend(topic.getTopic(), message);
+    }
+
+    public void publish(ChannelTopic topic, EndConfirmMessage message) {
         redisTemplate.convertAndSend(topic.getTopic(), message);
     }
 }
