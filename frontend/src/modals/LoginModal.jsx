@@ -16,11 +16,12 @@ const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
 
     const handleLogin = async () => {
         try {
-            const formData = new FormData();
-            formData.append('username', email);
-            formData.append('password', password);
+            const body = {
+                "email": email,
+                "password": passwrod
+            }
             const response = await axios.post('https://i11e106.p.ssafy.io/api/login',
-                formData,
+                JSON.stringify(body),
                 { withCredentials: true }
             );
             console.log(response.data);
