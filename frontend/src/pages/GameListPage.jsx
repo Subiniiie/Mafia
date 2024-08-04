@@ -3,13 +3,12 @@ import GLMain from "../components/GameListComponents/GLMain";
 import GLFooter from "../components/GameListComponents/GLFooter";
 import styles from "./GameListPage.module.css";
 
-
-function GameListPage({setToken}) {
+function GameListPage({setViduToken}) {
     return (
         <div className={styles.layout}>
-            <GLHeader setToken={setToken} />
+            <GLHeader setViduToken={setViduToken} />
             <main className={styles.main}>
-                <GLMain setToken={setToken}/>
+                <GLMain setViduToken={setViduToken}/>
             </main>
             <GLFooter />
         </div>

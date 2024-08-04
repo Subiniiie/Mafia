@@ -2,7 +2,7 @@ import { Link,useNavigate } from "react-router-dom";
 import styles from "./GameRoomCard.module.css";
 import axios from "axios";
 
-const GameRoomCard = ({ title, leader, progress, isInProgress, id , setToken}) => {
+const GameRoomCard = ({ title, leader, progress, isInProgress, id , setViduToken}) => {
 
     const navigate = useNavigate();
     const navigateToRoom = () => {
@@ -27,7 +27,7 @@ const GameRoomCard = ({ title, leader, progress, isInProgress, id , setToken}) =
                 })
             .then((response) => {
               console.log(response.data);
-              setToken(response.data.token);
+              setViduToken(response.data.token);
               console.log(response.data.token);
               console.log("Successfully Getting Token");
               navigateToRoom();

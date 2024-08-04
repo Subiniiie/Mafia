@@ -90,10 +90,6 @@ const CreateRoomModal = ({ isOpen, openModal, setToken}) => {
                         도전하기
                     </button>
                 </div>
-
-                <div className="form">
-
-                </div>
             </div>
         </div>
     );

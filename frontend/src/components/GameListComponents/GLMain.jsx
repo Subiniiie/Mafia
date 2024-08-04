@@ -3,7 +3,7 @@ import styles from "./GLMain.module.css";
 import axios from "axios";
 import React, {useEffect, useState ,useRef} from "react";
 
-const GLMain = ({setToken}) => {
+const GLMain = ({setViduToken, setState}) => {
 
     const getGameList = (maxPlayer, isPublic) => {
       axios.get("https://i11e106.p.ssafy.io/api/game",{
@@ -12,6 +12,7 @@ const GLMain = ({setToken}) => {
       })
         .then(({data}) => {
           console.log(data);
+
         })
         .catch(({response}) => {
           // err
@@ -25,7 +26,7 @@ const GLMain = ({setToken}) => {
     return (
         <div className={styles.container}>
             <div className={styles.cardWrapper}>
-                <GameRoomCard id="1" title="고국으로" leader="강진" progress={7} isInProgress={false} setToken={setToken}/>
+                <GameRoomCard id="1" title="고국으로" leader="강진" progress={7} isInProgress={false} setViduToken={setViduToken}/>
             </div>
             <div className={styles.cardWrapper}>
                 <GameRoomCard id="2" title="대한의 독립을 위하여" leader="수빈" progress={6} isInProgress={false} />

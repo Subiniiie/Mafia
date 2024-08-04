@@ -4,7 +4,7 @@ import axios from "axios";
 import styles from "./GamePageHeader.module.css"
 import GameSettingsModal from "../../modals/GameSettingsModal";
 
-function GamePageHeader({sessionId, token}) {
+function GamePageHeader({leaveSession}) {
     // 게임 리스트에서 게임 방을 클릭하면 or 방장이 새롭게 게임 방을 만들면 or 방장이 방 이름을 수정하면
     // 게임 방 정보가 나한테 들어올 거임
     // 그때 코드 수정하기 지금은 임시로 설정
@@ -25,12 +25,6 @@ function GamePageHeader({sessionId, token}) {
     const [ isModalOpen, setIsModalOpen ] = useState(false)
     const [ blackBackground, setBlackBackground ] = useState(false)
 
-    const navigate = useNavigate();
-
-    const navigateToList = () => {
-        navigate("/game-list");
-    }
-
     function openModal() {
         setIsModalOpen(!isModalOpen)
         setBlackBackground((preState) => !preState)
@@ -40,55 +34,6 @@ function GamePageHeader({sessionId, token}) {
     // 방제목을 가져옴
     // 아마 response 안에 roomTitle이 있겠지??
     // 그럼 response.data.roomTitle 이런 식??
-    useEffect(() => {
-        const getGameRoom = async function() {
-            try {
-                // id는 GamePage에서 useParams로 받은 id??
-                // 그럼 얘는 GamePage에서 props로 받아야하나
-                const response = await axios.get(`https://i11e106.p.ssafy.io/api/options/rooms/${roomId}`, {
-                    headers: {
-                        Authorization: `Bearer $access token`
-                    },
-                    params: {
-                        //  어케 씀?
-                        id: id,
-                    }
-                })
-                // response 안에 어떤 식으로 되어 있는지 알기
-                console.log(response.data)
-                return response.data
-            } catch (error) {
-                console.log(error)
-                throw error
-            }
-        }
-    }, [])
-
-    const leaveSession = () => {
-
-    }
-
-    const exitHandler = async (e) => {
-        e.preventDefault();
-
-        const body = {
-            "sessionNo": sessionId,
-            "token": token
-        }
-
-        console.log(sessionId, token);
-
-        await axios.post("https://i11e106.p.ssafy.io/openvidu/text-chat/api/session/leave",
-          body)
-          .then((response) => {
-              console.log("exit!")
-              navigateToList();
-          })
-          .catch((resp) => {
-              console.log(resp);
-          })
-
-    }
 
     const roomManagerSettings = <button className={styles.settings} onClick={openModal}>게임설정</button>
     return (
@@ -100,7 +45,7 @@ function GamePageHeader({sessionId, token}) {
                     </div>
                     <div className={styles.right}>
                         {roomManager ? roomManagerSettings : null}
-                            <Link to="/game-list" className={styles.exit} onClick={exitHandler}>
+                            <Link to="/game-list" className={styles.exit} onClick={leaveSession}>
                                 <img src="/exit.png" alt="exit.png" className={styles.exitImage}/>
                                 나가기
                             </Link>
