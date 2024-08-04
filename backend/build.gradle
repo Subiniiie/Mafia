@@ -26,6 +26,7 @@ repositories {
 dependencies {
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation group: 'org.redisson', name: 'redisson-spring-boot-starter', version: '3.34.1'
     // Jwt
     // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api
     implementation 'io.jsonwebtoken:jjwt-api:0.12.5'

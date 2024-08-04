@@ -6,6 +6,9 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import e106.emissary_backend.domain.game.entity.Game;
 import e106.emissary_backend.domain.game.service.subscriber.*;
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -24,6 +27,16 @@ import java.util.HashMap;
 
 @Configuration
 public class RedisConfig {
+
+    private static final String REDISSON_HOST_PREFIX = "redis://";
+
+    @Bean
+    public RedissonClient redissonClient(){
+        Config config = new Config();
+        config.useSingleServer()
+                .setAddress(REDISSON_HOST_PREFIX + "localhost:6379");
+        return Redisson.create(config);
+    }
 
     @Bean
     public RedisMessageListenerContainer redisMessageListener(RedisConnectionFactory connectionFactory) {

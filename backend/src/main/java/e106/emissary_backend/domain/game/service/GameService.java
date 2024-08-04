@@ -1,6 +1,7 @@
 package e106.emissary_backend.domain.game.service;
 
 import e106.emissary_backend.domain.game.GameConstant;
+import e106.emissary_backend.domain.game.aspect.RedissonLock;
 import e106.emissary_backend.domain.game.entity.Game;
 import e106.emissary_backend.domain.game.enumType.GameRole;
 import e106.emissary_backend.domain.game.enumType.GameState;
