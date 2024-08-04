@@ -20,220 +20,174 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequestMapping("/text-chat/api")
 public class TextChatAppController {
 
+    private static final String SESSION_NO = "sessionNo";
+    private static final String USER_ID = "userId";
+    private static final String TOKEN = "token";
+    private static final String SESSION_ID = "sessionId";
+
     private final OpenVidu openVidu;
     private final WebClient webClient;
+    private final String openviduUrl;
+    private final String openviduSecret;
 
-    private final String OPENVIDU_URL;
-    private final String OPENVIDU_SECRET;
-
-    // <sessionNo, Session>
     private final Map<String, Session> mapSessions = new ConcurrentHashMap<>();
-    // <sessionId, <token, role>>
     private final Map<String, Map<String, SessionRole>> mapSessionNamesTokens = new ConcurrentHashMap<>();
 
-    public TextChatAppController(@Value("${OPENVIDU_URL}") String OPENVIDU_URL,
-                                 @Value("${OPENVIDU_SECRET}") String OPENVIDU_SECRET) {
-        this.openVidu = new OpenVidu(OPENVIDU_URL, OPENVIDU_SECRET);
-        this.webClient = WebClient.builder().baseUrl(OPENVIDU_URL).build();
-        this.OPENVIDU_URL = OPENVIDU_URL;
-        this.OPENVIDU_SECRET = OPENVIDU_SECRET;
+    public TextChatAppController(@Value("${OPENVIDU_URL}") String openviduUrl,
+                                 @Value("${OPENVIDU_SECRET}") String openviduSecret) {
+        this.openVidu = new OpenVidu(openviduUrl, openviduSecret);
+        this.webClient = WebClient.builder().baseUrl(openviduUrl).build();
+        this.openviduUrl = openviduUrl;
+        this.openviduSecret = openviduSecret;
     }
 
-    // params => { 'sessionId':'~', 'userId':'~' }
     @PostMapping("/session/join")
     public ResponseEntity<JsonObject> joinSession(@RequestBody Map<String, Object> params) {
-        String sessionNo = params.get("sessionNo").toString();
-        String userId = params.get("userId").toString();
+        String sessionNo = params.get(SESSION_NO).toString();
+        String userId = params.get(USER_ID).toString();
 
-        System.out.println("[/get-token] 토큰 발급: sessionId=" + sessionNo + ", userId=" + userId);
+        System.out.println("[/get-token] 토큰 발급: sessionNo=" + sessionNo + ", userId=" + userId);
 
-        boolean isSessionAlreadyExisting = mapSessions.containsKey(sessionNo);
-        SessionRole role = null;
+        SessionRole role = mapSessions.containsKey(sessionNo) ? SessionRole.USER : SessionRole.HOST;
+        System.out.println("[/get-token] " + (role == SessionRole.HOST ? "새로운 세션 " : "세션 ") + sessionNo + (role == SessionRole.HOST ? "을 생성합니다. 방장으로 접속합니다." : "이 이미 존재합니다. 유저로 접속합니다."));
 
-        if (isSessionAlreadyExisting) {
-            System.out.println("[/get-token] 세션 " + sessionNo + "이 이미 존재합니다. 유저로 접속합니다.");
-            role = SessionRole.USER;
-        } else {
-            System.out.println("[/get-token] 새로운 세션 " + sessionNo + "을 생성합니다. 방장으로 접속합니다.");
-            role = SessionRole.HOST;
-        }
-
-        ConnectionProperties connectionProperties = new ConnectionProperties.Builder().type(ConnectionType.WEBRTC)
-                .role(OpenViduRole.PUBLISHER).data(userId).build();
-
-        JsonObject json = new JsonObject();
-
-        if (isSessionAlreadyExisting) {
-            try {
-                Session session = mapSessions.get(sessionNo);
-                String token = session.createConnection(connectionProperties).getToken();
-
-                // Update our collection storing the new token
-                this.mapSessionNamesTokens.get(session.getSessionId()).put(token, role);
-
-                json.addProperty("token", token);
-
-                // Return the response to the client
-                return ResponseEntity.ok(json);
-            } catch (OpenViduJavaClientException e1) {
-                // If internal error generate an error message and return it to client
-                return getErrorResponse(e1);
-            } catch (OpenViduHttpException e2) {
-                if (404 == e2.getStatus()) {
-                    // Invalid sessionId (user left unexpectedly). Session object is not valid
-                    // anymore. Clean collections and continue as new session
-                    this.mapSessionNamesTokens.remove(sessionNo);
-                }
-            }
-        }
+        ConnectionProperties connectionProperties = createConnectionProperties(userId);
 
         try {
-            // Create a new OpenVidu Session
-            Session session = this.openVidu.createSession();
-
-            mapSessions.put(sessionNo, session);
-            // Generate a new token with the recently created connectionProperties
+            Session session = getOrCreateSession(sessionNo);
             String token = session.createConnection(connectionProperties).getToken();
+            updateSessionTokens(session.getSessionId(), token, role);
 
-            // Store the session and the token in our collections
-            this.mapSessionNamesTokens.put(session.getSessionId(), new ConcurrentHashMap<>());
-            this.mapSessionNamesTokens.get(session.getSessionId()).put(token, role);
-
-            // Prepare the response with the sessionId and the token
-            json.addProperty("token", token);
-
-            // Return the response to the client
-            return ResponseEntity.ok(json);
-        } catch (Exception e) {
-            // If error generate an error message and return it to client
-            return getErrorResponse(e);
+            JsonObject response = new JsonObject();
+            response.addProperty(TOKEN, token);
+            return ResponseEntity.ok(response);
+        } catch (OpenViduJavaClientException | OpenViduHttpException e) {
+            return handleOpenViduException(e, sessionNo);
         }
     }
 
     @PostMapping("/users/session-roles")
     public ResponseEntity<JsonObject> getSessionRoles(@RequestBody Map<String, Object> params) {
-        String sessionId = params.get("sessionId").toString();
-        String token = params.get("token").toString();
+        String sessionId = params.get(SESSION_ID).toString();
+        String token = params.get(TOKEN).toString();
 
         SessionRole role = mapSessionNamesTokens.get(sessionId).get(token);
 
-        JsonObject json = new JsonObject();
-        json.addProperty("role", role.name());
+        JsonObject response = new JsonObject();
+        response.addProperty("role", role.name());
 
-        return ResponseEntity.ok(json);
+        return ResponseEntity.ok(response);
     }
 
-
-    // 유저가 세션에서 나가고 서버에 요청을 하면
-    // mapSessions와 mapSessionNamesTokens을 업데이트 하고
-    // 만약 나간 유저가 방장이고 유저가 남아있을 경우, creationTime이 가장 작은 사람에게 방장 권한을 넘겨주고
-    // 유저가 남아있지 않은 경우, 세션을 제거한다
     @PostMapping("/session/leave")
-    public ResponseEntity<JsonObject> leaveSession(@RequestBody Map<String, Object> params)
-            throws OpenViduJavaClientException, OpenViduHttpException {
-        String sessionNo = params.get("sessionNo").toString();
-        String token = params.get("token").toString();
+    public ResponseEntity<JsonObject> leaveSession(@RequestBody Map<String, Object> params) {
+        String sessionNo = params.get(SESSION_NO).toString();
+        String token = params.get(TOKEN).toString();
 
-        // 세션 찾기
         Session session = mapSessions.get(sessionNo);
 
-        JsonObject json = new JsonObject();
-
         if (session == null) {
-            json.addProperty("error", "Session does not exist");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(json);
+            return createErrorResponse("Session does not exist", HttpStatus.NOT_FOUND);
         }
 
         mapSessionNamesTokens.get(sessionNo).remove(token);
 
         if (session.getConnections().isEmpty()) {
-            mapSessions.remove(session.getSessionId());
-            mapSessionNamesTokens.remove(session.getSessionId());
-            session.close();
+            removeSession(session);
         }
 
-        json.addProperty("response", "세션을 성공적으로 떠났습니다");
-
-        return ResponseEntity.ok(json);
+        return createSuccessResponse("세션을 성공적으로 떠났습니다");
     }
 
     @PostMapping("/session/time/night")
     public ResponseEntity<JsonObject> changeTimeToNight(@RequestBody Map<String, Object> params) {
-        String sessionNo = params.get("sessionNo").toString();
-        Session session = mapSessions.get(sessionNo);
-
-        String sessionId = session.getSessionId();
-        String type = "signal:night";
-        String body = "It's night";
-
-        Mono<String> sendRes = sendSignalToSession(sessionId, type, body);
-        sendRes.block();
-
-        JsonObject json = new JsonObject();
-        json.addProperty("result", "success");
-
-        return ResponseEntity.ok(json);
+        return changeTime(params, "signal:night", "It's night");
     }
 
     @PostMapping("/session/time/day")
     public ResponseEntity<JsonObject> changeTimeToDay(@RequestBody Map<String, Object> params) {
-        String sessionNo = params.get("sessionNo").toString();
+        return changeTime(params, "signal:day", "It's day");
+    }
+
+    @PostMapping("/session/change-owner")
+    public ResponseEntity<JsonObject> changeSessionOwner(@RequestBody Map<String, Object> params) {
+        String sessionNo = params.get(SESSION_NO).toString();
         Session session = mapSessions.get(sessionNo);
 
-        String sessionId = session.getSessionId();
-        String type = "signal:day";
-        String body = "It's day";
+        try {
+            session.fetch();
+            Connection nextOwner = session.getActiveConnections().stream()
+                    .min((a, b) -> Long.compare(a.createdAt(), b.createdAt()))
+                    .orElseThrow(() -> new IllegalStateException("No active connections found"));
 
-        Mono<String> sendRes = sendSignalToSession(sessionId, type, body);
+            // Note: updateConnection is a pro version feature
+            // ConnectionProperties nextOwnerCP = new ConnectionProperties.Builder().role(OpenViduRole.MODERATOR).build();
+            // session.updateConnection(nextOwner.getConnectionId(), nextOwnerCP);
+
+            return createSuccessResponse("방장이 성공적으로 변경되었습니다");
+        } catch (OpenViduJavaClientException | OpenViduHttpException e) {
+            return handleOpenViduException(e, sessionNo);
+        }
+    }
+
+    private ConnectionProperties createConnectionProperties(String userId) {
+        return new ConnectionProperties.Builder()
+                .type(ConnectionType.WEBRTC)
+                .role(OpenViduRole.PUBLISHER)
+                .data(userId)
+                .build();
+    }
+
+    private Session getOrCreateSession(String sessionNo) throws OpenViduJavaClientException, OpenViduHttpException {
+        Session session = mapSessions.get(sessionNo);
+        if (session == null) {
+            session = openVidu.createSession();
+            mapSessions.put(sessionNo, session);
+            mapSessionNamesTokens.put(session.getSessionId(), new ConcurrentHashMap<>());
+        }
+        return session;
+    }
+
+    private void updateSessionTokens(String sessionId, String token, SessionRole role) {
+        mapSessionNamesTokens.get(sessionId).put(token, role);
+    }
+
+    private ResponseEntity<JsonObject> handleOpenViduException(Exception e, String sessionNo) {
+        if (e instanceof OpenViduHttpException && ((OpenViduHttpException) e).getStatus() == 404) {
+            mapSessionNamesTokens.remove(sessionNo);
+        }
+        return getErrorResponse(e);
+    }
+
+    private void removeSession(Session session) {
+        try {
+            session.close();
+            mapSessions.remove(session.getSessionId());
+            mapSessionNamesTokens.remove(session.getSessionId());
+        } catch (OpenViduJavaClientException | OpenViduHttpException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private ResponseEntity<JsonObject> changeTime(Map<String, Object> params, String type, String body) {
+        String sessionNo = params.get(SESSION_NO).toString();
+        Session session = mapSessions.get(sessionNo);
+
+        Mono<String> sendRes = sendSignalToSession(session.getSessionId(), type, body);
         sendRes.block();
 
-        JsonObject json = new JsonObject();
-        json.addProperty("result", "success");
-
-        return ResponseEntity.ok(json);
+        return createSuccessResponse("success");
     }
 
-    // TODO: 코드 갈아엎고 다시 짜야함
-    @PostMapping("/session/change-owner")
-    public ResponseEntity<JsonObject> changeSessionOwner(@RequestBody Map<String, Object> params) throws OpenViduJavaClientException, OpenViduHttpException {
-        String sessionNo = params.get("sessionNo").toString();
-        Session session = mapSessions.get(sessionNo);
+    private Mono<String> sendSignalToSession(String sessionId, String type, String data) {
+        String url = openviduUrl + "/openvidu/api/signal";
+        String authHeader = "Basic " + Base64.getEncoder().encodeToString(("OPENVIDUAPP:" + openviduSecret).getBytes());
 
-        session.fetch();
-        Connection nextOwner =
-                session.getActiveConnections()
-                        .stream()
-                        .min((a, b) -> Long.compare(a.createdAt(), b.createdAt()))
-                        .get();
-
-        ConnectionProperties nextOwnerCP = new ConnectionProperties.Builder().role(OpenViduRole.MODERATOR).build();
-
-        // updateConnection => pro 버전 기능이다
-        // session.updateConnection(nextOwner.getConnectionId(), nextOwnerCP);
-
-        JsonObject json = new JsonObject();
-        json.addProperty("response", "방장이 성공적으로 변경되었습니다");
-
-        return ResponseEntity.ok(json);
-    }
-
-    public void closeSession(Session session) throws OpenViduJavaClientException, OpenViduHttpException {
-        session.close();
-    }
-
-    public Mono<String> sendSignalToSession(String sessionId, String type, String data) {
-        String url = OPENVIDU_URL + "/openvidu/api/signal";
-
-        // Basic 인증 헤더 생성
-        String auth = "OPENVIDUAPP:" + OPENVIDU_SECRET;
-        String authHeader = "Basic " + Base64.getEncoder().encodeToString(auth.getBytes());
-
-        // 요청 본문 설정
         Map<String, Object> body = new HashMap<>();
         body.put("session", sessionId);
         body.put("type", type);
         body.put("data", data);
-        body.put("to", Collections.emptyList());  // 모든 참가자에게 전송
+        body.put("to", Collections.emptyList());
 
         return webClient.post()
                 .uri(url)
@@ -246,11 +200,23 @@ public class TextChatAppController {
                 .doOnError(error -> System.err.println("Failed to send signal: " + error.getMessage()));
     }
 
-    public ResponseEntity<JsonObject> getErrorResponse(Exception e) {
+    private ResponseEntity<JsonObject> getErrorResponse(Exception e) {
         JsonObject json = new JsonObject();
-        json.addProperty("cause", e.getCause().toString());
+        json.addProperty("cause", e.getCause() != null ? e.getCause().toString() : "Unknown");
         json.addProperty("error", e.getMessage());
         json.addProperty("exception", e.getClass().getCanonicalName());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(json);
+    }
+
+    private ResponseEntity<JsonObject> createErrorResponse(String message, HttpStatus status) {
+        JsonObject json = new JsonObject();
+        json.addProperty("error", message);
+        return ResponseEntity.status(status).body(json);
+    }
+
+    private ResponseEntity<JsonObject> createSuccessResponse(String message) {
+        JsonObject json = new JsonObject();
+        json.addProperty("response", message);
+        return ResponseEntity.ok(json);
     }
 }
