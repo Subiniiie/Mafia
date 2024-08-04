@@ -1,0 +1,36 @@
+.monitor {
+    width: 360px;
+    height: 220px;
+    border: 1px solid white;
+    box-sizing: border-box;
+    min-width: 200px;
+    margin-left: 5px;
+    padding: 10px;
+}
+
+.monitorHeader {
+    display: flex;
+    justify-content: space-between;
+}
+
+.voteBtnGreen, .voteBtnRed {
+    width: 5px;
+    height: 50px;
+    border : 6px solid grey;
+    border-radius: 50%;
+}
+
+.voteBtnGreen {
+    background-color: rgb(0, 100, 0);
+}
+
+.voteBtnRed {
+    background-color: rgb(139, 0, 0);
+}
+
+.voiceBtn {
+    width: 25px;
+    height: 25px;
+    margin-top: 120px;
+    cursor: pointer;
+}

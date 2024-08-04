@@ -1,28 +1,25 @@
-// const SearchBar = () => {
-
-//     return (
-//         <>
-//             <p>SearchBar</p>
-//         </>
-//     )
-// }
-
-const SearchBar = ({placeholder}) => {
+import styles from "./SearchBar.module.css"
+import SearchButton from "../assets/Buttons/SearchButton.png"
+const SearchBar = ({ placeholder }) => {
 
     return (
-        <form
-            className="border border-solid border-gray-300 rounded-lg w-[300px] h-[35px] flex items-center"
-        >
-            <input
-                required
-                type="text"
-                placeholder={placeholder}
-                className="border-none w-[90%] pl-2"
-            />
-            <button className="w-[10%]">
-                찾기
-            </button>
-        </form>
+        <div>
+            <form className={styles.searchBarContainer}>
+                <div className={styles.inputUnderline}>
+                    <input
+                        required
+                        type="text"
+                        placeholder={placeholder}
+                        className={styles.searchBarInput}
+                    />
+                </div>
+
+                {/* <button className="w-[10%]">
+                    찾기
+                </button> */}
+                <img src={SearchButton} alt="SearchButton" className={styles.searchButton} />
+            </form>
+        </div>
     )
 }
 

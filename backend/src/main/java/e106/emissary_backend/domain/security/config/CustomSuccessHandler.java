@@ -12,16 +12,19 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -49,8 +52,8 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
-        String access = jwtUtil.createJwt("Access", userId, username, email, gender, birth, role, 600000L);
-        String refresh = jwtUtil.createJwt("Refresh", userId, username, email, gender, birth, role, 86400000L);
+        String access = jwtUtil.createJwt("Access", userId, username, email, gender,/* birth,*/ role, 600000L);
+        String refresh = jwtUtil.createJwt("Refresh", userId, username, email, gender,/* birth,*/ role, 86400000L);
 
         addAccess(username, access, 600000L);
         addRefresh(username, refresh, 86400000L);
@@ -58,7 +61,13 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         response.addCookie(createCookie("Access",access));
         response.addCookie(createCookie("Refresh",refresh));
 
-        //response.sendRedirect("http://localhost:3000/"); // 여기
+        String redirectUrl = UriComponentsBuilder.fromUriString("/api/oauth/token")
+                                .queryParam("Access", access)
+                                .queryParam("Refresh", refresh)
+                                        .build().toUriString();
+
+
+        response.sendRedirect(redirectUrl); // 여기
         response.setStatus(HttpStatus.OK.value());
     }
 

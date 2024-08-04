@@ -46,5 +46,5 @@ public class CustomUserDetails implements UserDetails {
 
     public String getGender() { return user.getGender(); }
 
-    public String getBirth() { return user.getBirth().toString(); }
+//    public String getBirth() { return user.getBirth().toString(); }
 }
