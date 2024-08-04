@@ -22,7 +22,7 @@ const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
             }
             const response = await axios.post('https://i11e106.p.ssafy.io/api/login',
                 JSON.stringify(body),
-                { withCredentials: true }
+                // { withCredentials: true }
             );
             console.log(response.data);
             // 로그인 성공 시 처리 로직
