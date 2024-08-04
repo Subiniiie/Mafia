@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class SchedulerService {
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(20);
     private final Map<Long, Map<String, ScheduledFuture<?>>> gameTasks = new ConcurrentHashMap<>();
 
     public ScheduledFuture<?> scheduleTask(Long gameId, String taskName, Runnable task, long delay, TimeUnit timeUnit) {

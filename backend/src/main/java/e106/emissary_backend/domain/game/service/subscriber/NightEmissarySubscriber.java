@@ -3,25 +3,26 @@ package e106.emissary_backend.domain.game.service.subscriber;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import e106.emissary_backend.domain.game.enumType.GameState;
-import e106.emissary_backend.domain.game.service.subscriber.message.EndVoteMessage;
+import e106.emissary_backend.domain.game.service.subscriber.message.NightEmissaryMessage;
 import e106.emissary_backend.domain.game.service.subscriber.message.StartVoteMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-public class EndVoteSubscriber {
+public class NightEmissarySubscriber {
+
     private final ObjectMapper objectMapper;
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     public void sendMessage(String message){
         try {
-            // 지금 endVoteMessage
-            EndVoteMessage endVoteMessage = objectMapper.readValue(message, EndVoteMessage.class);
-            // Message를 통으로 내려보내자? or 결과만 꺼내서 내려보내자
+            NightEmissaryMessage nightEmissaryMessage = objectMapper.readValue(message, NightEmissaryMessage.class);
 
-            simpMessagingTemplate.convertAndSend("/sub/" + endVoteMessage.getGameId(), endVoteMessage);
+            simpMessagingTemplate.convertAndSend("/sub/" + nightEmissaryMessage.getGameId(), nightEmissaryMessage.getResult());
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
