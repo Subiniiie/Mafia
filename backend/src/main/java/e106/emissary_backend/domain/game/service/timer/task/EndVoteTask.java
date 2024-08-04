@@ -1,6 +1,7 @@
 package e106.emissary_backend.domain.game.service.timer.task;
 
 import e106.emissary_backend.domain.game.GameConstant;
+import e106.emissary_backend.domain.game.aspect.RedissonLock;
 import e106.emissary_backend.domain.game.entity.Game;
 import e106.emissary_backend.domain.game.enumType.GameState;
 import e106.emissary_backend.domain.game.enumType.VoteState;
@@ -46,6 +47,7 @@ public class EndVoteTask implements GameTask {
         execute(gameId);
     }
 
+    @RedissonLock(value = "#gameId")
     @Override
     public void execute(Long gameId) {
         log.info("EndVoteTask Started : {}", LocalDateTime.now());

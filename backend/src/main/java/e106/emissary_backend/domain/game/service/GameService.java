@@ -58,10 +58,12 @@ public class GameService {
     private final ChannelTopic nightPoliceTopic;
     private final EndConfirmTask endConfirmTask;
 
+    @RedissonLock(value = "#gameId")
     public void update(GameDTO gameDTO){
         Game game = gameDTO.toDao();
         redisKeyValueTemplate.update(game);
     } // end of update
+
 
     public GameResponseDTO findGameById(Long roomId) {
         Game game = redisGameRepository.findByGameId(roomId).orElseThrow(
@@ -106,6 +108,7 @@ public class GameService {
         room.changeState(RoomState.STARTED);
     } // end of startGame
 
+    @RedissonLock(value = "#gameId")
     public void startVote(long gameId, long userId, long targetId) {
         Map<Long, Player> playerMap = getAlivePlayerMap(gameId);
 
@@ -126,6 +129,7 @@ public class GameService {
         }
     } // end of startVote
 
+    @RedissonLock(value = "#gameId")
     private Map<Long, Player> getAlivePlayerMap(long gameId) {
         Game game = redisGameRepository.findById(gameId).orElseThrow(
                 () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
@@ -138,6 +142,7 @@ public class GameService {
         return playerMap;
     } // end of getPlayerMap
 
+    @RedissonLock(value = "#gameId")
     public HashMap<Long, Integer> getVoteMapFromRedis(String voteKey) {
         HashMap<Long, Integer> voteMap = voteRedisTemplate.opsForValue().get(voteKey);
         if (voteMap == null) {
@@ -164,6 +169,7 @@ public class GameService {
         voteRedisTemplate.delete(voteKey);
     } // end of endVote
 
+    @RedissonLock(value = "#gameId")
     public void startConfirm(Long gameId, long userId, boolean confirm) {
         Map<Long, Player> playerMap = getAlivePlayerMap(gameId);
 
@@ -198,6 +204,7 @@ public class GameService {
     /**
      제거하는 로직
      */
+    @RedissonLock(value = "#gameId")
     public void removeUser(Long gameId, Long targetId) {
         Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
                 () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
@@ -211,6 +218,7 @@ public class GameService {
         update(gameDTO);
     }
 
+    @RedissonLock(value = "#gameId")
     public void kill(Long gameId, Long targetId) {
         Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
                 () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
@@ -280,6 +288,7 @@ public class GameService {
                         .build());
     }
 
+    @RedissonLock(value = "#gameId")
     public void detect(Long gameId, Long targetId) {
         Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
                 () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
@@ -297,6 +306,7 @@ public class GameService {
         publisher.publish(nightPoliceTopic, nightPoliceMessage);
     }
 
+    @RedissonLock(value = "#gameId")
     public void day(Long gameId) {
         Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
                 () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
