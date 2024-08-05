@@ -57,13 +57,19 @@ const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
         console.log("나 로그아웃 버튼 눌렀어")
         try {
             console.log("try 들어왔어")
+            const token = localStorage.getItem('token')
+            console.log(token)
             // 로그아웃 API 요청
             await axios.post('https://i11e106.p.ssafy.io/api/logout', {}, {
-                withCredentials: true,
+                // headers: {
+                //     Authorization: `Bearer ${token}`
+                // },
+
+                // withCredentials: true,
             })
             // 로그아웃 성공 시 처리 로직
             localStorage.removeItem('token') // 로컬 스토리지에서 토큰 삭제
-            onLoginSuccess('') // 상위 컴포넌트에 로그아웃 알림
+            // onLoginSuccess('') // 상위 컴포넌트에 로그아웃 알림
         } catch (error) {
             console.log("catch 들어왔어")
             console.error("Logout failed:", error.response ? error.response.data : error.message)
