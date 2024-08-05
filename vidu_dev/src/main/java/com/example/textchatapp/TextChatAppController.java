@@ -24,12 +24,15 @@ public class TextChatAppController {
     private static final String USER_ID = "userId";
     private static final String TOKEN = "token";
     private static final String SESSION_ID = "sessionId";
+    private static final String CONNECTION_ID = "connectionId";
 
     private final OpenVidu openVidu;
     private final WebClient webClient;
     private final String openviduUrl;
     private final String openviduSecret;
 
+    // <sessionNo, session>
+    // <sessionId, <token, role>>
     private final Map<String, Session> mapSessions = new ConcurrentHashMap<>();
     private final Map<String, Map<String, SessionRole>> mapSessionNamesTokens = new ConcurrentHashMap<>();
 
@@ -55,6 +58,7 @@ public class TextChatAppController {
 
         try {
             Session session = getOrCreateSession(sessionNo);
+            session.fetch();
             String token = session.createConnection(connectionProperties).getToken();
             updateSessionTokens(session.getSessionId(), token, role);
 
@@ -80,7 +84,7 @@ public class TextChatAppController {
     }
 
     @PostMapping("/session/leave")
-    public ResponseEntity<JsonObject> leaveSession(@RequestBody Map<String, Object> params) {
+    public ResponseEntity<JsonObject> leaveSession(@RequestBody Map<String, Object> params) throws OpenViduJavaClientException, OpenViduHttpException {
         String sessionNo = params.get(SESSION_NO).toString();
         String token = params.get(TOKEN).toString();
 
@@ -90,10 +94,11 @@ public class TextChatAppController {
             return createErrorResponse("Session does not exist", HttpStatus.NOT_FOUND);
         }
 
-        mapSessionNamesTokens.get(sessionNo).remove(token);
+        Map<String, SessionRole> users = mapSessionNamesTokens.get(session.getSessionId());
+        users.remove(token);
 
-        if (session.getConnections().isEmpty()) {
-            removeSession(session);
+        if (users.isEmpty()) {
+            removeSession(sessionNo, session);
         }
 
         return createSuccessResponse("세션을 성공적으로 떠났습니다");
@@ -107,6 +112,24 @@ public class TextChatAppController {
     @PostMapping("/session/time/day")
     public ResponseEntity<JsonObject> changeTimeToDay(@RequestBody Map<String, Object> params) {
         return changeTime(params, "signal:day", "It's day");
+    }
+
+    @PostMapping("/session/kick")
+    public ResponseEntity<JsonObject> kickUser(@RequestBody Map<String, Object> params) throws OpenViduJavaClientException, OpenViduHttpException {
+        String sessionNo = params.get(SESSION_NO).toString();
+        String token = params.get(TOKEN).toString();
+        String connectionId = params.get(CONNECTION_ID).toString();
+
+        Session session = mapSessions.get(sessionNo);
+        SessionRole role = mapSessionNamesTokens.get(session.getSessionId()).get(token);
+
+        // TODO: 강퇴 요청을 한 사람이 방장이 아닐 경우 처리
+        if (role != SessionRole.HOST) {
+
+        }
+
+        session.forceDisconnect(connectionId);
+        return createSuccessResponse("connectionId " + connectionId + "를 강퇴하였습니다.");
     }
 
     @PostMapping("/session/change-owner")
@@ -156,15 +179,16 @@ public class TextChatAppController {
         if (e instanceof OpenViduHttpException && ((OpenViduHttpException) e).getStatus() == 404) {
             mapSessionNamesTokens.remove(sessionNo);
         }
+        System.err.println(e.getMessage());
+        e.printStackTrace();
         return getErrorResponse(e);
     }
 
-    private void removeSession(Session session) {
+    private void removeSession(String sessionNo, Session session) {
         try {
-            session.close();
-            mapSessions.remove(session.getSessionId());
+            mapSessions.remove(sessionNo);
             mapSessionNamesTokens.remove(session.getSessionId());
-        } catch (OpenViduJavaClientException | OpenViduHttpException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

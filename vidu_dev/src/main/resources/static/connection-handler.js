@@ -31,7 +31,11 @@ class OpenViduConnectionHandler {
 
     handleSessionDisconnected(event) {
         console.log('Session disconnected:', event.reason);
-        this.cleanupResources('publisher', event.target.connection);
+        // this.cleanupResources('publisher', event.target.connection);
+        if (event.reason === 'forceDisconnectByServer') {
+            this.callbacks.notifyLeaveSession();
+            location.reload();
+        }
     }
 
     handleStreamCreated(event) {
