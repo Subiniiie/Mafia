@@ -43,14 +43,16 @@ function App() {
   }, [])
 
   const refreshToken = async (accessToken, refreshToken) => {
-
     try {
       console.log('refresh 해볼게용')
+      console.log('access :', accessToken)
+      console.log('refresh :', refreshToken)
       const response = await axios.post('https://i11e106.p.ssafy.io/api/reissue', {}, {
-        // headers: {
-        //   // "Authorization": `Bearer ${refreshToken}`,
-        //   "Cookie": `Access=${accessToken}; Refresh=${refreshToken}`,
-        // },
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          'X-Access-Token': refreshToken
+          // "Cookie": `Access=${accessToken}; Refresh=${refreshToken}`,
+        },
         withCredentials: true // 필요 시 추가: 이 옵션을 추가하면 쿠키가 포함된 요청을 서버로 보낼 수 있음
       })
       console.log('새로운 response.data 출력해볼게 :', response.data)
@@ -67,7 +69,6 @@ function App() {
     }
   }
 
-
   const handleLoginSuccess = (username) => {
     setIsLoggedIn(true)
     setName(username)
@@ -78,7 +79,6 @@ function App() {
     // <BrowserRouter>
     <>
       <Navbar isLoggedIn={isLoggedIn} name={name} onLoginSuccess={handleLoginSuccess} />
-      {/* <Navbar isLoggedIn={isLoggedIn} name={name} /> */}
 
       <Routes>
         <Route path='/' element={<MainPage />}></Route>
