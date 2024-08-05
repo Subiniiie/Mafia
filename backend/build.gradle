@@ -24,6 +24,8 @@ repositories {
 }
 
 dependencies {
+    //openvidu
+    implementation 'io.openvidu:openvidu-java-client:2.30.0'
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation group: 'org.redisson', name: 'redisson-spring-boot-starter', version: '3.34.1'
@@ -33,6 +35,8 @@ dependencies {
     // websocket
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation group: 'org.webjars', name: 'sockjs-client', version: '1.5.1'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    testImplementation 'io.projectreactor:reactor-test'
     // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-impl
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
     // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-jackson
