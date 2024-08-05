@@ -1,4 +1,5 @@
 import React, {useState} from "react";
+import styles from "./GameChatInput.module.css"
 
 function GameChatInput({ onChatSubmit }) {
     const [ enteredChat, setEnteredChat ] = useState('')
@@ -16,14 +17,12 @@ function GameChatInput({ onChatSubmit }) {
     return (
         <>
             <form onSubmit={submitHandle}>
-                    <div>
-                        <label>채팅창</label>
+                    <div className={styles.main}>
                         <input 
                             type="text" 
                             value={enteredChat}
                             onChange={enteredChatHandle}
                             placeholder="채팅을 입력하세요."
-                            style={{ width: "600px" }}
                             >
                         </input>
                         <button type="submit">보내기</button>

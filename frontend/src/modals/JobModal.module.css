@@ -9,6 +9,7 @@
     width: 320px; 
     height: 390px;
     perspective: 800px; 
+    z-index: 100;
 }
 
 .content {
@@ -17,6 +18,8 @@
     height: 100%;
     transition: transform 1s;
     transform-style: preserve-3d;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+    border-radius: 10px;
 }
 
 .modals:hover .content {
@@ -25,20 +28,43 @@
 
 .front, .back {
     position: absolute;
-    width: 320px;
-    height: 390px;
-    color: black;
+    width: 100%;
+    height: 100%;
+    color: #6D6D6D; ;
     border: 1px solid black;
     border-radius: 10px;
-    background-color: #fafafa;
+    background: rgba(34, 15, 15, 0.5);
     backface-visibility: hidden;
+
 }
 
 .front {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     z-index: 2;
+}
+
+.front img {
+    width: 230px;
+    height: 230px;
 }
 
 .back {
     transform: rotateY(180deg);
     z-index: 1;
+}
+
+.backContent {
+    font-family: 'KimjungchulMyungjo-Bold';
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+    margin-left: 20px;
+    margin-right: 20px;
+    white-space: pre-wrap;
+
+
 }
