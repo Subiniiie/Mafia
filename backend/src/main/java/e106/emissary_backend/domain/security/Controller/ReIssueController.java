@@ -36,34 +36,56 @@ public class ReIssueController {
         System.out.println("[REISSUE] - IN ");
         String refresh = null;
         String access = null;
-        Cookie[] cookies = request.getCookies();
-        for(Cookie cookie : cookies) {
-            if(cookie.getName().equals("Refresh")) {
-                refresh = cookie.getValue();
-            }
-            if(cookie.getName().equals("Access")) {
-                access = cookie.getValue();
-            }
+
+        // 헤더에서 토큰 값 읽기
+        // Cookie[] cookies = request.getCookies();
+        String authorizationHeader = request.getHeader("Authorization");
+        String refreshTokenHeader = request.getHeader("X-Refresh-Token");
+
+        // for(Cookie cookie : cookies) {
+        //     if(cookie.getName().equals("Refresh")) {
+        //         refresh = cookie.getValue();
+        //     }
+        //     if(cookie.getName().equals("Access")) {
+        //         access = cookie.getValue();
+        //     }
+        // }
+
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            access = authorizationHeader.substring(7); // "Bearer " 이후의 토큰 값
         }
+
+        if (refreshTokenHeader != null) {
+            refresh = refreshTokenHeader;
+        }
+
         Map<String, Object> map = new HashMap<>();
 
-        if(refresh == null || jwtUtil.validateToken(refresh)) {
+        if(refresh == null || !jwtUtil.validateToken(refresh)) {
+            logger.warn("Invalid or missing refresh token");
             map.put("status", "fail1");
-            map.put("refresh",refresh);
-            map.put("Cookie-Refresh", cookies);
+            // map.put("refresh",refresh);
+            // map.put("Cookie-Refresh", cookies);
+            map.put("message", "Invalid or missing refresh token");
             return ResponseEntity.ok(map);
         }
+
         String category = jwtUtil.getCategory(refresh);
         if(!category.equals("Refresh")){
+            logger.warn("Invalid token category");
             map.put("status", "fail2");
-            map.put("refresh",refresh);
-            map.put("Cookie-Refresh", cookies);
+            // map.put("refresh",refresh);
+            // map.put("Cookie-Refresh", cookies);
+            map.put("message", "Invalid token category");
             return ResponseEntity.ok(map);
         }
+
         if(jwtService.findByRefresh(refresh).isEmpty()){
+            logger.warn("Refresh token not found");
             map.put("status", "fail3");
-            map.put("refresh",refresh);
-            map.put("Cookie-Refresh", cookies);
+            // map.put("refresh",refresh);
+            // map.put("Cookie-Refresh", cookies);
+            map.put("message", "Refresh token not found");
             return ResponseEntity.ok(map);
         }
 
@@ -74,6 +96,7 @@ public class ReIssueController {
             System.out.println(jwtService.findByAccess(access).isEmpty());
             System.out.println(!jwtUtil.validateToken(access));
         }
+
         String username = jwtUtil.getUsername(refresh);
         String userId = jwtUtil.getUserId(refresh);
         String email = jwtUtil.getEmail(refresh);
