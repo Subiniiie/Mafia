@@ -37,6 +37,15 @@ public class JWTFilter extends OncePerRequestFilter {
         request.getHeaderNames().asIterator()
             .forEachRemaining(headerName -> System.out.println(headerName+":"+request.getHeader(headerName)));
         System.out.println("-----[Decode Header END] ---- ");
+        System.out.println("-----[READ COOKIE] ---- ");
+        Cookie[] cookies = request.getCookies();
+		for(Cookie cookie:cookies) {
+			System.out.println(cookie.getName()+":"+cookie.getValue());
+		}
+        System.out.println("-----[READ COOKIE END] ---- ");
+        
+        System.out.println("-----[Decode Header END] ---- ");
+        
 
         String accessToken = Optional.ofNullable(request.getCookies())
                 .flatMap(cookies -> Arrays.stream(cookies)
