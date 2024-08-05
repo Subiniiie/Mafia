@@ -15,28 +15,6 @@ const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
 
-    // const handleLogin = async () => {
-    //     try {
-    //         const formData = new FormData();
-    //         formData.append('username', email);
-    //         formData.append('password', password);
-    //         const response = await axios.post('https://i11e106.p.ssafy.io/api/login',
-    //             formData,
-    //             { withCredentials: true }
-    //         );
-    //         console.log(response.data);
-    //         // 로그인 성공 시 처리 로직
-    //         const { token, name } = response.data
-    //         localStorage.setItem('token', token) // 로컬 스토리지에 토큰 저장
-    //         onLoginSuccess(name) // 상위 컴포넌트에 로그인 성공 알림
-    //         openModal()
-    //     } catch (error) {
-    //         console.error("Login failed:", error.response ? error.response.data : error.message);
-    //         // 로그인 실패 시 처리 로직
-    //     }
-    // };
-
-
     const handleLogin = async () => {
         try {
             console.log('로그인을 시작할게')
@@ -56,12 +34,12 @@ const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
             console.log(response.data);
             // 로그인 성공 시 처리 로직
             const { access, refresh } = response.data
-            console.log(access)
-            console.log(refresh)
+            // console.log(access)
+            // console.log(refresh)
             const decodedAccess = decode(access)
-            console.log(decodedAccess)
+            // console.log(decodedAccess)
             const { username } = decodedAccess.payload // 디코딩된 토큰에서 이름 추출
-            console.log(username)
+            console.log('username :', username)
             // const decodedRefresh = decode(refresh)
             // console.log(decodedRefresh)
             localStorage.setItem('access', access) // 로컬 스토리지에 토큰 저장
