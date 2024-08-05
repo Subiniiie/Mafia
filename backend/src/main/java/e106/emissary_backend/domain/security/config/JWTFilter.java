@@ -32,6 +32,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
+        System.out.println("[@JwtFilter] - IN");
 
         String accessToken = Optional.ofNullable(request.getCookies())
                 .flatMap(cookies -> Arrays.stream(cookies)
