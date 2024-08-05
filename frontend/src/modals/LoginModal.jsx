@@ -42,10 +42,7 @@ const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
                 email: email,
                 password: password
             }
-            const body = {
-                email: email,
-                password: password
-            }
+            
             const response = await axios.post('https://i11e106.p.ssafy.io/api/login',
                 JSON.stringify(body),{
                     headers: {
