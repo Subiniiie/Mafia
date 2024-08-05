@@ -57,13 +57,24 @@ const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
         console.log("나 로그아웃 버튼 눌렀어")
         try {
             console.log("try 들어왔어")
+            const access = localStorage.getItem('access')
+            console.log(access)
+            const refresh = localStorage.getItem('refresh')
+            console.log(refresh)
             // 로그아웃 API 요청
             await axios.post('https://i11e106.p.ssafy.io/api/logout', {}, {
-                withCredentials: true,
+                headers: {
+                    "Authorization": `Bearer ${access}`,
+                    'X-Access-Token': refresh
+                    // "Cookie": `Access=${accessToken}; Refresh=${refreshToken}`,
+                },
+                withCredentials: true // 필요 시 추가: 이 옵션을 추가하면 쿠키가 포함된 요청을 서버로 보낼 수 있음
             })
             // 로그아웃 성공 시 처리 로직
-            localStorage.removeItem('token') // 로컬 스토리지에서 토큰 삭제
-            onLoginSuccess('') // 상위 컴포넌트에 로그아웃 알림
+            localStorage.removeItem('access') // 로컬 스토리지에서 토큰 삭제
+            localStorage.removeItem('refresh') // 로컬 스토리지에서 토큰 삭제
+            console.log('localStorage 에서 access, refresh 삭제했어요')
+            // onLoginSuccess('') // 상위 컴포넌트에 로그아웃 알림
         } catch (error) {
             console.log("catch 들어왔어")
             console.error("Logout failed:", error.response ? error.response.data : error.message)
@@ -106,9 +117,9 @@ const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
                     </>
                 ) : (
                     <>
-                        <button onClick={openLoginModal}>활동하기</button>
+                        <button onClick={openLoginModal} className="navbar-logout-buttons east-sea-dokdo-regular">활동하기</button>
                         <LoginModal isOpen={isLoginModalOpen} openModal={openLoginModal} onLoginSuccess={onLoginSuccess} />
-                        <button onClick={openSignUpModal}>독립군 입단</button>
+                        <button onClick={openSignUpModal} className="navbar-logout-buttons east-sea-dokdo-regular">독립군 입단</button>
                         <SignUpModal isOpen={isSignUpModalOpen} openModal={openSignUpModal} />
                     </>
                 )}
