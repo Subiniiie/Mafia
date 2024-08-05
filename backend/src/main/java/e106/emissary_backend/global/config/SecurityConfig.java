@@ -2,12 +2,12 @@ package e106.emissary_backend.global.config;
 
 import e106.emissary_backend.domain.security.config.CustomLogoutFilter;
 import e106.emissary_backend.domain.security.config.JWTFilter;
-import e106.emissary_backend.domain.security.config.CustomSuccessHandler;
+//import e106.emissary_backend.domain.security.config.CustomSuccessHandler;
 import e106.emissary_backend.domain.security.config.LoginFilter;
 import e106.emissary_backend.domain.security.repository.AccessRepository;
 import e106.emissary_backend.domain.security.repository.RefreshRepository;
 import e106.emissary_backend.domain.security.service.JwtService;
-import e106.emissary_backend.domain.user.service.CustomOAuth2UserService;
+//import e106.emissary_backend.domain.user.service.CustomOAuth2UserService;
 import e106.emissary_backend.domain.security.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +35,8 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CustomOAuth2UserService oAuth2UserService;
-    private final CustomSuccessHandler customSuccessHandler;
+//    private final CustomOAuth2UserService oAuth2UserService;
+//    private final CustomSuccessHandler customSuccessHandler;
     private final JWTUtil jwtUtil;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtService jwtService;
@@ -88,20 +88,20 @@ public class SecurityConfig {
         //경로별 인가 작업 (/login 페이지와 루트 페이지, 회원가입페이지는 비로그인한 사람에게 접근 허용)
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/api/login","/", "/api/user", "/api/mail", "/api/reissue", "/api/logout", "/api/oauth/token", "api/oauth/login").permitAll()
+                        .requestMatchers("/api/login","/", "/api/user", "/api/mail", "/api/reissue", "/api/logout", "/api/oauth2/token", "/api/oauth2/login").permitAll()
                         .anyRequest().authenticated());
 
         //JWTFilter 추가
-        http
-                .addFilterBefore(new JWTFilter(jwtUtil, "OAUTH"), UsernamePasswordAuthenticationFilter.class);
+//        http
+//                .addFilterBefore(new JWTFilter(jwtUtil, "OAUTH"), UsernamePasswordAuthenticationFilter.class);
         //oauth2
-        http
-                .oauth2Login((oauth2) -> oauth2
-                        .authorizationEndpoint(endpoint ->
-                                endpoint.baseUri("/oauth2/authorization"))
-                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
-                                .userService(oAuth2UserService))
-                        .successHandler(customSuccessHandler));
+//        http
+//                .oauth2Login((oauth2) -> oauth2
+//                        .authorizationEndpoint(endpoint ->
+//                                endpoint.baseUri("/api/oauth2/authorization"))
+//                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
+//                                .userService(oAuth2UserService))
+//                        .successHandler(customSuccessHandler));
         http
                 .addFilterBefore(new JWTFilter(jwtUtil, "COMMON"), UsernamePasswordAuthenticationFilter.class);
 
