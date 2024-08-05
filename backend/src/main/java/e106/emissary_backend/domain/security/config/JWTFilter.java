@@ -39,8 +39,8 @@ public class JWTFilter extends OncePerRequestFilter {
         System.out.println("-----[Decode Header END] ---- ");
         System.out.println("-----[READ COOKIE] ---- ");
         Cookie[] tmpCookies = request.getCookies();
-		for(Cookie cookie:tmpCookies) {
-			System.out.println(cookie.getName()+":"+cookie.getValue());
+		for(Cookie Tcookie:tmpCookies) {
+			System.out.println(Tcookie.getName()+":"+Tcookie.getValue());
 		}
         System.out.println("-----[READ COOKIE END] ---- ");
         
