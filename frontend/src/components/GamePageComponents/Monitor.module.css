@@ -28,9 +28,34 @@
     background-color: rgb(139, 0, 0);
 }
 
+.deadBtn {
+    width: 5px;
+    height: 50px;
+    border : 6px solid grey;
+    border-radius: 50%;
+    background-color: rgba(169, 169, 169, 0.8);
+    cursor: not-allowed;
+}
+
 .voiceBtn {
     width: 25px;
     height: 25px;
     margin-top: 120px;
     cursor: pointer;
+}
+
+.monitorFooter {
+    display: flex;
+    justify-content: space-between;
+}
+
+.outBtn {
+    width: 120px;
+    height: 30px;
+    background: none;
+    border: none;
+    outline: none;
+    position: relative;
+    top: 110px;
+    left: 20px;
 }
