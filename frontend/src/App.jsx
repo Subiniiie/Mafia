@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import axios from 'axios'
 // import jwt_decode from 'jwt-decode'
 import { decode } from "jwt-js-decode";
+import { Cookies } from 'react-cookie'
 import Navbar from "./components/Navbar"
 import MainPage from './pages/MainPage'
 import GameListPage from './pages/GameListPage'
@@ -16,6 +17,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태
   // const [isLoggedIn, setIsLoggedIn] = useState(true); // 로그인 상태
   const [name, setName] = useState('') // 로그인된 사용자의 이름
+  const [cookies, setCookie, removeCookie] = useCookies(['access', 'refresh'])
 
   useEffect(() => {
     const access = localStorage.getItem('access')

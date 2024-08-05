@@ -5,6 +5,7 @@ import styles from "./LoginModal.module.css"
 import { useState } from "react";
 import axios from "axios";
 import { decode } from "jwt-js-decode";
+import { useCookies } from 'react-cookie';
 
 const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
     const modalTitle = '활동하기';
@@ -14,6 +15,7 @@ const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [cookies, setCookie] = useCookies(['access', 'refresh'])
 
     const handleLogin = async () => {
         try {
@@ -27,28 +29,31 @@ const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
                 headers: {
                     "Content-Type": "application/json",
                 }
-            }
-                ,
-                // { withCredentials: true }
-            );
+            });
             console.log(response.data);
             // 로그인 성공 시 처리 로직
             const { access, refresh } = response.data
-            // console.log(access)
-            // console.log(refresh)
             const decodedAccess = decode(access)
-            // console.log(decodedAccess)
             const { username } = decodedAccess.payload // 디코딩된 토큰에서 이름 추출
             console.log('username :', username)
             // const decodedRefresh = decode(refresh)
             // console.log(decodedRefresh)
-            localStorage.setItem('access', access) // 로컬 스토리지에 토큰 저장
-            localStorage.setItem('refresh', refresh)
+            // localStorage.setItem('access', access) // 로컬 스토리지에 토큰 저장
+            // localStorage.setItem('refresh', refresh)
+
+            // 토큰을 쿠키에 저장
+            setCookie('access', access, { path: '/' })
+            setCookie('refresh', refresh, { path: '/' })
+
+            // 쿠키 저장 확인 로그
+            // console.log('Access Token Cookie:', cookies.access);
+            // console.log('Refresh Token Cookie:', cookies.refresh);
+
             onLoginSuccess(username) // 상위 컴포넌트에 로그인 성공 알림
             openModal()
         } catch (error) {
-            console.error("Login failed:", error.response ? error.response.data : error.message);
             // 로그인 실패 시 처리 로직
+            console.error("Login failed:", error.response ? error.response.data : error.message);
         }
     };
 
