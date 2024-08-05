@@ -47,16 +47,16 @@ public class ReIssueController {
         Map<String, Object> map = new HashMap<>();
 
         if(refresh == null || jwtUtil.validateToken(refresh)) {
-            map.put("status", "fail");
+            map.put("status", "fail1");
             return ResponseEntity.ok(map);
         }
         String category = jwtUtil.getCategory(refresh);
         if(!category.equals("Refresh")){
-            map.put("status", "fail");
+            map.put("status", "fail2");
             return ResponseEntity.ok(map);
         }
         if(jwtService.findByRefresh(refresh).isEmpty()){
-            map.put("status", "fail");
+            map.put("status", "fail3");
             return ResponseEntity.ok(map);
         }
 
