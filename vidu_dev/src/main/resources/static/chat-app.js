@@ -1,5 +1,6 @@
 const OV = new OpenVidu();
 let session;
+let myToken;
 let userId;
 
 // Chat Application
@@ -32,6 +33,7 @@ class ChatApp {
         try {
             const token = await this.getToken(userId, sessionNo);
             await this.connectToSession(token);
+            myToken = token;
         } catch (error) {
             console.error('세션 연결 중 오류 발생:', error);
             alert('접속 중 오류가 발생했습니다. 다시 시도해주세요.');
@@ -56,6 +58,7 @@ class ChatApp {
         session = OV.initSession();
         this.connectionHandler = new OpenViduConnectionHandler(session, {
             addUserScreen: this.addUserScreen.bind(this),
+            notifyLeaveSession: this.notifyLeaveSession.bind(this),
             addMessageToChat: addMessageToChat  // 이 함수는 이미 전역 범위에 있습니다
         });
 
@@ -89,11 +92,19 @@ class ChatApp {
         });
     }
 
-    leaveSession() {
+    async leaveSession() {
         if (this.connectionHandler.session) {
+            const response = await this.notifyLeaveSession();
+            const data = await response.json();
+            console.log(data);
+            if (!response.ok) throw new Error('서버 응답 오류');
+
             this.connectionHandler.session.disconnect();
+
             this.resetVideoContainer();
             this.connectionHandler = null;
+            session = null;
+            myToken = null;
             console.log('세션에서 나갔습니다');
             elements.connectButton.style.display = 'block';
             elements.leaveSessionButton.style.display = 'none';
@@ -147,6 +158,7 @@ class ChatApp {
 
     addUserScreen(videoElement, streamManager) {
         const position = this.connectionHandler.addStreamManager(streamManager);
+        videoElement.addEventListener('click', () => this.kickUser(myToken, streamManager));
         const target = this.addVideoElement(videoElement, position);
         this.connectionHandler.parentMap.set(streamManager.stream.connection.connectionId, target);
         this.addNickName(target, streamManager);
@@ -167,5 +179,38 @@ class ChatApp {
         nicknameElement.className = 'nickname';
         nicknameElement.textContent = streamManager.stream.connection.data;
         targetElement.appendChild(nicknameElement);
+    }
+
+    // from : String(Token), target : StreamManager
+    async kickUser(from, target) {
+        const sessionNo = elements.sessionInput.value;
+
+        const response = await fetch(`${API_BASE_URL}/session/kick`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionNo,
+                'token': myToken,
+                'connectionId': target.stream.connection.connectionId
+            }),
+        });
+
+        if (!response.ok) throw new Error('서버 응답 오류');
+
+        const data = await response.json();
+        console.log(data)
+    }
+
+    async notifyLeaveSession() {
+        const sessionNo = elements.sessionInput.value;
+
+        return await fetch(`${API_BASE_URL}/session/leave`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                sessionNo,
+                'token': myToken,
+            }),
+        });
     }
 }
