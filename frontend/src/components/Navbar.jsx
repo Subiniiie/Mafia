@@ -65,7 +65,7 @@ const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
             await axios.post('https://i11e106.p.ssafy.io/api/logout', {}, {
                 headers: {
                     "Authorization": `Bearer ${access}`,
-                    'X-Access-Token': refresh
+                    'X-Refresh-Token': refresh
                     // "Cookie": `Access=${accessToken}; Refresh=${refreshToken}`,
                 },
                 withCredentials: true // 필요 시 추가: 이 옵션을 추가하면 쿠키가 포함된 요청을 서버로 보낼 수 있음

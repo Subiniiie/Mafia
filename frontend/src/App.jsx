@@ -50,12 +50,15 @@ function App() {
       const response = await axios.post('https://i11e106.p.ssafy.io/api/reissue', {}, {
         headers: {
           "Authorization": `Bearer ${accessToken}`,
-          'X-Access-Token': refreshToken
+          'X-Refresh-Token': refreshToken
           // "Cookie": `Access=${accessToken}; Refresh=${refreshToken}`,
         },
         withCredentials: true // 필요 시 추가: 이 옵션을 추가하면 쿠키가 포함된 요청을 서버로 보낼 수 있음
       })
-      console.log('새로운 response.data 출력해볼게 :', response.data)
+      if (response) {
+        console.log('response 가 있긴 있음 :', response)
+      }
+      // console.log('새로운 response.data 출력해볼게 :', response.data)
       const { access, refresh } = response.data
       localStorage.setItem('access', access)
       localStorage.setItem('refresh', refresh)
@@ -63,9 +66,27 @@ function App() {
       const { username } = decodedAccess.payload
       setName(username)
       setIsLoggedIn(true)
+      // } catch (error) {
+      //   console.error('Failed to refresh token:', error)
+      //   setIsLoggedIn(false)
+      console.log('response.data :', response.data)
     } catch (error) {
-      console.error('Failed to refresh token:', error)
-      setIsLoggedIn(false)
+      // console.log('또 error 인데용... 일단 response.data 출력해볼게용...')
+      // console.log(response.data)
+      if (error.response) {
+        // 서버가 2xx 외의 상태 코드를 반환한 경우
+        console.error('Error response data:', error.response.data);
+        console.error('Error response status:', error.response.status);
+        console.error('Error response headers:', error.response.headers);
+      } else if (error.request) {
+        // 요청이 만들어졌지만 응답을 받지 못한 경우
+        console.error('Error request:', error.request);
+      } else {
+        // 요청을 설정하는 중에 문제가 발생한 경우
+        console.error('Error message:', error.message);
+      }
+      console.error('Error config:', error.config);
+      setIsLoggedIn(false);
     }
   }
 
