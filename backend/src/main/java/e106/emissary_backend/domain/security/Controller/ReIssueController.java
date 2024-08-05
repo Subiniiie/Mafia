@@ -33,6 +33,7 @@ public class ReIssueController {
 
     @PostMapping("/api/reissue")
     public ResponseEntity<Map<String, Object>> reissue(HttpServletRequest request, HttpServletResponse response) {
+        System.out.println("[REISSUE] - IN ");
         String refresh = null;
         String access = null;
         Cookie[] cookies = request.getCookies();
