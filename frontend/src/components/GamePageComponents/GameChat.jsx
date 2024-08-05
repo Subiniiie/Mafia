@@ -4,17 +4,13 @@ import GameChatInput from "./GameChatInput";
 import GameChatHistory from "./GameChatHistory";
 import System from "./System";
 
-function GameChat() {
-    
+function GameChat({chatHistory, setChatHistory, session}) {
 
-    const [ chatHistory, setChatHistory ] = useState([])
+  const handleChatSubmit = (message) => {
+    setChatHistory(prevHistory => [...prevHistory, message])
+  }
 
-    const handleChatSubmit = (message) => {
-        setChatHistory(prevHistory => [...prevHistory, message])
-    }
-       
-
-    const [ clickUpBtn, setClickUpBtn ] = useState(false)
+  const [ clickUpBtn, setClickUpBtn ] = useState(false)
 
     function OpenChat() {
         setClickUpBtn(!clickUpBtn)
@@ -33,7 +29,7 @@ function GameChat() {
                             </button>
                             <System />
                             <GameChatHistory chatHistory={chatHistory}/>
-                            <GameChatInput onChatSubmit={handleChatSubmit}/>
+                            <GameChatInput onChatSubmit={handleChatSubmit} session={session}/>
                         </div>
     return (
         <>  

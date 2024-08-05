@@ -26,6 +26,9 @@ function GamePage({viduToken}) {
   const [userId, setUserId] = useState();
   const [nickname, setNickname] = useState();
 
+  // ViduChat
+  const [chatHistory, setChatHistory] = useState([]);
+
   useEffect( () => {
     // Todo: get nickname & userId from accessToken
     const nickname = "ssafy";
@@ -39,15 +42,22 @@ function GamePage({viduToken}) {
 
     const handleStreamCreated = (event) => {
       mySession.subscribeAsync(event.stream, undefined).then((subscriber) => {
-        setSubscribers((subs) => [subscriber, ...subs]);
+         setSubscribers((subs) => [subscriber, ...subs]);
       });
     };
+
+    const handleChatSignal = (event) => {
+      const chatData = JSON.parse(event.data);
+      setChatHistory(prevHistory => [...prevHistory, chatData]);
+    }
 
     mySession.on("streamCreated", handleStreamCreated);
 
     mySession.on("streamDestroyed", (event) => {
       deleteSubscriber(event.stream.streamManager);
     });
+
+    mySession.on("signal:chat", handleChatSignal);
 
     mySession.on("exception", (exception) => {
       console.warn(exception);
@@ -121,7 +131,7 @@ function GamePage({viduToken}) {
             <div className={styles.container}>
                 <GamePageHeader leaveSession={leaveSession}/>
                 <GamePageMain publisher={publisher} subscribers={subscribers} />
-                <GamePageFooter />
+                <GamePageFooter chatHistory={chatHistory} setChatHistory={setChatHistory} session={session}/>
             </div>
         </>
     )
