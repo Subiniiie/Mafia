@@ -3,6 +3,18 @@ import styles from "./GameReadyStartBtn.module.css"
 
 function GameReadyStartBtn({ roomManager }) {
 
+    // 준비/시작 버튼 화면에서 바로 roomManager 정보를 받는 게 낫나??
+    const players = [
+        {nickname: 'player1', roomManager: false},
+        {nickname: 'player2', roomManager: false},
+        {nickname: 'player3', roomManager: false},
+        {nickname: 'player4', roomManager: false},
+        {nickname: 'player5', roomManager: true},
+        {nickname: 'player6', roomManager: false},
+        {nickname: 'player7', roomManager: false},
+        {nickname: 'player8', roomManager: false},
+    ]
+
     // 준비 버튼을 선택했는지 안 했는지
     const [ clickedBtn, setClickedBtn ] = useState(false)
 
@@ -12,7 +24,7 @@ function GameReadyStartBtn({ roomManager }) {
 
     // 준비 상태를 나타내는 변수
     // 원래는 false로 해야함
-    const [ playerReadyStates, setPlayerReadyStates ] = useState(Array(7).fill(true))
+    const [ playerReadyStates, setPlayerReadyStates ] = useState(players.map(() => true))
 
 
     // 플레이어 준비 상태를 변경하는 함수
@@ -30,7 +42,7 @@ function GameReadyStartBtn({ roomManager }) {
     }
 
     // 준비 상태가 모두 활성화되었는지 확인
-    const allPlayersReady = playerReadyStates.every((ready) => ready)
+    const allPlayersReady = playerReadyStates.every((ready, index) => players[index].roomManager || ready)
 
 
     const btnRoomManagerText = '시작'
@@ -42,9 +54,10 @@ function GameReadyStartBtn({ roomManager }) {
     // 방장 여부에 따라 동작 버튼
     const handleBtnClick = function() {
         if (!roomManager) {
+            const currentPlayerIndex = players.findIndex(player => player.roomManager)
             // 일반 플레이어는 준비 상태를 토글함
             // 예시로 6번(인덱스 6) 플레이어의 상태 토글
-            togglePlayerReady(6)
+            togglePlayerReady(currentPlayerIndex)
             // 준비 버튼 메시지 바꾸기
             setClickedBtn((preveStates) => !preveStates)
         } else {
