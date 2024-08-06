@@ -5,11 +5,8 @@ import e106.emissary_backend.domain.game.enumType.GameState;
 import e106.emissary_backend.domain.game.model.GameDTO;
 import e106.emissary_backend.domain.game.model.Player;
 import e106.emissary_backend.domain.game.repository.RedisGameRepository;
-import e106.emissary_backend.domain.room.dto.RoomJoinDto;
-import e106.emissary_backend.domain.room.dto.RoomOptionDto;
-import e106.emissary_backend.domain.room.dto.RoomRequestDto;
+import e106.emissary_backend.domain.room.dto.*;
 import e106.emissary_backend.domain.room.entity.Room;
-import e106.emissary_backend.domain.room.dto.RoomListDto;
 import e106.emissary_backend.domain.room.enumType.RoomState;
 import e106.emissary_backend.domain.room.enumType.SessionRole;
 import e106.emissary_backend.domain.room.repository.RoomRepository;
@@ -27,15 +24,15 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -49,6 +46,7 @@ public class RoomService {
     private final UserInRoomRepository userInRoomRepository;
     private final UserRepository userRepository;
     private final RedisGameRepository redisGameRepository;
+    private final TaskExecutor brokerChannelExecutor;
 //    private final RedisTemplate<Long, GameDTO> redisGameTemplate;
 
     @Value("${OPENVIDU_URL}")
@@ -250,20 +248,60 @@ public class RoomService {
         if (userInRoom.isPresent()){
             String token = userInRoom.get().getViduToken();
             if (users.get(token) == SessionRole.USER){
-                // 나가기 처리
+                // 유저일 경우 나가기 처리
+                users.remove(token);
+                userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
             } else if (users.get(token) == SessionRole.HOST){
                 // 방장 위임
+                users.remove(token);
+//                changeSessionOwner(session); ToDo: 방장 위임기능
+                userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
             }
 
             // users empty 되면 방 삭제
-            users.remove(token);
+            if(users.isEmpty()){
+                mapSessions.remove(session.getSessionId());
+                mapSessionNamesTokens.remove(session.getSessionId());
+                roomRepository.deleteById(roomId);
+            }
         } else {
             throw new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION);
         }
-
-        roomRepository.deleteById(roomId);
-        userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
-
         return new CommonResponseDto("ok");
+    }
+
+    // 방장 변경 기능... 완성 안된거 같은데 ..?
+    public boolean changeSessionOwner(Session session){
+        try{
+            session.fetch();
+            Connection nextOwner = session.getActiveConnections().stream()
+                    .min((a,b) -> Long.compare(a.createdAt(), b.createdAt()))
+                    .orElseThrow(() -> new IllegalStateException("No active connections found"));
+            return true;
+        } catch (OpenViduJavaClientException | OpenViduHttpException e) {
+            return false;
+        }
+    }
+
+    private Mono<String> sendSignalToSession(String sessionId, String type, String data){
+        String url = openviduUrl + "/openvidu/api/signal";
+        String authHeader = "Basic" + Base64.getEncoder().encodeToString(("OPENVIDUAPP:"+openviduSecret).getBytes());
+
+        RoomSignalDto body = RoomSignalDto.builder()
+                .session(sessionId)
+                .type(type)
+                .data(data)
+                .to(Collections.emptyList())
+                .build();
+
+        return webClient.post()
+                .uri(url)
+                .header("Authorization", authHeader)
+                .header("Content-Type", "application/json")
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(String.class)
+                .doOnSuccess(response -> System.out.println("Signal Sent Successfully"))
+                .doOnError(error -> System.out.println("Fail to Send Signal: " + error.getMessage()));
     }
 }
