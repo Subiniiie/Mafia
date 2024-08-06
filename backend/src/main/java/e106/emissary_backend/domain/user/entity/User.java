@@ -1,5 +1,7 @@
 package e106.emissary_backend.domain.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import e106.emissary_backend.domain.achievement.entity.AchievementUsers;
 import e106.emissary_backend.domain.friends.entity.Friends;
 import e106.emissary_backend.global.common.BaseTimeEntity;
@@ -13,13 +15,13 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Table(name = "users")
 @EqualsAndHashCode(callSuper=false)
-@ToString(exclude = "achievementUsers")
 public class User extends BaseTimeEntity{
 
     @Id
@@ -30,7 +32,7 @@ public class User extends BaseTimeEntity{
     @Column(name = "email", unique = true, nullable = false, length = 50)
     private String email;
 
-    @Column(name = "nickname", unique = false, nullable = false, length = 200)
+    @Column(name = "nickname", unique = true, nullable = false, length = 200)
     private String nickname;
 
     @Column(name = "password", nullable = false, length = 200)
@@ -94,30 +96,13 @@ public class User extends BaseTimeEntity{
     private List<AchievementUsers> achievementUsers = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "user1")
-    private Set<Friends> friendsAsUser1 = new HashSet<>();
+    @JsonIgnore
+    @OneToMany(mappedBy = "user1", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Friends> friendsAsUser1 = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "user2")
-    private Set<Friends> friendsAsUser2 = new HashSet<>();
+    @JsonIgnore
+    @OneToMany(mappedBy = "user2", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Friends> friendsAsUser2 = new ArrayList<>();
 
-    @Transient
-    private Set<User> friends;
-
-    public Set<User> getFriends() {
-        if(friends == null) {
-            friends = new HashSet<>();
-            for(Friends friend : friendsAsUser1){
-                if("Y".equals(friend.getIsAccepted())){
-                    friends.add(friend.getUser2());
-                }
-            }
-            for(Friends friend : friendsAsUser2){
-                if("Y".equals(friend.getIsAccepted())){
-                    friends.add(friend.getUser1());
-                }
-            }
-        }
-        return friends;
-    }
 }

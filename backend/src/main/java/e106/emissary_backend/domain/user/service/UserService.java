@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -135,9 +136,9 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public String emailExists(CheckRequest request){
-        Optional<User> res = userRepository.findByEmail(request.getData());
-        System.out.println(request.getData());
+    public String emailExists(String email){
+        Optional<User> res = userRepository.findByEmail(email);
+//        System.out.println(email);
         if(res.isPresent()){
             throw new RuntimeException(("이미 존재하는 이메일 입니다."));
         } else {
@@ -145,8 +146,8 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public String nicknameExists(CheckRequest request) {
-        Optional<User> res = userRepository.findByNickname(request.getData());
+    public String nicknameExists(String nickname) {
+        Optional<User> res = userRepository.findByNickname(nickname);
         if (res.isPresent()) {
             throw new RuntimeException("이미 존재하는 닉네임 입니다.");
         } else {
@@ -204,6 +205,10 @@ public class UserService implements UserDetailsService {
         MimeMessage message = CreateMail(request);
         javaMailSender.send(message);
         return tmp;
+    }
+
+    public List<User> getContainNickname(String s){
+        return userRepository.findByNicknameContaining(s);
     }
 
 }
