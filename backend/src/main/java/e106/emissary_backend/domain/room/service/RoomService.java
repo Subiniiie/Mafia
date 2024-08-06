@@ -11,6 +11,7 @@ import e106.emissary_backend.domain.room.entity.Room;
 import e106.emissary_backend.domain.room.dto.RoomListDto;
 import e106.emissary_backend.domain.room.enumType.RoomState;
 import e106.emissary_backend.domain.room.repository.RoomRepository;
+import e106.emissary_backend.domain.security.Controller.ReIssueController;
 import e106.emissary_backend.domain.user.entity.User;
 import e106.emissary_backend.domain.user.repository.UserRepository;
 import e106.emissary_backend.domain.userInRoom.entity.UserInRoom;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -41,6 +43,7 @@ public class RoomService {
     private final UserInRoomRepository userInRoomRepository;
     private final UserRepository userRepository;
     private final RedisGameRepository redisGameRepository;
+    private final ReIssueController reIssueController;
 //    private final RedisTemplate<Long, GameDTO> redisGameTemplate;
 
     public List<RoomListDto> getRooms(Pageable pageable) {
@@ -75,9 +78,17 @@ public class RoomService {
         return new CommonResponseDto("ok");
     }
 
+    private void update(GameDTO gameDTO){
+        Game dao = gameDTO.toDao();
+        redisGameRepository.save(dao);
+    }
+
     public CommonResponseDto deleteRoom(Long roomId) {
         roomRepository.findByRoomId(roomId).orElseThrow(() -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
         roomRepository.deleteById(roomId);
+
+        redisGameRepository.deleteById(roomId);
+
         return new CommonResponseDto("ok");
     }
 
@@ -85,6 +96,14 @@ public class RoomService {
         roomRepository.findByRoomId(roomId).orElseThrow(() -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
         userInRoomRepository.findByPk_UserId(userId).orElseThrow(() -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION));
         userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
+
+        Game game = redisGameRepository.findByGameId(roomId).orElseThrow(() -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+
+        GameDTO gameDTO = GameDTO.toDto(game);
+        Map<Long, Player> playerMap = gameDTO.getPlayerMap();
+        playerMap.remove(userId);
+
+        update(gameDTO);
 
         return new CommonResponseDto("ok");
     }
@@ -128,9 +147,7 @@ public class RoomService {
         Player player = Player.createPlayer(user.getUserId(), user.getNickname());
         gameDTO.addPlayer(player);
 
-        Game game = gameDTO.toDao();
-
-        redisGameRepository.save(game);
+        update(gameDTO);
 
         return RoomOptionDto.of(user.getNickname(), roomRequestDto);
     }// end of makeRoom
@@ -170,13 +187,6 @@ public class RoomService {
         Game updateGame = gameDTO.toDao();
 
         redisGameRepository.save(updateGame);
-
-        return new CommonResponseDto("ok");
-    }
-
-    public CommonResponseDto leaveRoom(Long roomId, long userId) {
-        roomRepository.deleteById(roomId);
-        userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
 
         return new CommonResponseDto("ok");
     }

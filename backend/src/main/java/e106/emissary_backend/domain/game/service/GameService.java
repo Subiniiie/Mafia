@@ -122,7 +122,7 @@ public class GameService {
                 .build());
 
         update(gameDTO);
-    }
+    } // end of readyCancel
 
 
     public void setGame(Long roomId) {
