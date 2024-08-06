@@ -76,6 +76,7 @@ public class SocketGameController {
         gameService.startConfirm(roomId, userId, request.isConfirm());
     }
 
+    // 나가는거는 이걸로 처리
     @MessageMapping("/remove/{roomId}/{targetId}")
     public void removeUser(@DestinationVariable Long roomId, @DestinationVariable Long targetId) {
         gameService.removeUser(roomId, targetId);

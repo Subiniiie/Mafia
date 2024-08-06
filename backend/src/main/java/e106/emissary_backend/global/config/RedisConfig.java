@@ -87,7 +87,7 @@ public class RedisConfig {
 
     @Bean
     public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory connectionFactory,
-                                                                       MessageListenerAdapter readyAdapter, ChannelTopic readyTopic,
+                                                                       MessageListenerAdapter commonAdapter, ChannelTopic commonTopic,
                                                                        MessageListenerAdapter readyCompleteAdapter, ChannelTopic readyCompleteTopic,
                                                                        MessageListenerAdapter dayListenerAdapter, ChannelTopic dayTopic,
                                                                        MessageListenerAdapter startVoteAdapter, ChannelTopic startVoteTopic,
@@ -99,7 +99,7 @@ public class RedisConfig {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         // subscriber, topic
-        container.addMessageListener(readyAdapter, readyTopic);
+        container.addMessageListener(commonAdapter, commonTopic);
         container.addMessageListener(readyCompleteAdapter, readyCompleteTopic);
         container.addMessageListener(dayListenerAdapter, dayTopic);
         container.addMessageListener(startVoteAdapter, startVoteTopic);
@@ -113,13 +113,13 @@ public class RedisConfig {
     }
 
     @Bean
-    public MessageListenerAdapter readyAdapter(ReadySubscriber subscriber) {
+    public MessageListenerAdapter commonAdapter(CommonSubscriber subscriber) {
         return new MessageListenerAdapter(subscriber, "sendMessage");
     }
 
     @Bean
-    public ChannelTopic readyTopic() {
-        return new ChannelTopic("READY");
+    public ChannelTopic commonTopic() {
+        return new ChannelTopic("COMMON");
     }
 
     @Bean

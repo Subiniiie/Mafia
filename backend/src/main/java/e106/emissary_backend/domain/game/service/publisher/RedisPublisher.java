@@ -13,7 +13,7 @@ public class RedisPublisher {
     private final RedisTemplate<Long, Game> redisTemplate;
 
     // 구독한 채널로 메시지 발송 -> 발송시 메시지 규격 맞추기
-    public void publish(ChannelTopic topic, ReadyMessage message) {
+    public void publish(ChannelTopic topic, CommonMessage message) {
         redisTemplate.convertAndSend(topic.getTopic(), message);
     }
 

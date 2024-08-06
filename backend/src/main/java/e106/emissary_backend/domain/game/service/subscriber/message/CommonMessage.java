@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class ReadyMessage {
+public class CommonMessage {
     private long gameId;
     private GameState gameState;
     private CommonResult result;

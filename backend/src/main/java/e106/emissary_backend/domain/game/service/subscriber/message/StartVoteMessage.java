@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 @Getter
 public class StartVoteMessage {
     private long gameId;
+    private GameState gameState;
 }

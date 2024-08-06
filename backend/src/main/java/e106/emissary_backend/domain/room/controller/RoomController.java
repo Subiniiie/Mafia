@@ -75,9 +75,8 @@ public class RoomController {
             userId = customUserDetails.getUserId();
         }
 
-        return ResponseEntity.ok(roomService.leaveRoom(roomId, userId));
+        return ResponseEntity.ok(roomService.deleteUser(roomId, userId));
     }
-
 
 
     @DeleteMapping("/api/rooms/{roomId}/{userId}")

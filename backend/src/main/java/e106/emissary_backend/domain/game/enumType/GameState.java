@@ -6,8 +6,11 @@ public enum GameState {
     STARTED,
     DAY,
     VOTE_START,
+    VOTE,
     VOTE_END,
+    CONFIRM_START,
     CONFIRM_VOTE,
+    CONFIRM_END,
     NIGHT,
     END,
 }

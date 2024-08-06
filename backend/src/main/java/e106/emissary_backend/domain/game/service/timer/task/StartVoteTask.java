@@ -1,5 +1,6 @@
 package e106.emissary_backend.domain.game.service.timer.task;
 
+import e106.emissary_backend.domain.game.enumType.GameState;
 import e106.emissary_backend.domain.game.service.GameService;
 import e106.emissary_backend.domain.game.service.publisher.RedisPublisher;
 import e106.emissary_backend.domain.game.service.subscriber.message.StartVoteMessage;
@@ -36,8 +37,9 @@ public class StartVoteTask implements GameTask {
 
         //todo : vote 시작했다고 publish -> sub에서 프론트에게 알림
         publisher.publish(startVoteTopic, StartVoteMessage.builder()
-                .gameId(gameId)
-                .build());
+                        .gameState(GameState.VOTE_START)
+                        .gameId(gameId)
+                        .build());
         
         // 2분뒤 투표종료 안내
         endVoteTask.setGameId(gameId);

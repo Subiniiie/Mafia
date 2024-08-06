@@ -35,6 +35,8 @@ public class Player implements Serializable {
 
     private boolean isLeft;
 
+    private boolean isVoted;
+
     @Builder.Default
     private boolean isAlive = true;
 
@@ -42,6 +44,9 @@ public class Player implements Serializable {
         return Player.builder()
                 .id(id)
                 .nickname(nickname)
+                .isReady(false)
+                .isLeft(false)
+                .isVoted(false)
                 .build();
     }
 }

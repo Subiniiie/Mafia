@@ -46,7 +46,7 @@ public class GameService {
     private final SchedulerService scheduler;
 
     private final RedisPublisher publisher;
-    private final ChannelTopic readyTopic;
+    private final ChannelTopic commonTopic;
     private final ChannelTopic readyCompleteTopic;
     private final ChannelTopic dayTopic;
     private final ChannelTopic startVoteTopic;
@@ -61,35 +61,22 @@ public class GameService {
     private final ChannelTopic nightPoliceTopic;
     private final EndConfirmTask endConfirmTask;
 
+
     @RedissonLock(value = "#gameId")
     public void update(GameDTO gameDTO){
         Game game = gameDTO.toDao();
         redisKeyValueTemplate.update(game);
     } // end of update
 
-
-    public GameResponseDTO findGameById(Long roomId) {
-        Game game = redisGameRepository.findByGameId(roomId).orElseThrow(
-                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
-
-        return GameResponseDTO.toDto(game);
-    } // end of findGameById
-
     public void ready(Long gameId, Long userId) {
-        Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
-                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+        GameDTO gameDTO = getGameDTO(gameId);
 
-        GameDTO gameDTO = GameDTO.toDto(game);
         Map<Long, Player> playerMap = gameDTO.getPlayerMap();
         Player player = playerMap.get(userId);
 
         player.setReady(true);
 
-        publisher.publish(readyTopic, ReadyMessage.builder()
-                .gameId(gameId)
-                .gameState(GameState.WAIT)
-                .result(CommonResult.SUCCESS)
-                .build());
+        commonPublish(gameId, GameState.WAIT, CommonResult.SUCCESS);
 
         // 모두가 준비가 끝나면 알려주기.
         if(playerMap.values().stream().allMatch(Player::isReady)){
@@ -106,30 +93,21 @@ public class GameService {
     } // end of ready
 
     public void readyCancel(Long gameId, Long userId) {
-        Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
-                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+        GameDTO gameDTO = getGameDTO(gameId);
 
-        GameDTO gameDTO = GameDTO.toDto(game);
         Map<Long, Player> playerMap = gameDTO.getPlayerMap();
         Player player = playerMap.get(userId);
 
         player.setReady(false);
 
-        publisher.publish(readyTopic, ReadyMessage.builder()
-                .gameId(gameId)
-                .gameState(GameState.WAIT)
-                .result(CommonResult.SUCCESS)
-                .build());
+        commonPublish(gameId, GameState.WAIT, CommonResult.SUCCESS);
 
         update(gameDTO);
     } // end of readyCancel
 
 
     public void setGame(Long roomId) {
-        Game game = redisGameRepository.findById(roomId).orElseThrow(
-                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
-
-        GameDTO gameDTO = GameDTO.toDto(game);
+        GameDTO gameDTO = getGameDTO(roomId);
 
         gameDTO.setGameState(GameState.STARTED);
         gameDTO.setDay(0);
@@ -162,17 +140,33 @@ public class GameService {
 
     @RedissonLock(value = "#gameId")
     public void startVote(long gameId, long userId, long targetId) {
-        Map<Long, Player> playerMap = getAlivePlayerMap(gameId);
+        GameDTO gameDTO = getGameDTO(gameId);
 
-        String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
+        Map<Long, Player> playerMap = gameDTO.getPlayerMap().entrySet().stream()
+                .filter(entry -> entry.getValue().isAlive())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        // 현재 투표 상태 가져와서 투표
-        HashMap<Long, Integer> voteMap = getVoteMapFromRedis(voteKey);
-        voteMap.put(targetId, voteMap.getOrDefault(targetId, 0) + 1);
-        voteRedisTemplate.opsForValue().set(voteKey, voteMap);
+        Player player = playerMap.get(userId);
 
-        // 모든 플레이어가 투표했는지 확인
-        if (voteMap.values().stream().mapToInt(Integer::intValue).sum() == playerMap.size()) {
+        player.setVoted(true);
+        update(gameDTO);
+
+        if(GameRole.BETRAYER.equals(player.getRole())){
+            commonPublish(gameId, GameState.VOTE, CommonResult.SUCCESS);
+        }else {
+            String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
+
+            // 현재 투표 상태 가져와서 투표
+            HashMap<Long, Integer> voteMap = getVoteMapFromRedis(voteKey);
+            voteMap.put(targetId, voteMap.getOrDefault(targetId, 0) + 1);
+            voteRedisTemplate.opsForValue().set(voteKey, voteMap);
+
+            commonPublish(gameId, GameState.VOTE, CommonResult.SUCCESS);
+
+            // 모든 플레이어가 투표했는지 확인
+            // todo : 이거 근데 투표갯수를 세는게 맞을까? 각각 투표완료를 세는게 아니라
+        }
+        if (playerMap.values().stream().filter(Player::isVoted).count() == playerMap.size()) {
             // todo : 만약 여기서 바로 이걸 타면 endVote타이머 종료해야함.
             // todo : 예약된 Task를 종료하고 Task를 직접 실행하자.
             endVoteTask.execute(gameId);
@@ -181,27 +175,6 @@ public class GameService {
         }
     } // end of startVote
 
-    @RedissonLock(value = "#gameId")
-    private Map<Long, Player> getAlivePlayerMap(long gameId) {
-        Game game = redisGameRepository.findById(gameId).orElseThrow(
-                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
-
-        GameDTO gameDTO = GameDTO.toDto(game);
-        Map<Long, Player> playerMap = gameDTO.getPlayerMap().entrySet().stream()
-                .filter(entry -> entry.getValue().isAlive())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        return playerMap;
-    } // end of getPlayerMap
-
-    @RedissonLock(value = "#gameId")
-    public HashMap<Long, Integer> getVoteMapFromRedis(String voteKey) {
-        HashMap<Long, Integer> voteMap = voteRedisTemplate.opsForValue().get(voteKey);
-        if (voteMap == null) {
-            voteMap = new HashMap<>();
-        }
-        return voteMap;
-    } // end of getVoteMapFromRedis
 
     public void endVote(EndVoteMessage message) {
         // 무승부의 경우 재투표로 설정
@@ -223,21 +196,37 @@ public class GameService {
 
     @RedissonLock(value = "#gameId")
     public void startConfirm(Long gameId, long userId, boolean confirm) {
-        Map<Long, Player> playerMap = getAlivePlayerMap(gameId);
+        GameDTO gameDTO = getGameDTO(gameId);
 
-        String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
+        Map<Long, Player> playerMap = gameDTO.getPlayerMap().entrySet().stream()
+                .filter(entry -> entry.getValue().isAlive())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        // 투표 및 저장 ( userId : 1(승낙) 0(거절) )
-        HashMap<Long, Integer> voteMap = getVoteMapFromRedis(voteKey);
-        voteMap.put(userId, confirm ? 1 : 0);
-        voteRedisTemplate.opsForValue().set(voteKey, voteMap);
+        Player player = playerMap.get(userId);
 
-        if (voteMap.values().stream().mapToInt(Integer::intValue).sum() == playerMap.size()) {
+        player.setVoted(true);
+        update(gameDTO);
+
+        if(GameRole.BETRAYER.equals(player.getRole())){
+            commonPublish(gameId, GameState.VOTE, CommonResult.SUCCESS);
+        }else{
+            String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
+
+            // 투표 및 저장 ( userId : 1(승낙) 0(거절) )
+            HashMap<Long, Integer> voteMap = getVoteMapFromRedis(voteKey);
+            voteMap.put(userId, confirm ? 1 : 0);
+            voteRedisTemplate.opsForValue().set(voteKey, voteMap);
+
+            commonPublish(gameId, GameState.CONFIRM_VOTE, CommonResult.SUCCESS);
+        }
+
+        if (playerMap.values().stream().filter(Player::isVoted).count() == playerMap.size()) {
             // todo : 얘도 이거 타면 end confirm 타이머 끄는게 필요함
             endConfirmTask.execute(gameId);
 //            EndConfirmMessage endConfirmMessage = EndConfirmMessage.builder().gameId(gameId).voteMap(voteMap).build();
 //            endConfirm(endConfirmMessage);
         }
+
     } // end of startConfirm
 
     public void endConfirm(EndConfirmMessage message) {
@@ -258,23 +247,19 @@ public class GameService {
      */
     @RedissonLock(value = "#gameId")
     public void removeUser(Long gameId, Long targetId) {
-        Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
-                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
-
-        GameDTO gameDTO = GameDTO.toDto(game);
+        GameDTO gameDTO = getGameDTO(gameId);
 
         Map<Long, Player> playerMap = gameDTO.getPlayerMap();
 
         playerMap.get(targetId).setAlive(false);
 
         update(gameDTO);
-    }
+    } // end of removeUser
 
     @RedissonLock(value = "#gameId")
     public void kill(Long gameId, Long targetId) {
-        Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
-                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
-        GameDTO gameDTO = GameDTO.toDto(game);
+        GameDTO gameDTO = getGameDTO(gameId);
+
         Player targetPlayer = gameDTO.getPlayerMap().get(targetId);
 
         if(!targetPlayer.isAlive()){
@@ -291,16 +276,14 @@ public class GameService {
                         .targetId(targetId)
                         .result("success")
                         .build());
-    }
+    } // end of Kill
 
     public void appease(Long gameId, Long targetId) {
-        Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
-                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+        GameDTO gameDTO = getGameDTO(gameId);
 
-        if(!Objects.isEmpty(game.getEmissary()))
+        if(!Objects.isEmpty(gameDTO.getEmissary()))
             throw new AlreadyUseAppeaseException(CommonErrorCode.ALREADY_USE_APPEASE_EXCEPTION);
 
-        GameDTO gameDTO = GameDTO.toDto(game);
         Map<Long, Player> playerMap = gameDTO.getPlayerMap();
         Player targetPlayer = playerMap.get(targetId);
 
@@ -338,14 +321,12 @@ public class GameService {
                         .targetId(targetId)
                         .result("success")
                         .build());
-    }
+    } // end of appease
 
     @RedissonLock(value = "#gameId")
     public void detect(Long gameId, Long targetId) {
-        Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
-                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+        GameDTO gameDTO = getGameDTO(gameId);
 
-        GameDTO gameDTO = GameDTO.toDto(game);
         Map<Long, Player> playerMap = gameDTO.getPlayerMap();
         Player targetPlayer = playerMap.get(targetId);
 
@@ -356,18 +337,42 @@ public class GameService {
         // todo : 이미 조사한 유저에 대해서 어떻게하지? -> 그냥 다 모른다 쳐!
         NightPoliceMessage nightPoliceMessage = NightPoliceMessage.builder().gameId(gameId).targetId(targetId).result(targetPlayer.getRole()).build();
         publisher.publish(nightPoliceTopic, nightPoliceMessage);
-    }
+    } // end of detect
 
     @RedissonLock(value = "#gameId")
     public void day(Long gameId) {
-        Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
-                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+        GameDTO gameDTO = getGameDTO(gameId);
 
-        GameDTO gameDTO = GameDTO.toDto(game);
         gameDTO.setGameState(GameState.DAY);
-        gameDTO.setDay(game.getDay() + 1);
+        gameDTO.setDay(gameDTO.getDay() + 1);
 
         // 2분뒤 다시 토론 시작
         scheduler.scheduleTask(gameId, TaskName.START_VOTE_TASK, startVoteTask, 2, TimeUnit.MINUTES);
-    }
+    } // end of day
+
+
+    @RedissonLock(value = "#gameId")
+    private HashMap<Long, Integer> getVoteMapFromRedis(String voteKey) {
+        HashMap<Long, Integer> voteMap = voteRedisTemplate.opsForValue().get(voteKey);
+        if (voteMap == null) {
+            voteMap = new HashMap<>();
+        }
+        return voteMap;
+    } // end of getVoteMapFromRedis
+
+    private GameDTO getGameDTO(long gameId) {
+        Game game = redisGameRepository.findById(gameId).orElseThrow(
+                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+
+        GameDTO gameDTO = GameDTO.toDto(game);
+        return gameDTO;
+    } // end of getGameDTO
+
+    private void commonPublish(long gameId, GameState gameState, CommonResult commonResult){
+        publisher.publish(commonTopic, CommonMessage.builder()
+                .gameId(gameId)
+                .gameState(gameState)
+                .result(commonResult)
+                .build());
+    } // end of commonPublish
 }
