@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -35,7 +36,7 @@ public class StartConfirmTask implements GameTask {
         
         // 2분뒤 투표종료 안내
         endConfirmTask.setGameId(gameId);
-        scheduler.scheduleTask(gameId, "EndConfirmTask", endConfirmTask, 2, TimeUnit.MINUTES);
+        ScheduledFuture<?> scheduledFuture = scheduler.scheduleTask(gameId, TaskName.END_CONFIRM_TASK, endConfirmTask, 2, TimeUnit.MINUTES);
     }
 
     public void setGameId(long gameId){

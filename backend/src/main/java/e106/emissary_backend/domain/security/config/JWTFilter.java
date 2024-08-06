@@ -1,7 +1,7 @@
 package e106.emissary_backend.domain.security.config;
 
 import e106.emissary_backend.domain.security.util.JWTUtil;
-import e106.emissary_backend.domain.user.dto.CustomOAuth2User;
+//import e106.emissary_backend.domain.user.dto.CustomOAuth2User;
 import e106.emissary_backend.domain.user.dto.CustomUserDetails;
 import e106.emissary_backend.domain.user.entity.User;
 import jakarta.servlet.FilterChain;
@@ -32,6 +32,12 @@ public class JWTFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
+        System.out.println("[@JwtFilter] - IN");
+        System.out.println("-----[Decode Header] ---- ");
+        request.getHeaderNames().asIterator()
+            .forEachRemaining(headerName -> System.out.println(headerName+":"+request.getHeader(headerName)));
+        System.out.println("-----[Decode Header END] ---- ");
+        
 
         String accessToken = Optional.ofNullable(request.getCookies())
                 .flatMap(cookies -> Arrays.stream(cookies)
@@ -41,7 +47,7 @@ public class JWTFilter extends OncePerRequestFilter {
                 .orElse(null);
 
         String requestURI = request.getRequestURI();
-        if (requestURI.equals("/api/reissue")||requestURI.equals("/")||requestURI.equals("/api/user")||requestURI.equals("/api/login")||requestURI.equals("/api/logout")||requestURI.equals("/api/mail")) {
+        if (requestURI.equals("/api/reissue")||requestURI.equals("/")||requestURI.equals("/api/user")||requestURI.equals("/api/login")||requestURI.equals("/api/logout")||requestURI.equals("/api/mail") || requestURI.equals("/api/checknick") || requestURI.equals("/api/checkemail")) {
             chain.doFilter(request, response);
             return;
         }
@@ -73,10 +79,10 @@ public class JWTFilter extends OncePerRequestFilter {
                 .nickname(jwtUtil.getUsername(accessToken))
                 .role(jwtUtil.getRole(accessToken))
                 .build();
-        if(Objects.equals(IS_COME, "OAUTH")) {
-            CustomOAuth2User customOAuth2User = new CustomOAuth2User(user, Map.of());
-            authToken = new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities());
-        }
+//        if(Objects.equals(IS_COME, "OAUTH")) {
+//            CustomOAuth2User customOAuth2User = new CustomOAuth2User(user, Map.of());
+//            authToken = new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities());
+//        }
         if(Objects.equals(IS_COME, "COMMON")) {
             CustomUserDetails customUserDetails = new CustomUserDetails(user);
             authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());

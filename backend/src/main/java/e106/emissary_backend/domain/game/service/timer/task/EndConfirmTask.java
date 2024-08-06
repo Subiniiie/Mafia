@@ -1,6 +1,7 @@
 package e106.emissary_backend.domain.game.service.timer.task;
 
 import e106.emissary_backend.domain.game.GameConstant;
+import e106.emissary_backend.domain.game.aspect.RedissonLock;
 import e106.emissary_backend.domain.game.service.GameService;
 import e106.emissary_backend.domain.game.service.publisher.RedisPublisher;
 import e106.emissary_backend.domain.game.service.subscriber.message.EndConfirmMessage;
@@ -28,6 +29,7 @@ public class EndConfirmTask implements GameTask {
         execute(gameId);
     }
 
+    @RedissonLock(value = "#gameId")
     @Override
     public void execute(Long gameId) {
         // todo : vote 종료 로직 구현
