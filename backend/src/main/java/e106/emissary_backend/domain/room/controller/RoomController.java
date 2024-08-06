@@ -1,11 +1,14 @@
 package e106.emissary_backend.domain.room.controller;
 
+import e106.emissary_backend.domain.room.dto.RoomJoinDto;
 import e106.emissary_backend.domain.room.dto.RoomOptionDto;
 import e106.emissary_backend.domain.room.dto.RoomRequestDto;
 import e106.emissary_backend.domain.room.dto.RoomListDto;
 import e106.emissary_backend.domain.room.service.RoomService;
 import e106.emissary_backend.domain.user.dto.CustomUserDetails;
 import e106.emissary_backend.global.common.CommonResponseDto;
+import io.openvidu.java.client.OpenViduHttpException;
+import io.openvidu.java.client.OpenViduJavaClientException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,8 +49,15 @@ public class RoomController {
         if(!Objects.isNull(customUserDetails)){
             userId = customUserDetails.getUserId();
         }
-
-        return ResponseEntity.ok(roomService.makeRoom(userId, roomRequestDto));
+        try{
+            // 방이 성공적으로 생성되었을 시, Room Option Dto에 Token 실어서 전송
+            RoomOptionDto res = roomService.makeRoom(userId, roomRequestDto);
+            return ResponseEntity.ok(res);
+        } catch (OpenViduJavaClientException | OpenViduHttpException e){
+            // 방이 생성 실패 되었을 시, 500 error 전송
+            RoomOptionDto res = new RoomOptionDto();
+            return ResponseEntity.internalServerError().body(res);
+        }
     }
 
     /**
@@ -55,13 +65,21 @@ public class RoomController {
      */
     // Todo : JWT 처리하는거 추가.
     @PostMapping("/rooms/{roomId}")
-    public ResponseEntity<CommonResponseDto> enterRoom(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long roomId) {
+    public ResponseEntity<RoomJoinDto> enterRoom(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long roomId) {
         // 테스트용으로
         long userId = 1L;
         if(!Objects.isNull(customUserDetails)){
             userId = customUserDetails.getUserId();
         }
-        return ResponseEntity.ok(roomService.enterRoom(roomId, userId));
+
+        try{
+            // 참가 성공 시
+            RoomJoinDto res = roomService.enterRoom(roomId, userId);
+            return ResponseEntity.ok(res);
+        } catch (OpenViduJavaClientException | OpenViduHttpException e){
+            // 참가 실패 시
+            return ResponseEntity.internalServerError().body(new RoomJoinDto());
+        }
     }
 
     /**
@@ -71,8 +89,10 @@ public class RoomController {
     public ResponseEntity<CommonResponseDto> leaveRoom(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long roomId) {
         // 테스트용으로
         long userId = 1L;
+        String nickname = "";
         if(!Objects.isNull(customUserDetails)){
             userId = customUserDetails.getUserId();
+            nickname = customUserDetails.getUsername();
         }
 
         return ResponseEntity.ok(roomService.leaveRoom(roomId, userId));
