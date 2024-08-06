@@ -87,8 +87,9 @@ public class RedisConfig {
 
     @Bean
     public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory connectionFactory,
-                                                                       MessageListenerAdapter dayListenerAdapter,
-                                                                       ChannelTopic dayTopic,
+                                                                       MessageListenerAdapter readyAdapter, ChannelTopic readyTopic,
+                                                                       MessageListenerAdapter readyCompleteAdapter, ChannelTopic readyCompleteTopic,
+                                                                       MessageListenerAdapter dayListenerAdapter, ChannelTopic dayTopic,
                                                                        MessageListenerAdapter startVoteAdapter, ChannelTopic startVoteTopic,
                                                                        MessageListenerAdapter endVoteAdapter, ChannelTopic endVoteTopic,
                                                                        MessageListenerAdapter startConfirmAdapter, ChannelTopic startConfirmTopic,
@@ -98,6 +99,8 @@ public class RedisConfig {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         // subscriber, topic
+        container.addMessageListener(readyAdapter, readyTopic);
+        container.addMessageListener(readyCompleteAdapter, readyCompleteTopic);
         container.addMessageListener(dayListenerAdapter, dayTopic);
         container.addMessageListener(startVoteAdapter, startVoteTopic);
         container.addMessageListener(endVoteAdapter, endVoteTopic);
@@ -107,6 +110,26 @@ public class RedisConfig {
         container.addMessageListener(nightPoliceAdapter, nightPoliceTopic);
 
         return container;
+    }
+
+    @Bean
+    public MessageListenerAdapter readyAdapter(ReadySubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "sendMessage");
+    }
+
+    @Bean
+    public ChannelTopic readyTopic() {
+        return new ChannelTopic("READY");
+    }
+
+    @Bean
+    public MessageListenerAdapter readyCompleteAdapter(ReadyCompleteSubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "sendMessage");
+    }
+
+    @Bean
+    public ChannelTopic readyCompleteTopic() {
+        return new ChannelTopic("READY_Complete");
     }
 
     @Bean

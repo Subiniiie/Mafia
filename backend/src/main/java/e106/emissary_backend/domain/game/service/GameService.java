@@ -3,6 +3,7 @@ package e106.emissary_backend.domain.game.service;
 import e106.emissary_backend.domain.game.GameConstant;
 import e106.emissary_backend.domain.game.aspect.RedissonLock;
 import e106.emissary_backend.domain.game.entity.Game;
+import e106.emissary_backend.domain.game.enumType.CommonResult;
 import e106.emissary_backend.domain.game.enumType.GameRole;
 import e106.emissary_backend.domain.game.enumType.GameState;
 import e106.emissary_backend.domain.game.model.GameDTO;
@@ -45,6 +46,8 @@ public class GameService {
     private final SchedulerService scheduler;
 
     private final RedisPublisher publisher;
+    private final ChannelTopic readyTopic;
+    private final ChannelTopic readyCompleteTopic;
     private final ChannelTopic dayTopic;
     private final ChannelTopic startVoteTopic;
     private final StartVoteTask startVoteTask;
@@ -71,6 +74,55 @@ public class GameService {
 
         return GameResponseDTO.toDto(game);
     } // end of findGameById
+
+    public void ready(Long gameId, Long userId) {
+        Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
+                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+
+        GameDTO gameDTO = GameDTO.toDto(game);
+        Map<Long, Player> playerMap = gameDTO.getPlayerMap();
+        Player player = playerMap.get(userId);
+
+        player.setReady(true);
+
+        publisher.publish(readyTopic, ReadyMessage.builder()
+                .gameId(gameId)
+                .gameState(GameState.WAIT)
+                .result(CommonResult.SUCCESS)
+                .build());
+
+        // 모두가 준비가 끝나면 알려주기.
+        if(playerMap.values().stream().allMatch(Player::isReady)){
+            gameDTO.setGameState(GameState.READY_COMPLETE);
+
+            publisher.publish(readyCompleteTopic, ReadyCompleteMessage.builder()
+                    .gameId(gameId)
+                    .gameState(GameState.READY_COMPLETE)
+                    .result(CommonResult.SUCCESS)
+                    .build());
+        }
+
+        update(gameDTO);
+    } // end of ready
+
+    public void readyCancel(Long gameId, Long userId) {
+        Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
+                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+
+        GameDTO gameDTO = GameDTO.toDto(game);
+        Map<Long, Player> playerMap = gameDTO.getPlayerMap();
+        Player player = playerMap.get(userId);
+
+        player.setReady(false);
+
+        publisher.publish(readyTopic, ReadyMessage.builder()
+                .gameId(gameId)
+                .gameState(GameState.WAIT)
+                .result(CommonResult.SUCCESS)
+                .build());
+
+        update(gameDTO);
+    }
 
 
     public void setGame(Long roomId) {
