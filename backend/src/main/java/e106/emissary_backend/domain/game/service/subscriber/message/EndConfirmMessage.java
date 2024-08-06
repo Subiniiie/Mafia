@@ -1,5 +1,6 @@
 package e106.emissary_backend.domain.game.service.subscriber.message;
 
+import e106.emissary_backend.domain.game.enumType.GameState;
 import e106.emissary_backend.domain.game.enumType.VoteState;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +15,8 @@ import java.util.HashMap;
 @Getter
 public class EndConfirmMessage {
     private long gameId;
+    @Builder.Default
+    private GameState gameState = GameState.CONFIRM_END;
     private HashMap<Long, Integer> voteMap;
     private Long targetId;
     private String result;

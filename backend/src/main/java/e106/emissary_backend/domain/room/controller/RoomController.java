@@ -1,5 +1,6 @@
 package e106.emissary_backend.domain.room.controller;
 
+import e106.emissary_backend.domain.room.dto.RoomDetailDto;
 import e106.emissary_backend.domain.room.dto.RoomOptionDto;
 import e106.emissary_backend.domain.room.dto.RoomRequestDto;
 import e106.emissary_backend.domain.room.dto.RoomListDto;
@@ -75,9 +76,13 @@ public class RoomController {
             userId = customUserDetails.getUserId();
         }
 
-        return ResponseEntity.ok(roomService.leaveRoom(roomId, userId));
+        return ResponseEntity.ok(roomService.deleteUser(roomId, userId));
     }
 
+    @GetMapping("/rooms/{roomId}")
+    public ResponseEntity<RoomDetailDto> detailRoom(@PathVariable Long roomId) {
+        return ResponseEntity.ok(roomService.detailRoom(roomId));
+    }
 
 
     @DeleteMapping("/api/rooms/{roomId}/{userId}")
