@@ -18,9 +18,8 @@ function GamePage({viduToken}) {
   // OpenViduSession Variables
   let OV = new OpenVidu();
   const [session, setSession] = useState();
-  const [mainStreamManager, setMainStreamManager] = useState();
-  const [publisher, setPublisher] = useState();
-  const [subscribers, setSubscribers] = useState([]);
+  const [streamManagers, setStreamManagers] = useState([]);
+
 
   // User Info
   const [userId, setUserId] = useState();
@@ -40,9 +39,17 @@ function GamePage({viduToken}) {
     let mySession = OV.initSession();
     setSession(mySession);
 
+    const addStreamManager = (streamManager) => {
+      setStreamManagers(subs => [...subs, streamManager]);
+    }
+
+    const deleteStreamManager = (streamManager) => {
+      setStreamManagers(subs => subs.filter(s => s !== streamManager));
+    }
+
     const handleStreamCreated = (event) => {
-      mySession.subscribeAsync(event.stream, undefined).then((subscriber) => {
-         setSubscribers((subs) => [subscriber, ...subs]);
+      mySession.subscribeAsync(event.stream, undefined).then((streamManager) => {
+        addStreamManager(streamManager);
       });
     };
 
@@ -54,7 +61,7 @@ function GamePage({viduToken}) {
     mySession.on("streamCreated", handleStreamCreated);
 
     mySession.on("streamDestroyed", (event) => {
-      deleteSubscriber(event.stream.streamManager);
+      deleteStreamManager(event.stream.streamManager);
     });
 
     mySession.on("signal:chat", handleChatSignal);
@@ -69,7 +76,8 @@ function GamePage({viduToken}) {
     }
 
     mySession
-      .connect(viduToken, JSON.stringify(data))
+      // .connect(viduToken, JSON.stringify(data))
+      .connect(viduToken, data)
       .then(async () => {
         let publisher = OV.initPublisher(undefined, {
           audioSource: undefined,
@@ -82,17 +90,9 @@ function GamePage({viduToken}) {
           mirror: true,
         });
 
-        mySession.publish(publisher);
+        await mySession.publish(publisher);
+        addStreamManager(publisher);
 
-        var devices = await this.OV.getDevices();
-        var videoDevices = devices.filter(device => device.kind === 'videoinput');
-        var currentVideoDeviceId = publisher.stream.getMediaStream().getVideoTracks()[0].getSettings().deviceId;
-        var currentVideoDevice = videoDevices.find(device => device.deviceId === currentVideoDeviceId);
-
-        publisher.videoSource = currentVideoDevice;
-
-        setMainStreamManager(publisher);
-        setPublisher(publisher);
       })
       .catch((error) => {
         console.warn(error)
@@ -102,17 +102,6 @@ function GamePage({viduToken}) {
     }
   }, []);
 
-  const deleteSubscriber = (streamManager) => {
-    setSubscribers((subs) => {
-      let index = subs.indexOf(streamManager, 0);
-      if(index > -1) {
-        subs.splice(index, 1);
-        return subs;
-      }
-      return subs;
-    });
-  };
-
   const leaveSession = () => {
     const mySession = session;
     if(mySession) {
@@ -121,16 +110,19 @@ function GamePage({viduToken}) {
 
     this.OV = null;
     setSession(undefined);
-    setSubscribers([]);
-    setMainStreamManager(undefined);
+    setStreamManagers([]);
     window.location.reload();
+  }
+
+  const getSortedStreamManagers = (streamManagers) => {
+    return [...streamManagers].sort((a, b) => a.stream.creationTime - b.stream.creationTime);
   }
 
     return (
         <>
             <div className={styles.container}>
                 <GamePageHeader leaveSession={leaveSession}/>
-                <GamePageMain publisher={publisher} subscribers={subscribers} />
+                <GamePageMain streamManagers={getSortedStreamManagers(streamManagers)}/>
                 <GamePageFooter chatHistory={chatHistory} setChatHistory={setChatHistory} session={session}/>
             </div>
         </>

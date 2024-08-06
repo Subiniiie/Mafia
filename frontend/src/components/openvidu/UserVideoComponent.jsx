@@ -4,7 +4,7 @@ import axios from "axios";
 
 import styles from "./UserVideo.module.css";
 
-const UserVideoComponent = ({streamManager, sub}) => {
+const UserVideoComponent = ({streamManager}) => {
     const nicknameTag = "ssafy_test"
     const id = 1;
 

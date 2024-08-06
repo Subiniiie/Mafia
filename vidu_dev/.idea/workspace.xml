@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="2a8ea3c7-f167-4c6e-bb35-ddd94d6787cd" name="변경" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="HTML File" />
+        <option value="JavaScript File" />
+        <option value="Enum" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4
+}</component>
+  <component name="ProjectId" id="2jcwcA1Cc1utYrucWjA25IUKYOj" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "Gradle.text-chat-app 빌드.executor": "Run",
+    "Gradle.vidu_dev 빌드.executor": "Run",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "Spring Boot.TextChatAppApplication.executor": "Run",
+    "git-widget-placeholder": "560-kkj",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/SSAFY/Desktop/work/S11P12E106/vidu_dev/src/main/resources/static",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="ReactorSettings">
+    <option name="notificationShown" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\SSAFY\Desktop\work\S11P12E106\vidu_dev\src\main\resources\static" />
+      <recent name="C:\Users\SSAFY\Desktop\text_chat\backend\text-chat-app\src\main\resources\static" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="TextChatAppApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <module name="text-chat-app.main" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.example.textchatapp.TextChatAppApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TextChatAppApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <module name="text-chat-app.main" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.example.textchatapp.TextChatAppApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9f38398b9061-39b83d9b5494-intellij.indexing.shared.core-IU-241.18034.62" />
+        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-IU-241.18034.62" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="애플리케이션 수준" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="디폴트 작업">
+      <changelist id="2a8ea3c7-f167-4c6e-bb35-ddd94d6787cd" name="변경" comment="" />
+      <created>1721699751026</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1721699751026</updated>
+      <workItem from="1721699752089" duration="18130000" />
+      <workItem from="1721725063244" duration="107000" />
+      <workItem from="1721786334586" duration="17222000" />
+      <workItem from="1721867541876" duration="12511000" />
+      <workItem from="1721961156518" duration="18000" />
+      <workItem from="1721962250663" duration="2000" />
+      <workItem from="1721975110714" duration="4000" />
+      <workItem from="1721975428066" duration="2825000" />
+      <workItem from="1722143538139" duration="11885000" />
+      <workItem from="1722210081836" duration="15351000" />
+      <workItem from="1722230183765" duration="6042000" />
+      <workItem from="1722299674549" duration="18711000" />
+      <workItem from="1722386050231" duration="23684000" />
+      <workItem from="1722414416453" duration="793000" />
+      <workItem from="1722471082359" duration="1867000" />
+      <workItem from="1722473103605" duration="3183000" />
+      <workItem from="1722481239433" duration="16622000" />
+      <workItem from="1722555704207" duration="19247000" />
+      <workItem from="1722768310834" duration="130000" />
+      <workItem from="1722768446872" duration="1838000" />
+      <workItem from="1722777681432" duration="2548000" />
+      <workItem from="1722815857490" duration="8530000" />
+      <workItem from="1722835200066" duration="44000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/example/textchatapp/TextChatAppController.java</url>
+          <line>87</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

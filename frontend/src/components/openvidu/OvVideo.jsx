@@ -20,9 +20,7 @@ export default class OpenViduVideoComponnet extends Component {
 
     render(){
         return(
-            <video autoPlay={true}
-                   ref={this.videoRef}
-           />
+            <video autoPlay={true} ref={this.videoRef} />
         );
     }
 }
