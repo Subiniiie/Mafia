@@ -4,7 +4,7 @@ import GameChatInput from "./GameChatInput";
 import GameChatHistory from "./GameChatHistory";
 import System from "./System";
 
-function GameChat() {
+function GameChat({ systemMessage }) {
     
 
     const [ chatHistory, setChatHistory ] = useState([])
@@ -24,7 +24,7 @@ function GameChat() {
                              <button onClick={OpenChat} className={styles.chatBtn}>
                                 <svg xmlns="http://www.w3.org/2000/svg" height="25" viewBox="0 -960 960 960" width="25" fill="#5f6368"><path d="m296-224-56-56 240-240 240 240-56 56-184-183-184 183Zm0-240-56-56 240-240 240 240-56 56-184-183-184 183Z"/></svg>
                              </button>
-                             <System />
+                             <System systemMessage={systemMessage} />
                           </div>
 
     const visibleChat = <div className={styles.opened}>
