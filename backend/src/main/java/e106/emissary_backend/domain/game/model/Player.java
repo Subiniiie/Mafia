@@ -40,6 +40,9 @@ public class Player implements Serializable {
     @Builder.Default
     private boolean isAlive = true;
 
+    @Builder.Default
+    private boolean isWin = false;
+
     public static Player createPlayer(Long id, String nickname) {
         return Player.builder()
                 .id(id)

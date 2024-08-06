@@ -5,6 +5,7 @@ import e106.emissary_backend.domain.game.enumType.GameState;
 import e106.emissary_backend.domain.game.model.GameDTO;
 import e106.emissary_backend.domain.game.model.Player;
 import e106.emissary_backend.domain.game.repository.RedisGameRepository;
+import e106.emissary_backend.domain.room.dto.RoomDetailDto;
 import e106.emissary_backend.domain.room.dto.RoomOptionDto;
 import e106.emissary_backend.domain.room.dto.RoomRequestDto;
 import e106.emissary_backend.domain.room.entity.Room;
@@ -12,6 +13,7 @@ import e106.emissary_backend.domain.room.dto.RoomListDto;
 import e106.emissary_backend.domain.room.enumType.RoomState;
 import e106.emissary_backend.domain.room.repository.RoomRepository;
 import e106.emissary_backend.domain.security.Controller.ReIssueController;
+import e106.emissary_backend.domain.user.dto.RoomDetailUserDto;
 import e106.emissary_backend.domain.user.entity.User;
 import e106.emissary_backend.domain.user.repository.UserRepository;
 import e106.emissary_backend.domain.userInRoom.entity.UserInRoom;
@@ -189,5 +191,19 @@ public class RoomService {
         redisGameRepository.save(updateGame);
 
         return new CommonResponseDto("ok");
+    }
+
+    public RoomDetailDto detailRoom(long roomId) {
+        List<UserInRoom> userInRoom = userInRoomRepository.findAllByPk_RoomId(roomId).orElseThrow(
+                () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
+
+        Room room = userInRoom.get(0).getRoom();
+
+        List<RoomDetailUserDto> roomDetailUserDtoList = userInRoom.stream()
+                .map(UserInRoom::getUser)
+                .map(user -> RoomDetailUserDto.of(user, room.getOwnerId() ))
+                .collect(Collectors.toList());
+
+        return RoomDetailDto.toDTO(room, roomDetailUserDtoList);
     }
 }

@@ -68,7 +68,8 @@ public class GameService {
         redisKeyValueTemplate.update(game);
     } // end of update
 
-    public void ready(Long gameId, Long userId) {
+    @RedissonLock(value = "#gameId")
+    public void ready(long gameId, long userId) {
         GameDTO gameDTO = getGameDTO(gameId);
 
         Map<Long, Player> playerMap = gameDTO.getPlayerMap();
@@ -92,7 +93,8 @@ public class GameService {
         update(gameDTO);
     } // end of ready
 
-    public void readyCancel(Long gameId, Long userId) {
+    @RedissonLock(value = "#gameId")
+    public void readyCancel(long gameId, long userId) {
         GameDTO gameDTO = getGameDTO(gameId);
 
         Map<Long, Player> playerMap = gameDTO.getPlayerMap();
@@ -106,7 +108,7 @@ public class GameService {
     } // end of readyCancel
 
 
-    public void setGame(Long roomId) {
+    public void setGame(long roomId) {
         GameDTO gameDTO = getGameDTO(roomId);
 
         gameDTO.setGameState(GameState.STARTED);
@@ -162,13 +164,8 @@ public class GameService {
             voteRedisTemplate.opsForValue().set(voteKey, voteMap);
 
             commonPublish(gameId, GameState.VOTE, CommonResult.SUCCESS);
-
-            // 모든 플레이어가 투표했는지 확인
-            // todo : 이거 근데 투표갯수를 세는게 맞을까? 각각 투표완료를 세는게 아니라
         }
         if (playerMap.values().stream().filter(Player::isVoted).count() == playerMap.size()) {
-            // todo : 만약 여기서 바로 이걸 타면 endVote타이머 종료해야함.
-            // todo : 예약된 Task를 종료하고 Task를 직접 실행하자.
             endVoteTask.execute(gameId);
 //            EndVoteMessage endVoteMessage = EndVoteMessage.builder().gameId(gameId).voteMap(voteMap).build();
 //            endVote(endVoteMessage);
@@ -195,7 +192,7 @@ public class GameService {
     } // end of endVote
 
     @RedissonLock(value = "#gameId")
-    public void startConfirm(Long gameId, long userId, boolean confirm) {
+    public void startConfirm(long gameId, long userId, boolean confirm) {
         GameDTO gameDTO = getGameDTO(gameId);
 
         Map<Long, Player> playerMap = gameDTO.getPlayerMap().entrySet().stream()
@@ -246,7 +243,7 @@ public class GameService {
      제거하는 로직
      */
     @RedissonLock(value = "#gameId")
-    public void removeUser(Long gameId, Long targetId) {
+    public void removeUser(long gameId, long targetId) {
         GameDTO gameDTO = getGameDTO(gameId);
 
         Map<Long, Player> playerMap = gameDTO.getPlayerMap();
@@ -257,7 +254,7 @@ public class GameService {
     } // end of removeUser
 
     @RedissonLock(value = "#gameId")
-    public void kill(Long gameId, Long targetId) {
+    public void kill(long gameId, long targetId) {
         GameDTO gameDTO = getGameDTO(gameId);
 
         Player targetPlayer = gameDTO.getPlayerMap().get(targetId);
@@ -278,7 +275,7 @@ public class GameService {
                         .build());
     } // end of Kill
 
-    public void appease(Long gameId, Long targetId) {
+    public void appease(long gameId, long targetId) {
         GameDTO gameDTO = getGameDTO(gameId);
 
         if(!Objects.isEmpty(gameDTO.getEmissary()))
@@ -324,7 +321,7 @@ public class GameService {
     } // end of appease
 
     @RedissonLock(value = "#gameId")
-    public void detect(Long gameId, Long targetId) {
+    public void detect(long gameId, long targetId) {
         GameDTO gameDTO = getGameDTO(gameId);
 
         Map<Long, Player> playerMap = gameDTO.getPlayerMap();
@@ -340,7 +337,7 @@ public class GameService {
     } // end of detect
 
     @RedissonLock(value = "#gameId")
-    public void day(Long gameId) {
+    public void day(long gameId) {
         GameDTO gameDTO = getGameDTO(gameId);
 
         gameDTO.setGameState(GameState.DAY);
@@ -350,6 +347,17 @@ public class GameService {
         scheduler.scheduleTask(gameId, TaskName.START_VOTE_TASK, startVoteTask, 2, TimeUnit.MINUTES);
     } // end of day
 
+    @RedissonLock(value = "#gameId")
+    public void isGameEnd(long gameId){
+
+    }
+
+    @RedissonLock(value = "#gameId")
+    public void gameEnd(long gameId){
+        GameDTO gameDTO = getGameDTO(gameId);
+        gameDTO.setGameState(GameState.END);
+
+    }
 
     @RedissonLock(value = "#gameId")
     private HashMap<Long, Integer> getVoteMapFromRedis(String voteKey) {
