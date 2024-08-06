@@ -8,12 +8,12 @@ const SignUpModal = ({ isOpen, openModal }) => {
     const modalTitle = 'SignUp Modal';
 
     const [email, setEmail] = useState('')
-    const [username, setUsername] = useState('')
+    const [nickname, setNickname] = useState('')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
 
     const emailRef = useRef()
-    const usernameRef = useRef()
+    const nicknameRef = useRef()
     const passwordRef = useRef()
     const confirmPasswordRef = useRef()
     const submitButtonRef = useRef()
@@ -21,6 +21,16 @@ const SignUpModal = ({ isOpen, openModal }) => {
     if (!isOpen) return null; // 모달이 열리지 않았다면 렌더링하지 않음
 
     const handleSignUp = async () => {
+        var specialRule = /[`~!@#$%^&*|'";:/?]/gi
+
+        if (password.length < 8) {
+            alert('비밀번호를 8자 이상으로 설정해주세요.')
+            return
+        } else if (!specialRule.test(password)) {
+            alert('비밀번호에 특수문자를 넣어서 설정해주세요.')
+            return
+        }
+
         if (password != confirmPassword) {
             alert('비밀번호가 일치하지 않습니다.')
             return
@@ -30,7 +40,7 @@ const SignUpModal = ({ isOpen, openModal }) => {
             console.log('회원가입을 시작할게')
             const body = {
                 email: email,
-                username: username,
+                nickname: nickname,
                 password: password
             }
             console.log(body)
@@ -49,12 +59,14 @@ const SignUpModal = ({ isOpen, openModal }) => {
 
     const handleValidKeyDown = async (e, apiEndpoint, nextRef) => {
         if (e.key === 'Enter') {
+            console.log('Enter를 눌렀네! 유효성 검증을 해볼게')
             try {
                 const response = await axios.get(`https://i11e106.p.ssafy.io${apiEndpoint}`);
-                if (response.data.isValid) {
+                console.log(response.data)
+                if (response.data.status === 'success') {
                     nextRef.current.focus()
                 } else {
-                    alert('유효하지 않은 입력입니다.')
+                    alert(response.data.message)
                 }
             } catch (error) {
                 console.error('유효성 검증 실패 :', error)
@@ -82,7 +94,7 @@ const SignUpModal = ({ isOpen, openModal }) => {
                         className={styles.inputField}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        onKeyDown={(e) => handleValidKeyDown(e, `/api/checkemail?email=${email}`, usernameRef)}
+                        onKeyDown={(e) => handleValidKeyDown(e, `/api/checkemail?email=${email}`, nicknameRef)}
                         ref={emailRef}
                     />
 
@@ -92,10 +104,10 @@ const SignUpModal = ({ isOpen, openModal }) => {
                         type="text"
                         placeholder="닉네임을 입력해주세요"
                         className={styles.inputField}
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        onKeyDown={(e) => handleValidKeyDown(e, `api/checknick?username=${username}`, passwordRef)}
-                        ref={usernameRef}
+                        value={nickname}
+                        onChange={(e) => setNickname(e.target.value)}
+                        onKeyDown={(e) => handleValidKeyDown(e, `api/checknick?nickname=${nickname}`, passwordRef)}
+                        ref={nicknameRef}
                     />
 
                     <h5>비밀번호</h5>
