@@ -78,7 +78,7 @@ function App() {
   }
 
   const handleLoginSuccess = (username) => {
-    setIsLoggedIn(true)
+    setIsLoggedIn(!isLoggedIn)
     setName(username)
   }
 

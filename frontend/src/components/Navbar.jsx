@@ -79,7 +79,7 @@ const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
             localStorage.removeItem('access') // 로컬 스토리지에서 토큰 삭제
             localStorage.removeItem('refresh') // 로컬 스토리지에서 토큰 삭제
             console.log('localStorage 에서 access, refresh 삭제했어요')
-            // onLoginSuccess('') // 상위 컴포넌트에 로그아웃 알림
+            onLoginSuccess('') // 상위 컴포넌트에 로그아웃 알림
         } catch (error) {
             console.log("catch 들어왔어")
             console.error("Logout failed:", error.response ? error.response.data : error.message)
