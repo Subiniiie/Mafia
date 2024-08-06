@@ -27,12 +27,13 @@ function App() {
       console.log('currentTime :', currentTime)
       console.log('exp :', decodedAccess.payload.exp)
 
-      if (decodedAccess.payload.exp < currentTime) {
-        // 가짜로 만료된 척 하는 중...
-        // if (1722826419 < currentTime) {
+      // if (decodedAccess.payload.exp < currentTime) {
+      // 가짜로 만료된 척 하는 중...
+      if (1722826419 < currentTime) {
         // Access token이 만료된 경우
         console.log('Access token expired. Attempting to refresh token...')
         refreshToken(access, refresh)
+        console.log('reissue 성공!')
       } else {
         // Access token이 유효한 경우
         setIsLoggedIn(true)
@@ -43,19 +44,26 @@ function App() {
   }, [])
 
   const refreshToken = async (accessToken, refreshToken) => {
+    // const cookies = new Cookies();
     try {
-      console.log('refresh 해볼게용')
-      console.log('access :', accessToken)
-      console.log('refresh :', refreshToken)
-      const response = await axios.post('https://i11e106.p.ssafy.io/api/reissue', {}, {
+      console.log('reissue 해볼게용')
+
+      const body = {
+        access: accessToken,
+        refresh: refreshToken
+      }
+
+      const response = await axios.post('https://i11e106.p.ssafy.io/api/reissue', JSON.stringify(body), {
         headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          'X-Access-Token': refreshToken
-          // "Cookie": `Access=${accessToken}; Refresh=${refreshToken}`,
+          "Content-Type": "application/json",
         },
+        // headers: {
+        //   "Authorization": `Bearer ${accessToken}`,
+        //   'X-Access-Token': refreshToken
+        //   // "Cookie": `Access=${accessToken}; Refresh=${refreshToken}`,
+        // },
         withCredentials: true // 필요 시 추가: 이 옵션을 추가하면 쿠키가 포함된 요청을 서버로 보낼 수 있음
       })
-      console.log('새로운 response.data 출력해볼게 :', response.data)
       const { access, refresh } = response.data
       localStorage.setItem('access', access)
       localStorage.setItem('refresh', refresh)

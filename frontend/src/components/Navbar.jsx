@@ -59,13 +59,13 @@ const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
             console.log("try 들어왔어")
             const access = localStorage.getItem('access')
             console.log(access)
-            const refresh = localStorage.getItem('refresh')
-            console.log(refresh)
+            // const refresh = localStorage.getItem('refresh')
+            // console.log(refresh)
             // 로그아웃 API 요청
-            await axios.post('https://i11e106.p.ssafy.io/api/logout', {}, {
+            await axios.get('https://i11e106.p.ssafy.io/api/logout', {}, {
                 headers: {
                     "Authorization": `Bearer ${access}`,
-                    'X-Access-Token': refresh
+                    // 'X-Access-Token': refresh
                     // "Cookie": `Access=${accessToken}; Refresh=${refreshToken}`,
                 },
                 withCredentials: true // 필요 시 추가: 이 옵션을 추가하면 쿠키가 포함된 요청을 서버로 보낼 수 있음
@@ -74,7 +74,7 @@ const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
             localStorage.removeItem('access') // 로컬 스토리지에서 토큰 삭제
             localStorage.removeItem('refresh') // 로컬 스토리지에서 토큰 삭제
             console.log('localStorage 에서 access, refresh 삭제했어요')
-            // onLoginSuccess('') // 상위 컴포넌트에 로그아웃 알림
+            onLoginSuccess('') // 상위 컴포넌트에 로그아웃 알림
         } catch (error) {
             console.log("catch 들어왔어")
             console.error("Logout failed:", error.response ? error.response.data : error.message)
