@@ -24,6 +24,7 @@ const Monitor = function({ nickname, isRoomManager, isMe, isAlive, onVote }) {
     }
 
     // 강퇴 기능
+    // 방장만 클릭할 수 있도록
     const getOutPlayer = function() {
         console.log('넌 나가라')
     }
