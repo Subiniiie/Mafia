@@ -1,16 +1,19 @@
 import PropTypes from 'prop-types';
-import styles from './Filter.module.css'; // 스타일 파일을 별도로 관리합니다.
+import styles from "./Filter.module.css";
 
 const Filter = ({ label, value, onChange }) => {
     return (
-        <label className={styles.filterLabel}>
+        <div className={styles.filterBox}>
+            {/* <label> */}
             <input
                 type="checkbox"
                 value={value}
                 onChange={onChange}
             />
+            {/* {label} */}
+            {/* </label> */}
             {label}
-        </label>
+        </div>
     );
 };
 
