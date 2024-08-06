@@ -11,15 +11,12 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.http.ResponseCookie;
 
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -80,8 +77,6 @@ public class ReIssueController {
         String userId = jwtUtil.getUserId(refresh);
         String email = jwtUtil.getEmail(refresh);
         String gender = jwtUtil.getGender(refresh);
-//        String birth = jwtUtil.getBirth(refresh);
-//        System.out.println(birth);
         String role = jwtUtil.getRole(refresh);
 
         String newAccess = jwtUtil.createJwt("Access", Long.parseLong(userId), username, email, gender, /*birth,*/ role, 600000L);
@@ -105,8 +100,6 @@ public class ReIssueController {
         cookie.setMaxAge(60*60*60);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-//        cookie.setSecure(true);
-//        cookie.setAttribute("SameSite", "None");
 
         return cookie;
     }
