@@ -61,15 +61,15 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String username = customUserDetails.getUsername();
         String email = customUserDetails.getEmail();
         String gender = customeUserDetails.getGender();
-        String birth = customeUserDetails.getBirth();
+//        String birth = customeUserDetails.getBirth();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth  = iterator.next();
         String role = auth.getAuthority();
 
-        String access = jwtUtil.createJwt("Access", userId, username, email, gender, birth, role, 600000L);
-        String refresh = jwtUtil.createJwt("Refresh", userId, username, email, gender, birth, role, 86400000L);
+        String access = jwtUtil.createJwt("Access", userId, username, email, gender,/* birth,*/ role, 600000L);
+        String refresh = jwtUtil.createJwt("Refresh", userId, username, email, gender,/* birth,*/ role, 86400000L);
 
         addAccess(userId,username, access, 60000L);
         addRefresh(userId,username, refresh, 86400000L);

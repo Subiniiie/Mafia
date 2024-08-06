@@ -22,9 +22,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
 //                .setAllowedOrigins("*")
-                .setAllowedOriginPatterns("*");
+                .setAllowedOriginPatterns("*")
         // 지우니까 잘돼...
-//                .withSockJS();
+                .withSockJS();
     }
 
     /**

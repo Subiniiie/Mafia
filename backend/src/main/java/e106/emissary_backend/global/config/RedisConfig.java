@@ -1,10 +1,14 @@
 package e106.emissary_backend.global.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import e106.emissary_backend.domain.game.entity.Game;
-import e106.emissary_backend.domain.game.service.subscriber.DaySubscriber;
-import e106.emissary_backend.domain.game.service.subscriber.EndVoteSubscriber;
-import e106.emissary_backend.domain.game.service.subscriber.StartConfirmSubscriber;
-import e106.emissary_backend.domain.game.service.subscriber.StartVoteSubscriber;
+import e106.emissary_backend.domain.game.service.subscriber.*;
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -24,6 +28,16 @@ import java.util.HashMap;
 @Configuration
 public class RedisConfig {
 
+    private static final String REDISSON_HOST_PREFIX = "redis://";
+
+    @Bean
+    public RedissonClient redissonClient(){
+        Config config = new Config();
+        config.useSingleServer()
+                .setAddress(REDISSON_HOST_PREFIX + "43.202.1.100:6389");
+        return Redisson.create(config);
+    }
+
     @Bean
     public RedisMessageListenerContainer redisMessageListener(RedisConnectionFactory connectionFactory) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
@@ -31,13 +45,26 @@ public class RedisConfig {
         return container;
     }
 
+    @Bean public ObjectMapper objectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); // timestamp 형식 안따르도록 설정
+        mapper.registerModules(new JavaTimeModule(), new Jdk8Module()); // LocalDateTime 매핑을 위해 모듈 활성화
+        return mapper;
+    }
+
     @Bean
-    public RedisTemplate<Long, Game> redisTemplate(RedisConnectionFactory connectionFactory) {
+    public RedisTemplate<Long, Game> redisTemplate(RedisConnectionFactory connectionFactory, ObjectMapper objectMapper) {
         RedisTemplate<Long, Game> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(connectionFactory);
         redisTemplate.setKeySerializer(new GenericToStringSerializer<>(Long.class));
         redisTemplate.setHashKeySerializer(new GenericToStringSerializer<>(Long.class));
-        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(Game.class)); // Game으로 변경
+
+        Jackson2JsonRedisSerializer<Game> serializer = new Jackson2JsonRedisSerializer<>(objectMapper, Game.class);
+        redisTemplate.setValueSerializer(serializer);
+        redisTemplate.setHashValueSerializer(serializer);
+        redisTemplate.afterPropertiesSet();
+
+//        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(Game.class)); // Game으로 변경
         return redisTemplate;
     }
 
@@ -65,7 +92,9 @@ public class RedisConfig {
                                                                        MessageListenerAdapter startVoteAdapter, ChannelTopic startVoteTopic,
                                                                        MessageListenerAdapter endVoteAdapter, ChannelTopic endVoteTopic,
                                                                        MessageListenerAdapter startConfirmAdapter, ChannelTopic startConfirmTopic,
-                                                                       MessageListenerAdapter endConfirmAdapter, ChannelTopic endConfirmTopic) {
+                                                                       MessageListenerAdapter endConfirmAdapter, ChannelTopic endConfirmTopic,
+                                                                       MessageListenerAdapter nightEmissaryAdapter, ChannelTopic nightEmissaryTopic,
+                                                                       MessageListenerAdapter nightPoliceAdapter, ChannelTopic nightPoliceTopic) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         // subscriber, topic
@@ -74,6 +103,8 @@ public class RedisConfig {
         container.addMessageListener(endVoteAdapter, endVoteTopic);
         container.addMessageListener(startConfirmAdapter, startConfirmTopic);
         container.addMessageListener(endConfirmAdapter, endConfirmTopic);
+        container.addMessageListener(nightEmissaryAdapter, nightEmissaryTopic);
+        container.addMessageListener(nightPoliceAdapter, nightPoliceTopic);
 
         return container;
     }
@@ -127,4 +158,26 @@ public class RedisConfig {
     public ChannelTopic endConfirmTopic() {
         return new ChannelTopic("END_CONFIRM");
     }
+
+
+    @Bean
+    public MessageListenerAdapter nightEmissaryAdapter(NightEmissarySubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "sendMessage");
+    }
+
+    @Bean
+    public ChannelTopic nightEmissaryTopic() {
+        return new ChannelTopic("NIGHT_EMISSARY");
+    }
+
+    @Bean
+    public MessageListenerAdapter nightPoliceAdapter(NightPoliceSubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "sendMessage");
+    }
+
+    @Bean
+    public ChannelTopic nightPoliceTopic() {
+        return new ChannelTopic("NIGHT_POLICE");
+    }
+
 }

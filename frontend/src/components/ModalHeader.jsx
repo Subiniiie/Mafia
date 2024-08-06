@@ -1,14 +1,18 @@
+import classNames from 'classnames'
 import styles from './ModalHeader.module.css'
+import ModalCloseButton from '../assets/Buttons/ModalCloseButton.png'
+
 
 const ModalHeader = ({ modalTitle, openModal }) => {
 
+    const modalTitleClass = classNames('kimjungchul-gothic-bold', styles.modalTitle)
     return (
         <>
-            <div>
-                <div>
+            <div className={styles.modalHeader}>
+                <div className={modalTitleClass}>
                     {modalTitle}
                 </div>
-                <button onClick={openModal} className={styles.closeButton}>닫기</button>
+                <img src={ModalCloseButton} alt="ModalCloseButton" className={styles.modalCloseButton} onClick={openModal} />
             </div>
         </>
     )
