@@ -70,6 +70,12 @@ public class LoginController {
 
             String role = authentication.getAuthorities().iterator().next().getAuthority();
 
+            Optional<User> user = userRepository.findByEmail(email);
+            if(!user.isPresent()||user.get().getIsDeleted()){
+                map.put("status", "fail");
+                return ResponseEntity.ok(map);
+            }
+
             String access = jwtUtil.createJwt("Access", userId, username, email, gender,/* birth,*/ role, 600000L);
             String refresh = jwtUtil.createJwt("Refresh", userId, username, email, gender,/* birth,*/ role, 86400000L);
 

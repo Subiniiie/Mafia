@@ -156,8 +156,8 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public int deleteUser(String email){
-        Optional<User> present = userRepository.findByEmail(email);
+    public int deleteUser(String nickname){
+        Optional<User> present = userRepository.findByNickname(nickname);
         if(present.isPresent()){
             User user = present.get();
             user.setIsDeleted(true);

@@ -6,9 +6,6 @@ import e106.emissary_backend.global.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
