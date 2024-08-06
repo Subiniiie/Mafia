@@ -1,5 +1,6 @@
 package e106.emissary_backend.domain.game.service.subscriber.message;
 
+import e106.emissary_backend.domain.game.enumType.GameState;
 import e106.emissary_backend.domain.game.enumType.VoteState;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +15,8 @@ import java.util.*;
 @Getter
 public class EndVoteMessage {
     private long gameId;
+    @Builder.Default
+    private GameState gameState = GameState.VOTE_END;
     private HashMap<Long, Integer> voteMap;
     private VoteState result;
     private List<Long> maxPlayerList;

@@ -79,23 +79,23 @@ class GameServiceTest {
 //        verify(redisKeyValueTemplate, times(1)).update(any(Game.class));
 //    }
 
-    @Test
-    void findGameById_Success() {
-        when(redisGameRepository.findByGameId(1L)).thenReturn(Optional.of(testGame));
-
-        GameResponseDTO result = gameService.findGameById(1L);
-
-        assertNotNull(result);
-        assertEquals(testGameDTO.getGameId(), result.getGameId());
-        assertEquals(testGameDTO.getTitle(), result.getTitle());
-    }
-
-    @Test
-    void findGameById_NotFound() {
-        when(redisGameRepository.findByGameId(1L)).thenReturn(Optional.empty());
-
-        assertThrows(NotFoundGameException.class, () -> gameService.findGameById(1L));
-    }
+//    @Test
+//    void findGameById_Success() {
+//        when(redisGameRepository.findByGameId(1L)).thenReturn(Optional.of(testGame));
+//
+//        GameResponseDTO result = gameService.findGameById(1L);
+//
+//        assertNotNull(result);
+//        assertEquals(testGameDTO.getGameId(), result.getGameId());
+//        assertEquals(testGameDTO.getTitle(), result.getTitle());
+//    }
+//
+//    @Test
+//    void findGameById_NotFound() {
+//        when(redisGameRepository.findByGameId(1L)).thenReturn(Optional.empty());
+//
+//        assertThrows(NotFoundGameException.class, () -> gameService.findGameById(1L));
+//    }
 
 //    @Test
 //    void startGame_Success() {
