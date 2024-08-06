@@ -27,9 +27,9 @@ function App() {
       console.log('currentTime :', currentTime)
       console.log('exp :', decodedAccess.payload.exp)
 
-      // if (decodedAccess.payload.exp < currentTime) {
-      // 가짜로 만료된 척 하는 중...
-      if (1722826419 < currentTime) {
+      if (decodedAccess.payload.exp < currentTime) {
+        // 가짜로 만료된 척 하는 중...
+        // if (1722826419 < currentTime) {
         // Access token이 만료된 경우
         console.log('Access token expired. Attempting to refresh token...')
         refreshToken(access, refresh)
