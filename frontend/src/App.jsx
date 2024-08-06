@@ -12,7 +12,8 @@ import './App.css'
 
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태
+  // const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태
+  const [isLoggedIn, setIsLoggedIn] = useState(true); // 로그인 상태
   const [name, setName] = useState('') // 로그인된 사용자의 이름
 
   useEffect(() => {

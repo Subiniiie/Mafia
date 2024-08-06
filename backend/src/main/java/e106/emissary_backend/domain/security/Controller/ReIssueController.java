@@ -1,5 +1,6 @@
 package e106.emissary_backend.domain.security.Controller;
 
+import e106.emissary_backend.domain.security.dto.ReissueRequest;
 import e106.emissary_backend.domain.security.entity.Access;
 import e106.emissary_backend.domain.security.entity.Refresh;
 import e106.emissary_backend.domain.security.repository.AccessRepository;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Date;
@@ -29,31 +31,38 @@ public class ReIssueController {
     private final RefreshRepository refreshRepository;
 
     @PostMapping("/api/reissue")
-    public ResponseEntity<Map<String, Object>> reissue(HttpServletRequest request, HttpServletResponse response) {
-        String refresh = null;
-        String access = null;
-        Cookie[] cookies = request.getCookies();
-        for(Cookie cookie : cookies) {
-            if(cookie.getName().equals("Refresh")) {
-                refresh = cookie.getValue();
-            }
-            if(cookie.getName().equals("Access")) {
-                access = cookie.getValue();
-            }
-        }
+    public ResponseEntity<Map<String, Object>> reissue(@RequestBody ReissueRequest request, HttpServletResponse response) {
+        System.out.println("[REISSUE] - IN ");
+        String refresh = request.getRefresh();
+        String access = request.getAccess();
+//        Cookie[] cookies = request.getCookies();
+//        for(Cookie cookie : cookies) {
+//            if(cookie.getName().equals("Refresh")) {
+//                refresh = cookie.getValue();
+//            }
+//            if(cookie.getName().equals("Access")) {
+//                access = cookie.getValue();
+//            }
+//        }
         Map<String, Object> map = new HashMap<>();
 
         if(refresh == null || jwtUtil.validateToken(refresh)) {
-            map.put("status", "fail");
+            map.put("status", "fail1");
+            map.put("refresh",refresh);
+//            map.put("Cookie-Refresh", cookies);
             return ResponseEntity.ok(map);
         }
         String category = jwtUtil.getCategory(refresh);
         if(!category.equals("Refresh")){
-            map.put("status", "fail");
+            map.put("status", "fail2");
+            map.put("refresh",refresh);
+//            map.put("Cookie-Refresh", cookies);
             return ResponseEntity.ok(map);
         }
         if(jwtService.findByRefresh(refresh).isEmpty()){
-            map.put("status", "fail");
+            map.put("status", "fail3");
+            map.put("refresh",refresh);
+//            map.put("Cookie-Refresh", cookies);
             return ResponseEntity.ok(map);
         }
 
@@ -77,8 +86,8 @@ public class ReIssueController {
         addAccessEntity(username, newAccess, 600000L);
         addRefreshEntity(username, newRefresh, 86400000L);
 
-        response.addCookie(createCookie("Access",newAccess));
-        response.addCookie(createCookie("Refresh",newRefresh));
+//        response.addCookie(createCookie("Access",newAccess));
+//        response.addCookie(createCookie("Refresh",newRefresh));
         map.put("refresh", newRefresh);
         map.put("access", newAccess);
         map.put("status", "success");

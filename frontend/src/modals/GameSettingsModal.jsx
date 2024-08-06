@@ -18,6 +18,7 @@ function GameSettingsModal({ openModal, roomId }) {
             try {
                 const response = await fetch(`https://i11e106.p.ssafy.io/api/options/rooms/${roomId}`)
                 const data = await response.json()
+                console.log(data)
                 // 데이터에서 변수명(?) 어떻게 되어있냐에 따라 넣을 거 바꾸기
                 // 이름 바꾸기
                  setRoomName(data.roomName || '')

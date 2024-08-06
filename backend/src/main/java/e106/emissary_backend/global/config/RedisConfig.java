@@ -34,7 +34,7 @@ public class RedisConfig {
     public RedissonClient redissonClient(){
         Config config = new Config();
         config.useSingleServer()
-                .setAddress(REDISSON_HOST_PREFIX + "localhost:6379");
+                .setAddress(REDISSON_HOST_PREFIX + "43.202.1.100:6389");
         return Redisson.create(config);
     }
 
