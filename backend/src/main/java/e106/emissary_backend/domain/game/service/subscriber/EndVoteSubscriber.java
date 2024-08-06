@@ -17,6 +17,7 @@ public class EndVoteSubscriber {
 
     public void sendMessage(String message){
         try {
+            // 지금 endVoteMessage
             EndVoteMessage endVoteMessage = objectMapper.readValue(message, EndVoteMessage.class);
             // Message를 통으로 내려보내자? or 결과만 꺼내서 내려보내자
 

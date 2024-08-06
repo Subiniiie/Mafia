@@ -32,8 +32,45 @@ public class GlobalExceptionAdvice {
         return handleExceptionInternal(errorCode);
     }
 
+
+    @ExceptionHandler
+    public ResponseEntity<Object> alreadyUserInRoom(AlreadyUserInRoomException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return handleExceptionInternal(errorCode);
+    }
+
     @ExceptionHandler
     public ResponseEntity<Object> gameFull(GameFullException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return handleExceptionInternal(errorCode);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Object> alreadyUseAppease(AlreadyUseAppeaseException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return handleExceptionInternal(errorCode);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Object> alreadyRemoveUser(AlreadyRemoveUserException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return handleExceptionInternal(errorCode);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Object> emissaryKill(EmissaryKillException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return handleExceptionInternal(errorCode);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Object> alreadyDetectUser(AlreadyDetectUserException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return handleExceptionInternal(errorCode);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Object> emissaryAppeaseEmissary(EmissaryAppeaseEmissaryException e) {
         ErrorCode errorCode = e.getErrorCode();
         return handleExceptionInternal(errorCode);
     }
