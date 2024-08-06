@@ -115,13 +115,15 @@ function GameReadyStartBtn() {
             brokerURL: 'ws://i11e106.p.ssafy.io/ws',
             reconnectDelay: 5000,
             onConnect: () => {
-                stompClient.publish({
-                    destination: `/pub/start/${roomId}`
-                })
-                // 게임 시작 알람
+                // 게임 시작 알람 모달
                 setShowModal(true)
-                setTimeout(() => setShowModal(false), 1500)
-                stompClient.deactivate()
+                // 모달이 닫힌 후에 게임 시작 요청을 보냄 
+                setTimeout(() => {
+                    stompClient.publish({
+                        destination: `/pub/start/${roomId}`
+                    })
+                    stompClient.deactivate()
+                }, 1500)
             },
             onStompError: (error) => {
                 console.log('게임 시작 웹소켓 오류', error)
