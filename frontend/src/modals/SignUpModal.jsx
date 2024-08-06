@@ -47,6 +47,22 @@ const SignUpModal = ({ isOpen, openModal }) => {
         }
     }
 
+    const handleValidKeyDown = async (e, apiEndpoint, nextRef) => {
+        if (e.key === 'Enter') {
+            try {
+                const response = await axios.get(`https://i11e106.p.ssafy.io${apiEndpoint}`);
+                if (response.data.isValid) {
+                    nextRef.current.focus()
+                } else {
+                    alert('유효하지 않은 입력입니다.')
+                }
+            } catch (error) {
+                console.error('유효성 검증 실패 :', error)
+                alert('유효성 검증에 실패했습니다. 다시 시도해주세요.')
+            }
+        }
+    }
+
     const handleKeyDown = (e, ref) => {
         if (e.key === 'Enter') {
             ref.current ? ref.current.focus() : handleSignUp()
@@ -66,7 +82,7 @@ const SignUpModal = ({ isOpen, openModal }) => {
                         className={styles.inputField}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        onKeyDown={(e) => handleKeyDown(e, usernameRef)}
+                        onKeyDown={(e) => handleValidKeyDown(e, `/api/checkemail?email=${email}`, usernameRef)}
                         ref={emailRef}
                     />
 
@@ -78,7 +94,7 @@ const SignUpModal = ({ isOpen, openModal }) => {
                         className={styles.inputField}
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        onKeyDown={(e) => handleKeyDown(e, passwordRef)}
+                        onKeyDown={(e) => handleValidKeyDown(e, `api/checknick?username=${username}`, passwordRef)}
                         ref={usernameRef}
                     />
 
