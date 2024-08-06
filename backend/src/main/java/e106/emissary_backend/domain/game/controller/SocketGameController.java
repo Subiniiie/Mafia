@@ -28,6 +28,19 @@ public class SocketGameController {
 
     private final GameService gameService;
 
+    @MessageMapping("/ready/{roomId}")
+    public void ready(@DestinationVariable Long roomId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
+
+        gameService.ready(roomId, userId);
+    }
+
+    @MessageMapping("/ready/cancel/{roomId}")
+    public void readyCancel(@DestinationVariable Long roomId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
+
+        gameService.readyCancel(roomId, userId);
+    }
 
     // Ready는 프론트에서 처리한다고 하여서 안함.
     @MessageMapping("/start/{roomId}")
@@ -63,6 +76,7 @@ public class SocketGameController {
         gameService.startConfirm(roomId, userId, request.isConfirm());
     }
 
+    // 나가는거는 이걸로 처리
     @MessageMapping("/remove/{roomId}/{targetId}")
     public void removeUser(@DestinationVariable Long roomId, @DestinationVariable Long targetId) {
         gameService.removeUser(roomId, targetId);

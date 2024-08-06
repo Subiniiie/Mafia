@@ -34,6 +34,8 @@ public class EndVoteTask implements GameTask {
     private Long gameId;
 
     private final RedisTemplate<String, HashMap<Long, Integer>> voteRedisTemplate;
+    private final RedisKeyValueTemplate redisKeyValueTemplate;
+    private final RedisGameRepository redisGameRepository;
 
     private final RedisPublisher publisher;
     private final ChannelTopic endVoteTopic;
@@ -51,11 +53,15 @@ public class EndVoteTask implements GameTask {
     @Override
     public void execute(Long gameId) {
         log.info("EndVoteTask Started : {}", LocalDateTime.now());
+        Game game = redisGameRepository.findById(gameId).orElseThrow(
+                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+        GameDTO gameDTO = GameDTO.toDto(game);
 
-        // todo : vote 종료 로직 구현
-        // todo : 투표 결과를 EndVoteMessage에 담아서 내려보내야함.
-        // todo : 이거 그냥 바로 service로 넘길까? 그래야 publish를 한번에 처리하기가 좋고 schedule 예약하기가 좋음
-        // todo : 게임 상태도 confirm으로 바꿔줘야함
+        gameDTO.getPlayerMap().values().forEach(player -> {player.setVoted(false);});
+
+        redisKeyValueTemplate.update(gameDTO.toDao());
+
+
         String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
         HashMap<Long, Integer> voteMap = voteRedisTemplate.opsForValue().get(voteKey);
 
@@ -78,6 +84,7 @@ public class EndVoteTask implements GameTask {
         if(VoteState.RE_VOTE.equals(endVoteMessage.getResult())){
             // 다시 투표하세용
             publisher.publish(startVoteTopic, StartVoteMessage.builder()
+                            .gameState(GameState.VOTE_START)
                             .gameId(gameId)
                             .build());
             // 예약

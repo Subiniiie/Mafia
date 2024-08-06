@@ -17,7 +17,7 @@ public class AchievementController {
 
     private final AchievementService achievementService;
 
-    @PostMapping("api/honors")
+    @PostMapping("/api/honors")
     public ResponseEntity<Map<String, Object>> addHonors(String email){
         Map<String, Object> map = new HashMap<>();
         try{

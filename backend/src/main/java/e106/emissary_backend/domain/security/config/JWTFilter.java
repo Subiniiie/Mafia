@@ -32,6 +32,12 @@ public class JWTFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
+        System.out.println("[@JwtFilter] - IN");
+        System.out.println("-----[Decode Header] ---- ");
+        request.getHeaderNames().asIterator()
+            .forEachRemaining(headerName -> System.out.println(headerName+":"+request.getHeader(headerName)));
+        System.out.println("-----[Decode Header END] ---- ");
+        
 
         String accessToken = Optional.ofNullable(request.getCookies())
                 .flatMap(cookies -> Arrays.stream(cookies)
@@ -41,7 +47,7 @@ public class JWTFilter extends OncePerRequestFilter {
                 .orElse(null);
 
         String requestURI = request.getRequestURI();
-        if (requestURI.equals("/api/reissue")||requestURI.equals("/")||requestURI.equals("/api/user")||requestURI.equals("/api/login")||requestURI.equals("/api/logout")||requestURI.equals("/api/mail")/*||requestURI.equals("/oauth2/api/login")||requestURI.equals("/oauth2/api/token")*/) {
+        if (requestURI.equals("/api/reissue")||requestURI.equals("/")||requestURI.equals("/api/user")||requestURI.equals("/api/login")||requestURI.equals("/api/logout")||requestURI.equals("/api/mail") || requestURI.equals("/api/checknick") || requestURI.equals("/api/checkemail")) {
             chain.doFilter(request, response);
             return;
         }

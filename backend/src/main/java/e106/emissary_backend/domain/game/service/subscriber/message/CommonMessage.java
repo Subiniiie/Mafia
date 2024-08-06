@@ -1,5 +1,6 @@
 package e106.emissary_backend.domain.game.service.subscriber.message;
 
+import e106.emissary_backend.domain.game.enumType.CommonResult;
 import e106.emissary_backend.domain.game.enumType.GameState;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class StartVoteMessage {
+public class CommonMessage {
     private long gameId;
     private GameState gameState;
+    private CommonResult result;
 }

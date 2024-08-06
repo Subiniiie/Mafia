@@ -22,10 +22,10 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/api/checkemail")
-    public ResponseEntity<Map<String, Object>> checkEmail(@RequestBody CheckRequest request){
+    public ResponseEntity<Map<String, Object>> checkEmail(@RequestParam String email){//(@RequestBody CheckRequest request){
         Map<String, Object> map = new HashMap<>();
         try{
-            String ret = userService.emailExists(request);
+            String ret = userService.emailExists(email);
             map.put("status", "success");
             map.put("message", ret);
             return ResponseEntity.ok(map);
@@ -37,10 +37,10 @@ public class UserController {
     }
 
     @GetMapping("/api/checknick")
-    public ResponseEntity<Map<String, Object>> checkNick(@RequestBody CheckRequest request) {
+    public ResponseEntity<Map<String, Object>> checkNick(@RequestParam String nickname){//(@RequestBody CheckRequest request) {
         Map<String, Object> map = new HashMap<>();
         try{
-            String ret = userService.nicknameExists(request);
+            String ret = userService.nicknameExists(nickname);
             map.put("status", "success");
             map.put("message", ret);
             return ResponseEntity.ok(map);
@@ -126,5 +126,4 @@ public class UserController {
             return ResponseEntity.ok(map);
         }
     }
-
 }
