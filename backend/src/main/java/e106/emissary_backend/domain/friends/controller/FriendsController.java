@@ -1,8 +1,6 @@
 package e106.emissary_backend.domain.friends.controller;
 
-import e106.emissary_backend.domain.friends.dto.FriendsListRequest;
 import e106.emissary_backend.domain.friends.dto.FriendshipRequest;
-import e106.emissary_backend.domain.friends.dto.SearchRequest;
 import e106.emissary_backend.domain.friends.dto.SearchResponse;
 import e106.emissary_backend.domain.friends.entity.Friends;
 import e106.emissary_backend.domain.friends.service.FriendsService;
