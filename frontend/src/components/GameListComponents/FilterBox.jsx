@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import Filter from './Filter';
-import styles from './FilterBox.module.css'; // 스타일 파일을 별도로 관리합니다.
 
 const FilterBox = () => {
     const [selectedFilters, setSelectedFilters] = useState([]);
@@ -19,9 +18,9 @@ const FilterBox = () => {
     };
 
     return (
-        <div className={styles.filterBox}>
-            <div className={styles.filterContainer}>
-                <div className={styles.checkboxContainer}>
+        <div>
+            <div>
+                <div>
                     <Filter
                         label="공개 임무"
                         value="publicMission"
@@ -35,8 +34,8 @@ const FilterBox = () => {
                 </div>
             </div>
 
-            <div className={styles.filterContainer}>
-                <div className={styles.checkboxContainer}>
+            <div>
+                <div>
                     <Filter
                         label="임무 시작 전"
                         value="preMission"
