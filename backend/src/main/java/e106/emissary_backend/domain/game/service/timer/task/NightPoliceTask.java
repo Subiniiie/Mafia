@@ -43,9 +43,10 @@ public class NightPoliceTask implements GameTask {
                         .result(CommonResult.SUCCESS)
                         .build());
 
-        if(gameUtil.isEnd(gameId)){
-            gameUtil.endPublish(gameId);
-        }
+        //todo: 해야함
+//        if(gameUtil.isEnd(gameId)){
+//            gameUtil.endPublish(gameId);
+//        }
     }
 
     public void setGameId(long gameId){
