@@ -42,10 +42,11 @@ public class SocketGameController {
         gameService.readyCancel(roomId, userId);
     }
 
-    // Ready는 프론트에서 처리한다고 하여서 안함.
     @MessageMapping("/start/{roomId}")
-    public void start( @DestinationVariable Long roomId) {
-        gameService.setGame(roomId);
+    public void start( @DestinationVariable Long roomId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        long userId = userDetails.getUserId();
+
+        gameService.setGame(roomId, userId);
     }
 
 

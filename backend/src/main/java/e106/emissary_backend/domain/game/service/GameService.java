@@ -112,7 +112,7 @@ public class GameService {
     } // end of readyCancel
 
 
-    public void setGame(long roomId) {
+    public void setGame(long roomId, long userId) {
         GameDTO gameDTO = getGameDTO(roomId);
 
         gameDTO.setGameState(GameState.STARTED);
@@ -134,9 +134,10 @@ public class GameService {
         scheduler.scheduleTask(roomId, TaskName.NIGHT_EMISSARY, nightEmissaryTask, 15, TimeUnit.SECONDS);
 
         publisher.publish(gameSetTopic, GameSetMessage.builder()
-                .gameId(roomId)
-                .gameDTO(gameDTO)
-                .build());
+                        .gameId(roomId)
+                        .userId(userId)
+                        .gameDTO(gameDTO)
+                        .build());
 
         // room 상태 변경해서 DB에 넣기
         Room room = roomRepository.findById(roomId).orElseThrow(
