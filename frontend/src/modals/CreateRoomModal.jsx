@@ -14,11 +14,18 @@ const CreateRoomModal = ({ isOpen, openModal }) => {
 
     const roomTitleRef = useRef()
     const roomPwRef = useRef()
+    const secretRoomRef = useRef()
+    const submitButtonRef = useRef()
 
     // const [showRoomPwInput, setShowRoomPwInput] = useState(false)
     const [isSecretRoom, setIsSecretRoom] = useState(false)
 
     const handleCreateRoom = async () => {
+        if (isSecretRoom && !/^\d{4}$/.test(roomPw)) {
+            alert('암호는 숫자 4자리로 설정해주세요.');
+            return;
+        }
+
         try {
             console.log('방을 한번 만들어볼게')
             const body = {
@@ -51,13 +58,20 @@ const CreateRoomModal = ({ isOpen, openModal }) => {
         if (e.key === 'Enter') {
             e.preventDefault() // 기본 제출 동작 방지
             console.log('Enter를 눌렀네!')
+            secretRoomRef.current.focus()
         }
     }
+
 
     const handleRoomPwKeyDown = (e) => {
         if (e.key === 'Enter') {
             e.preventDefault() // 기본 제출 동작 방지
             console.log('Enter를 눌렀네!')
+            if (!/^\d{4}$/.test(roomPw)) {
+                alert('암호는 숫자 4자리로 설정해주세요.')
+            } else {
+                submitButtonRef.current.click()
+            }
         }
     }
 
@@ -104,6 +118,8 @@ const CreateRoomModal = ({ isOpen, openModal }) => {
                             id="secretRoom"
                             className="mr-1"
                             onChange={handleSecretRoomChange}
+                            onKeyDown={handleRoomPwKeyDown}
+                            ref={secretRoomRef}
                         />
                     </div>
 
@@ -129,12 +145,12 @@ const CreateRoomModal = ({ isOpen, openModal }) => {
                         </form>
                     </div>
                 </div>
-                <button className={styles.submitButton} onClick={handleCreateRoom}>
+                <button className={styles.submitButton} onClick={handleCreateRoom} ref={submitButtonRef}>
                     도전하기
                 </button>
             </div>
         </div>
     );
-};
+}
 
 export default CreateRoomModal;
