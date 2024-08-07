@@ -9,7 +9,7 @@ import ChoiceDieOrTurncoat from "../../modals/ChoiceDieOrTurncoat";
 import FinalDefensePlayerModal from "../../modals/FinalDefensePlayerModal";
 import styles from "./GamePageMain.module.css"
 
-function GamePageMain({ setSystemMessage, changeGameState }) {
+function GamePageMain({ setSystemMessage, nowGameState, roomId }) {
     const [ gameData, setGameData ] = useState(null)
     const [ nowGameState, setNowGameState ] = useState(null)
     const [ nightTimer, setNightTimer ] = useState(30)                                  // 밤 타이머   
@@ -34,10 +34,10 @@ function GamePageMain({ setSystemMessage, changeGameState }) {
         socket.onopen = function(event) {
             console.log('웹소켓 연결이 열렸습니다. 게임을 시작합니다')
         }
+        socket.close()
         socket.onclose = function(event) {
             console.log('게임 시작 웹소켓 연결이 닫혔습니다')
         }
-        setNowGameState("night_emissary")        
     }
 
     // 밀정 시간
@@ -66,6 +66,7 @@ function GamePageMain({ setSystemMessage, changeGameState }) {
         socket.onerror = function(error) {
             console.log('밀정 웹소켓 오류', error)
         }
+        socket.close()
         socket.onclose = function(event) {
             console.log('밀정 웹소켓 연결이 닫혔습니다.')
         }
@@ -85,6 +86,7 @@ function GamePageMain({ setSystemMessage, changeGameState }) {
             socket.onopen = function(event) {
                 console.log('웹소켓 연결이 열렸습니다. 변절자 정보를 전송합니다')
             }
+            socket.close()
             socket.onclose() = function(event) {
                 console.log('변절자 정보 전송 웹소켓 연결이 닫혔습니다')
             }
@@ -93,12 +95,12 @@ function GamePageMain({ setSystemMessage, changeGameState }) {
             socket.onopen = function(event) {
                 console.log('웹소켓 연결이 열렸습니다. 사망자 정보를 전송합니다')
             }
+            socket.close()
             socket.onclose() = function(event) {
                 console.log('사망자 정보 전송 웹소켓 연결이 닫혔습니다')
             }
         }
         setchoiceDieOrTurncoat(false)
-        setNowGameState("night_police")
     }
 
     // 첩보원이 활동한다
@@ -113,12 +115,12 @@ function GamePageMain({ setSystemMessage, changeGameState }) {
             socket.onopen = function(evnet) {
                 console.log('웹소켓 연결이 열렸습니다. 첩보원에게 플레이어 정보를 전송합니다')
             }
+            socket.close()
             socket.onclose() = function(event) {
                 console.log('첩보원에게 플레이어 정보를 전송하는 웹소켓 연결이 닫혔습니다.')
             }
             // 첩보원 화면에만 뜨게 하기
 
-            setNowGameState("vote_start")
     }
 
     // 낮(토론 및 투표 중)
@@ -170,7 +172,6 @@ function GamePageMain({ setSystemMessage, changeGameState }) {
             })
             return updatedVotes
         })
-        setNowGameState('VOTE_START')
     }
 
     // 최종 용의자 한 명이 나옴
@@ -226,84 +227,45 @@ function GamePageMain({ setSystemMessage, changeGameState }) {
         } else {
             console.log('STOMP 클라이언트가 연결되지 않았습니다')
         }
-        }
-
-    // 방 정보 가져오기
-    useEffect(() => {
-        const { roomId } = useParams()
-        const gameRoomInfo = async() => {
-            try {
-                const response = await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`)
-                setGameData(response.data)
-            } catch (error) {
-                console.log("게임방 API를 불러오지 못했습니다", error)
-            }
-        }
-        gameRoomInfo()
-    }, [])
-
-    // STOMP 연결
-    // useEffect(() => {
-    //     const stompClient = new Client({
-    //         brokerURL: 'ws://i11e106.p.ssafy.io/ws',
-    //         reconnectDelay: 5000,
-    //         onConnect: () => {
-    //             stompClient.subscribe(`/sub/${roomId}`, (message) => {
-    //                 const messageJson = JSON.parse(message.body)
-    //                 setNowGameState(messageJson.gameState)
+    }
 
 
-                    // 게임 상태에 따른 처리
-                    switch (nowGameState) {
-                        case 'STARTED' :
-                            gameStart()
-                            break
-                        case 'night_emissary' :
-                            setSystemMessage('밤이 시작되었습니다. 밀정이 활동 중입니다.')
-                            emissaryTime()
-                            break
-                        case 'night_police' :
-                            setSystemMessage('밤이 되었습니다. 첩보원이 활동 중입니다.')
-                            policeTime()
-                        case 'VOTE_START' :
-                            setSystemMessage('낮이 되었습니다. 토론을 하며 투표를 진행하세요.')
-                            voteStart()
-                        case 'VOTE_END' :
-                            setSystemMessage('낮이 되었습니다. 투표가 끝이 났습니다.')
-                            voteEnd()
-                        case 'revote' :
-                            setSystemMessage('동점자가 나왔습니다. 재투표를 실시합니다.')
-                            voteAgain()
-                        case 'finish' :
-                            setSystemMessage(`투표에 의해 ${playerId}님이 최종 용의자가 되었습니다.`)
-                            voteFinish()
-                        case 'confirm_start' :
-                            setSystemMessage(`최종 투표를 시작합니다.`)
-                            confirmStart()
-                        case 'confirm_end' :
-                            setSystemMessage(`최종 투표가 끝이 났습니다`)
-                            confirmEnd()
-                        case 'end' :
-                            setSystemMessage('게임이 끝이 났습니다.')
-                            gameEnd()
-                    }
-                })
-            },
-            onDisconnect: () => {
-                console.log('구독 웹소켓 연결이 종료되었습니다')
-            },
-            onStompError: (error) => {
-                console.log('구독 웹소켓 오류', error)
-            }
-        })
-        stompClient.activate()
 
-        return () => {
-            stompClient.deactivate()
-        }
-    }, [nowGameState])
 
- 
+switch (nowGameState)
+    {
+    case 'STARTED' :
+        gameStart()
+        break
+    case 'night_emissary' :
+        setSystemMessage('밤이 시작되었습니다. 밀정이 활동 중입니다.')
+        emissaryTime()
+        break
+    case 'night_police' :
+        setSystemMessage('밤이 되었습니다. 첩보원이 활동 중입니다.')
+        policeTime()
+    case 'VOTE_START' :
+        setSystemMessage('낮이 되었습니다. 토론을 하며 투표를 진행하세요.')
+        voteStart()
+    case 'VOTE_END' :
+        setSystemMessage('낮이 되었습니다. 투표가 끝이 났습니다.')
+        voteEnd()
+    case 'revote' :
+        setSystemMessage('동점자가 나왔습니다. 재투표를 실시합니다.')
+        voteAgain()
+    case 'finish' :
+        setSystemMessage(`투표에 의해 ${playerId}님이 최종 용의자가 되었습니다.`)
+        voteFinish()
+    case 'confirm_start' :
+        setSystemMessage(`최종 투표를 시작합니다.`)
+        confirmStart()
+    case 'confirm_end' :
+        setSystemMessage(`최종 투표가 끝이 났습니다`)
+        confirmEnd()
+    case 'end' :
+        setSystemMessage('게임이 끝이 났습니다.')
+        gameEnd()
+}
 
     return (
         <>
