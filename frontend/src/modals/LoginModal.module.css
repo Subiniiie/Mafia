@@ -70,7 +70,7 @@
     align-self: center;
     justify-content: center;
     background-color: #091a14;
-    border: 1.5px solid #014015;
+    border: 1.8px solid #014015;
     /* 버튼 배경색 */
     color: white;
     padding: 10px 15px;
@@ -88,9 +88,10 @@
 }
 
 .submitButton:hover {
-    background-color: #165c42;
+    /* background-color: #165c42; */
+    background-color: #09642A;
     /* 버튼 호버 색상 변경 */
-    border: 1.5px solid #02A434;
+    border: 1.8px solid #02A434;
 
 }
 
