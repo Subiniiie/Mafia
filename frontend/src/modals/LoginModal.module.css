@@ -58,6 +58,7 @@
     font-size: 14px;
     /* 글자 크기 조정 */
     color: black;
+    width: 100%;
 }
 
 .inputField::placeholder {
