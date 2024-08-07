@@ -15,16 +15,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisKeyValueTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.management.relation.Role;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class GameUtil {
     private final RedisGameRepository redisGameRepository;
     private final RedisKeyValueTemplate redisKeyValueTemplate;
+
 
     private final RedisPublisher redisPublisher;
 
@@ -47,6 +49,9 @@ public class GameUtil {
     }
 
     public void endPublish(long gameId){
+
+
+
         redisGameRepository.deleteById(gameId);
 
         redisPublisher.publish(commonTopic, CommonMessage.builder()
@@ -55,4 +60,5 @@ public class GameUtil {
                         .result(CommonResult.SUCCESS)
                         .build());
     }
+
 }
