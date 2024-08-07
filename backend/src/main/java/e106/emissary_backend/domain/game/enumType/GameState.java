@@ -11,6 +11,7 @@ public enum GameState {
     CONFIRM_START,
     CONFIRM_VOTE,
     CONFIRM_END,
-    NIGHT,
+    NIGHT_EMISSARY,
+    NIGHT_POLICE,
     END,
 }
