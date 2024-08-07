@@ -28,11 +28,15 @@ const CreateRoomModal = ({ isOpen, openModal }) => {
                 haveBetray: true
             }
 
+            const access = localStorage.getItem('access')
+
             const response = await axios.post('https://i11e106.p.ssafy.io/api/rooms',
                 JSON.stringify(body), {
                 headers: {
                     "Content-Type": "application/json",
-                }
+                    "Authorization": `Bearer ${access}`,
+                },
+                withCredentials: true // 필요 시 추가: 이 옵션을 추가하면 쿠키가 포함된 요청을 서버로 보낼 수 있음
             }
             )
             console.log(response.data)
