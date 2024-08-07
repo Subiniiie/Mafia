@@ -7,7 +7,6 @@ import e106.emissary_backend.domain.game.enumType.CommonResult;
 import e106.emissary_backend.domain.game.enumType.GameRole;
 import e106.emissary_backend.domain.game.enumType.GameState;
 import e106.emissary_backend.domain.game.model.GameDTO;
-import e106.emissary_backend.domain.game.model.GameResponseDTO;
 import e106.emissary_backend.domain.game.model.Player;
 import e106.emissary_backend.domain.game.repository.RedisGameRepository;
 import e106.emissary_backend.domain.game.service.publisher.RedisPublisher;
@@ -48,8 +47,11 @@ public class GameService {
     private final RedisPublisher publisher;
     private final ChannelTopic commonTopic;
     private final ChannelTopic readyCompleteTopic;
-    private final ChannelTopic dayTopic;
+    private final ChannelTopic gameSetTopic;
     private final ChannelTopic startVoteTopic;
+
+    private final NightEmissaryTask nightEmissaryTask;
+
     private final StartVoteTask startVoteTask;
     private final ChannelTopic endVoteTopic;
 
@@ -126,10 +128,10 @@ public class GameService {
         update(gameDTO);
 
         // 타이머 - 토론시간임.
-        startVoteTask.setGameId(roomId);
-        scheduler.scheduleTask(roomId, TaskName.START_VOTE_TASK, startVoteTask, 0, TimeUnit.SECONDS);
+        nightEmissaryTask.setGameId(roomId);
+        scheduler.scheduleTask(roomId, TaskName.NIGHT_EMISSARY, nightEmissaryTask, 15, TimeUnit.SECONDS);
 
-        publisher.publish(dayTopic, DayMessage.builder()
+        publisher.publish(gameSetTopic, GameSetMessage.builder()
                 .gameId(roomId)
                 .gameDTO(gameDTO)
                 .build());

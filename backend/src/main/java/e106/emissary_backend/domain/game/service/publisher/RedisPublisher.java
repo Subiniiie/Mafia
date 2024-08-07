@@ -21,7 +21,7 @@ public class RedisPublisher {
         redisTemplate.convertAndSend(topic.getTopic(), message);
     }
 
-    public void publish(ChannelTopic topic, DayMessage message) {
+    public void publish(ChannelTopic topic, GameSetMessage message) {
         redisTemplate.convertAndSend(topic.getTopic(), message);
     }
 
