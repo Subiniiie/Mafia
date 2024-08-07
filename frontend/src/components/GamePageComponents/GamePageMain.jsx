@@ -6,7 +6,7 @@ import ChoiceDieOrTurncoat from "../../modals/ChoiceDieOrTurncoat";
 import FinalDefensePlayerModal from "../../modals/FinalDefensePlayerModal";
 import styles from "./GamePageMain.module.css"
 
-function GamePageMain({ setSystemMessage }) {
+function GamePageMain({ setSystemMessage, roomId, streamManagers }) {
     // 플레이어들의 초기 상태
     const initialPlayers = [
         {nickname: 'player1', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
@@ -290,7 +290,9 @@ function GamePageMain({ setSystemMessage }) {
                         isRoomManager={player.isRoomManager}
                         isMe={player.isMe}
                         isAlive={player.isAlive}
-                        
+                        roomId={roomId}
+                        //publisher={publisher}
+                        streamManager={streamManager}
                     />
                 ))}
             </div>
