@@ -13,6 +13,7 @@ import e106.emissary_backend.domain.game.service.publisher.RedisPublisher;
 import e106.emissary_backend.domain.game.service.subscriber.message.*;
 import e106.emissary_backend.domain.game.service.timer.SchedulerService;
 import e106.emissary_backend.domain.game.service.timer.task.*;
+import e106.emissary_backend.domain.game.util.GameUtil;
 import e106.emissary_backend.domain.game.util.RoleUtils;
 import e106.emissary_backend.domain.room.entity.Room;
 import e106.emissary_backend.domain.room.enumType.RoomState;
@@ -62,6 +63,7 @@ public class GameService {
     private final ChannelTopic nightEmissaryTopic;
     private final ChannelTopic nightPoliceTopic;
     private final EndConfirmTask endConfirmTask;
+    private final GameUtil gameUtil;
 
 
     @RedissonLock(value = "#gameId")
@@ -141,6 +143,19 @@ public class GameService {
                 () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
         room.changeState(RoomState.STARTED);
     } // end of startGame
+
+    @RedissonLock(value = "#gameId")
+    public void day(long gameId) {
+        GameDTO gameDTO = getGameDTO(gameId);
+
+        gameDTO.setGameState(GameState.DAY);
+        gameDTO.setDay(gameDTO.getDay() + 1);
+
+        // 2분뒤 투표 시작
+        if(!gameUtil.isEnd(gameId)){
+            scheduler.scheduleTask(gameId, TaskName.START_VOTE_TASK, startVoteTask, 15, TimeUnit.SECONDS );
+        }
+    } // end of day
 
     @RedissonLock(value = "#gameId")
     public void startVote(long gameId, long userId, long targetId) {
@@ -344,17 +359,6 @@ public class GameService {
         NightPoliceMessage nightPoliceMessage = NightPoliceMessage.builder().gameId(gameId).targetId(targetId).result(targetPlayer.getRole()).build();
         publisher.publish(nightPoliceTopic, nightPoliceMessage);
     } // end of detect
-
-    @RedissonLock(value = "#gameId")
-    public void day(long gameId) {
-        GameDTO gameDTO = getGameDTO(gameId);
-
-        gameDTO.setGameState(GameState.DAY);
-        gameDTO.setDay(gameDTO.getDay() + 1);
-
-        // 2분뒤 다시 토론 시작
-        scheduler.scheduleTask(gameId, TaskName.START_VOTE_TASK, startVoteTask, 2, TimeUnit.MINUTES);
-    } // end of day
 
     @RedissonLock(value = "#gameId")
     public void isGameEnd(long gameId){

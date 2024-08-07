@@ -10,15 +10,19 @@ import e106.emissary_backend.domain.game.model.Player;
 import e106.emissary_backend.domain.game.repository.RedisGameRepository;
 import e106.emissary_backend.domain.game.service.publisher.RedisPublisher;
 import e106.emissary_backend.domain.game.service.subscriber.message.CommonMessage;
+import e106.emissary_backend.domain.user.entity.User;
+import e106.emissary_backend.domain.user.repository.UserRepository;
+import e106.emissary_backend.domain.userInRoom.entity.UserInRoom;
+import e106.emissary_backend.domain.userInRoom.repository.UserInRoomRepository;
 import e106.emissary_backend.global.error.CommonErrorCode;
 import e106.emissary_backend.global.error.exception.NotFoundGameException;
+import e106.emissary_backend.global.error.exception.NotFoundRoomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisKeyValueTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import javax.management.relation.Role;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -27,47 +31,145 @@ import java.util.stream.Collectors;
 public class GameUtil {
     private final RedisGameRepository redisGameRepository;
     private final RedisKeyValueTemplate redisKeyValueTemplate;
-
+    private final UserInRoomRepository userInRoomRepository;
 
     private final RedisPublisher redisPublisher;
 
     private final ChannelTopic commonTopic;
+    private final UserRepository userRepository;
 
     @RedissonLock(value = "#gameId")
-    public EndType isEnd(long gameId){
-        Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
-                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+    public boolean isEnd(long gameId){
+        Game game = getGame(gameId);
 
-        Map<GameRole, Long> roleCounts = game.getPlayerMap().values().stream().collect(Collectors.groupingBy(
+        Map<Long, Player> playerMap = game.getPlayerMap();
+
+        Map<GameRole, Long> roleCounts = playerMap.values().stream().collect(Collectors.groupingBy(
                 Player::getRole,
                 Collectors.counting()
         ));
 
         long emissaryCnt = roleCounts.getOrDefault(GameRole.EMISSARY, 0L) + roleCounts.getOrDefault(GameRole.BETRAYER, 0L);
         long personCnt = roleCounts.getOrDefault(GameRole.PERSON, 0L) + roleCounts.getOrDefault(GameRole.POLICE, 0L);
-        EndType result;
 
+        List<UserInRoom> userInRooms = userInRoomRepository.findAllByPk_RoomId(gameId).orElseThrow(
+                () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
+
+        boolean result = true;
         if(emissaryCnt == 0){
-            result = EndType.PERSON_WIN;
+            update(userInRooms, playerMap, -1);
+            endPublish(gameId);
         }else if(emissaryCnt >= personCnt){
-            result = EndType.EMISSARY_WIN;
+            update(userInRooms, playerMap, 1);
+            endPublish(gameId);
         }else{
-            result = EndType.NO_END;
+            result = false;
         }
 
         return result;
     }
 
-    public void endPublish(long gameId){
-        // todo : 반영하기
+    public void emissaryWin(long gameId) {
+        Game game = getGame(gameId);
 
+        Map<Long, Player> playerMap = game.getPlayerMap();
+
+        List<UserInRoom> userInRooms = userInRoomRepository.findAllByPk_RoomId(gameId).orElseThrow(
+                () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
+
+        update(userInRooms, playerMap, 1);
+    } // end of emissary Win
+
+    public void personWin(long gameId) {
+        Game game = getGame(gameId);
+
+        Map<Long, Player> playerMap = game.getPlayerMap();
+
+        List<UserInRoom> userInRooms = userInRoomRepository.findAllByPk_RoomId(gameId).orElseThrow(
+                () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
+
+        update(userInRooms, playerMap, -1);
+    } // end of person Win
+
+    private void update(List<UserInRoom> userInRooms, Map<Long, Player> playerMap, int value) {
+        List<User> personUsers = getUpdateUsers(userInRooms,
+                getRoleList(playerMap, GameRole.PERSON),
+                -1 * value,
+                GameRole.PERSON);
+        List<User> policeUsers = getUpdateUsers(userInRooms,
+                getRoleList(playerMap, GameRole.POLICE),
+                -1 * value,
+                GameRole.POLICE);
+        List<User> emissaryUsers = getUpdateUsers(userInRooms,
+                getRoleList(playerMap, GameRole.EMISSARY),
+                value,
+                GameRole.EMISSARY);
+        List<User> betrayerUsers = getUpdateUsers(userInRooms,
+                getRoleList(playerMap, GameRole.BETRAYER),
+                value,
+                GameRole.BETRAYER);
+
+
+        userRepository.saveAll(personUsers);
+        userRepository.saveAll(policeUsers);
+        userRepository.saveAll(emissaryUsers);
+        userRepository.saveAll(betrayerUsers);
+    } // end of update
+
+
+
+    private static List<User> getUpdateUsers(List<UserInRoom> userInRooms, List<Long> roleList, int value, GameRole role) {
+        return userInRooms.stream()
+                .map(UserInRoom::getUser)
+                .filter(user -> roleList.contains(user.getUserId()))
+                .map(user -> {
+                    switch (role) {
+                        case PERSON:
+                            user.setCitizenWinCnt(user.getCitizenWinCnt() + value);
+                            user.setCitizenGameCnt(user.getCitizenGameCnt() + value);
+                            break;
+                        case POLICE:
+                            user.setPoliceWinCnt(user.getPoliceWinCnt() + value);
+                            user.setPolicePlayCnt(user.getPolicePlayCnt() + value);
+                            break;
+                        case EMISSARY:
+                            user.setMafiaWinCnt(user.getMafiaWinCnt() + value);
+                            user.setMafiaPlayCnt(user.getMafiaPlayCnt() + value);
+                        case BETRAYER:
+                            user.setTurncoatWinCnt(user.getTurncoatWinCnt() + value);
+                            user.setTurncoatGameCnt(user.getTurncoatGameCnt() + value);
+                    }
+
+                    user.setMafiaWinCnt(user.getMafiaWinCnt() + value);
+                    user.setMafiaPlayCnt(user.getMafiaPlayCnt() + value);
+
+                    return user;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private static List<Long> getRoleList(Map<Long, Player> playerMap, GameRole role) {
+        return playerMap.values().stream()
+                .filter(player -> player.getRole().equals(role))
+                .map(Player::getId)
+                .collect(Collectors.toList());
+    }
+
+
+    private Game getGame(long gameId) {
+        Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
+                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+        return game;
+    }
+
+    @RedissonLock(value = "#gameId")
+    private void endPublish(long gameId){
         redisGameRepository.deleteById(gameId);
 
         redisPublisher.publish(commonTopic, CommonMessage.builder()
-                        .gameId(gameId)
-                        .gameState(GameState.END)
-                        .result(CommonResult.SUCCESS)
-                        .build());
+                .gameId(gameId)
+                .gameState(GameState.END)
+                .result(CommonResult.SUCCESS)
+                .build());
     }
-
 }

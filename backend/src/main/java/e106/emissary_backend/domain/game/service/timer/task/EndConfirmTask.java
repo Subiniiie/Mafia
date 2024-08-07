@@ -81,9 +81,7 @@ public class EndConfirmTask implements GameTask {
         voteRedisTemplate.delete(voteKey);
 
 
-        if(!gameUtil.isEnd(gameId).equals(EndType.NO_END)){
-            gameUtil.endPublish(gameId);
-        }else{
+        if(!gameUtil.isEnd(gameId)){
             nightEmissaryTask.setGameId(gameId);
             schedulerService.scheduleTask(gameId, TaskName.NIGHT_EMISSARY, nightEmissaryTask, 15, TimeUnit.SECONDS);
         }
