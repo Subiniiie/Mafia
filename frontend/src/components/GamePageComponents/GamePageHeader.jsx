@@ -1,23 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useParams } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import styles from "./GamePageHeader.module.css"
 import GameSettingsModal from "../../modals/GameSettingsModal";
 
 function GamePageHeader() {
-    // 게임 리스트에서 게임 방을 클릭하면 or 방장이 새롭게 게임 방을 만들면 or 방장이 방 이름을 수정하면
-    // 게임 방 정보가 나한테 들어올 거임
-    // 그때 코드 수정하기 지금은 임시로 설정
-
-    // 2-1.
-    // useState(response.data.roomTitle) 이런 식
-    const [ roomTitle, setRoomTitle ] = useState('대한의 독립을 위하여')
-
-    // 2-2.
-    // 방장 정보는 어디서 얻음??
-    // 백에서 주겠지
-    // response 안에 있나
-    const [ roomManager, setRoomManager ] = useState(true)
+    const { gameData, setGameData } = useState(null)
+    
+    const roomTitle = gameData.title
+    const roomManager = gameData.userList.find(user => user.isOwner === true)
+    const roomManagerSettings = <button className={styles.settings} onClick={openModal}>게임설정</button>
 
 
     // 방장만 게임 설정 바꿀 수 있게
@@ -30,35 +22,24 @@ function GamePageHeader() {
         setBlackBackground((preState) => !preState)
     }
 
-    // 1.
-    // 방제목을 가져옴
-    // 아마 response 안에 roomTitle이 있겠지??
-    // 그럼 response.data.roomTitle 이런 식??
+    // 방 정보를 가져올거임
     useEffect(() => {
-        const getGameRoom = async function() {
+        // 주소에서 roomId를 가져옴
+        // 방 클릭할 때 주소 전송하는 걸 누가 해야하지?
+        // 주소에서  roomId인지 id인지 보기
+        const { roomId } = useParams()
+        const gameRoomInfo = async () => {
             try {
-                // id는 GamePage에서 useParams로 받은 id??
-                // 그럼 얘는 GamePage에서 props로 받아야하나
-                const response = await axios.get(`https://i11e106.p.ssafy.io/api/options/rooms/${roomId}`, {
-                    headers: {
-                        Authorization: `Bearer $access token`
-                    },
-                    params: {
-                        //  어케 씀?
-                        id: id,
-                    }
-                })
-                // response 안에 어떤 식으로 되어 있는지 알기
-                console.log(response.data)
-                return response.data
+                // 게임방 API 호출
+                const response = await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`)
+                setGameData(response.data)
             } catch (error) {
-                console.log(error)
-                throw error
+                console.log("게임방 API를 불러오지 못했습니다", error)
             }
         }
-    }, [])
+        gameRoomInfo()
+    } , [])
 
-    const roomManagerSettings = <button className={styles.settings} onClick={openModal}>게임설정</button>
     return (
         <>
             <div className={styles.container}>
