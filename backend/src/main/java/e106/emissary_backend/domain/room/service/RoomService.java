@@ -169,7 +169,7 @@ public class RoomService {
                 .isHaveBetrayer(savedRoom.isHaveBetray())
                 .gameState(GameState.WAIT)
                 .build();
-        Player player = Player.createPlayer(user.getUserId(), user.getNickname());
+        Player player = Player.createPlayer(user.getUserId(), user.getNickname(), userInRoom.getConnectTime());
         gameDTO.addPlayer(player);
 
         Game game = gameDTO.toDao();
