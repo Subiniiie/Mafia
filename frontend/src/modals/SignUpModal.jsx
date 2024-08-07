@@ -5,28 +5,36 @@ import axios from 'axios'
 
 
 const SignUpModal = ({ isOpen, openModal }) => {
-    const modalTitle = 'SignUp Modal';
+    const modalTitle = '입단하기';
 
     const [email, setEmail] = useState('')
+    const [verificationCode, setVerificationCode] = useState('')
     const [nickname, setNickname] = useState('')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
 
     const [emailValid, setEmailValid] = useState(false)
+    const [verificationCodeValid, setVerificationCodeValid] = useState(false)
     const [nicknameValid, setNicknameValid] = useState(false)
     const [passwordValid, setPasswordValid] = useState(false)
     const [confirmPasswordValid, setConfirmPasswordValid] = useState(false)
 
     const [emailError, setEmailError] = useState(false)
+    const [verificationCodeError, setVerificationCodeError] = useState(false)
     const [nicknameError, setNicknameError] = useState(false)
     const [passwordError, setPasswordError] = useState(false)
     const [confirmPasswordError, setConfirmPasswordError] = useState(false)
 
+    const [showVerificationCodeInput, setShowVerificationCodeInput] = useState(false)
+    const [givenCode, setGivenCode] = useState('')
+
     const emailRef = useRef()
+    const verificationCodeRef = useRef()
     const nicknameRef = useRef()
     const passwordRef = useRef()
     const confirmPasswordRef = useRef()
     const submitButtonRef = useRef()
+
 
     if (!isOpen) return null; // 모달이 열리지 않았다면 렌더링하지 않음
 
@@ -81,7 +89,24 @@ const SignUpModal = ({ isOpen, openModal }) => {
                     if (response.data.status === 'success') {
                         setEmailValid(true)
                         setEmailError(false)
-                        nicknameRef.current.focus()
+                        try {
+                            const mailResponse = await axios.post('https://i11e106.p.ssafy.io/api/mail',
+                                JSON.stringify(
+                                    { mail: email }
+                                ), {
+                                headers: {
+                                    "Content-Type": "application/json",
+                                }
+                            });
+                            console.log(mailResponse.data)
+                            setGivenCode(mailResponse.data)
+                            setShowVerificationCodeInput(true)
+                            verificationCodeRef.current.focus()
+
+                        } catch (error) {
+                            console.log('mail axios 요청 뭔가 이상해', error)
+                        }
+
                     } else {
                         setEmailValid(false)
                         setEmailError(true)
@@ -165,11 +190,21 @@ const SignUpModal = ({ isOpen, openModal }) => {
         }
     }
 
-    // const handleKeyDown = (e, ref) => {
-    //     if (e.key === 'Enter') {
-    //         ref.current ? ref.current.focus() : handleSignUp()
-    //     }
-    // }
+    const handleVerificationCodeKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            // nicknameRef.current ? nicknameRef.current.focus() : handleSignUp()
+            console.log('givenCode :', givenCode)
+            if (verificationCode === givenCode) {
+                setVerificationCodeValid(true)
+                setVerificationCodeError(false)
+                nicknameRef.current.focus()
+            } else {
+                alert('올바른 인증코드를 입력해주세요.')
+                setVerificationCodeValid(false)
+                setVerificationCodeError(true)
+            }
+        }
+    }
 
     return (
         <div className={styles.modalOverlay} onClick={openModal}>
@@ -187,6 +222,21 @@ const SignUpModal = ({ isOpen, openModal }) => {
                         onKeyDown={handleEmailKeyDown}
                         ref={emailRef}
                     />
+                    {showVerificationCodeInput && (
+                        <div>
+                            <h5>인증번호</h5>
+                            <input
+                                required
+                                type="text"
+                                placeholder='인증번호를 입력해주세요'
+                                className={`${styles.inputField} ${verificationCodeValid ? styles.valid : ''} ${verificationCodeError ? styles.error : ''}`}
+                                value={verificationCode}
+                                onChange={(e) => setVerificationCode(e.target.value)}
+                                onKeyDown={handleVerificationCodeKeyDown}
+                                ref={verificationCodeRef}
+                            />
+                        </div>
+                    )}
 
                     <h5>닉네임</h5>
                     <input
