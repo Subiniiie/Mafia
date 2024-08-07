@@ -1,9 +1,6 @@
 package e106.emissary_backend.domain.room.controller;
 
-import e106.emissary_backend.domain.room.dto.RoomJoinDto;
-import e106.emissary_backend.domain.room.dto.RoomOptionDto;
-import e106.emissary_backend.domain.room.dto.RoomRequestDto;
-import e106.emissary_backend.domain.room.dto.RoomListDto;
+import e106.emissary_backend.domain.room.dto.*;
 import e106.emissary_backend.domain.room.service.RoomService;
 import e106.emissary_backend.domain.user.dto.CustomUserDetails;
 import e106.emissary_backend.global.common.CommonResponseDto;
@@ -79,6 +76,27 @@ public class RoomController {
         } catch (OpenViduJavaClientException | OpenViduHttpException e){
             // 참가 실패 시
             return ResponseEntity.internalServerError().body(new RoomJoinDto());
+        }
+    }
+
+    @DeleteMapping("/rooms/kick")
+    public ResponseEntity<CommonResponseDto> kickRoom(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody RoomKickDto roomKickDto) {
+
+        long userId = 1L;
+        if (!Objects.isNull(customUserDetails)) {
+            userId = customUserDetails.getUserId();
+        }
+
+        try {
+            boolean res = roomService.kickUser(roomKickDto, userId);
+
+            if (res) {
+                return ResponseEntity.ok(new CommonResponseDto("ok"));
+            } else {
+                return ResponseEntity.internalServerError().body(new CommonResponseDto("There's an error - kicked Yourself or UnAuthorization"));
+            }
+        } catch (OpenViduJavaClientException | OpenViduHttpException e) {
+            return ResponseEntity.internalServerError().body(new CommonResponseDto("OpenViduError"));
         }
     }
 

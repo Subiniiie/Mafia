@@ -256,7 +256,7 @@ public class RoomService {
             } else if (users.get(token) == SessionRole.HOST){
                 // 방장 위임
                 users.remove(token);
-//                changeSessionOwner(session); ToDo: 방장 위임기능
+                changeSessionOwner(session);
                 userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
             }
 
@@ -276,13 +276,65 @@ public class RoomService {
     public boolean changeSessionOwner(Session session){
         try{
             session.fetch();
+            // 다음 먼저 들어온 유처 확인
             Connection nextOwner = session.getActiveConnections().stream()
                     .min((a,b) -> Long.compare(a.createdAt(), b.createdAt()))
                     .orElseThrow(() -> new IllegalStateException("No active connections found"));
+
+            Map<String, SessionRole> users = mapSessionNamesTokens.get(session.getSessionId());
+            users.put(nextOwner.getToken(), SessionRole.HOST);
+
             return true;
         } catch (OpenViduJavaClientException | OpenViduHttpException e) {
             return false;
         }
+    }
+
+    public boolean kickUser(RoomKickDto roomKickDto, long userId) throws OpenViduJavaClientException, OpenViduHttpException {
+            Session session = mapSessions.get(String.valueOf(roomKickDto.getRoomId()));
+            String connectionId = roomKickDto.getConnectionId();
+            session.fetch();
+
+            if (session == null){
+                throw new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION);
+            }
+
+            Optional<UserInRoom> userInRoom = userInRoomRepository.findByPk_UserId(userId);
+            String token = "";
+            if (userInRoom.isPresent()){
+                 token = userInRoom.get().getViduToken();
+            } else {
+                throw new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION);
+            }
+
+            SessionRole role = mapSessionNamesTokens.get(session.getSessionId()).get(token);
+
+            if (role != SessionRole.HOST){
+                // 권한 부족 exception 전송
+                return false;
+            }
+
+            session.getConnection(connectionId).getToken();
+            // UserInRooM 처리하고
+            String nickname = session.getConnection(connectionId).getClientData();
+            Optional<UserInRoom> kickedUser = userInRoomRepository.findByPk_UserId(userId);
+            String kickedToken = "";
+            if (kickedUser.isPresent()){
+                if (userInRoom.get().getViduToken().equals(kickedUser.get().getViduToken())){
+                    // 호스트가 스스로 강퇴할 때 exception
+                    return false;
+                }
+                kickedToken = kickedUser.get().getViduToken();
+                userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomKickDto.getRoomId(), userId);
+            }
+
+            // Map 삭제하고
+            Map<String, SessionRole> users = mapSessionNamesTokens.get(session.getSessionId());
+            users.remove(kickedToken);
+
+            // 강퇴 ㄱ
+            session.forceDisconnect(connectionId);
+            return true;
     }
 
     private Mono<String> sendSignalToSession(String sessionId, String type, String data){
