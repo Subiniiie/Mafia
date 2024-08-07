@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import axios from 'axios'
 // import jwt_decode from 'jwt-decode'
+import { decode } from "jwt-js-decode";
 import Navbar from "./components/Navbar"
 import MainPage from './pages/MainPage'
 import GameListPage from './pages/GameListPage'
@@ -12,36 +13,75 @@ import './App.css'
 
 
 function App() {
-  // const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태
-  const [isLoggedIn, setIsLoggedIn] = useState(true); // 로그인 상태
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태
+  // const [isLoggedIn, setIsLoggedIn] = useState(true); // 로그인 상태
   const [name, setName] = useState('') // 로그인된 사용자의 이름
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      // 여기서 토큰을 디코딩하거나 백엔드에서 사용자 정보를 가져올 수 있습니다.
-      setIsLoggedIn(true)
-      setName('이현규') // 실제 사용자 이름을 설정합니다.
-      console.log(token) // undefined
+    const access = localStorage.getItem('access')
+    const refresh = localStorage.getItem('refresh')
 
-      // try {
-      //   const decodedToken = jwt_decode(token)
-      //   setName(decodedToken.name)
-      //   setIsLoggedIn(true)
+    if (access && refresh) {
+      const decodedAccess = decode(access)
+      const currentTime = Math.floor(Date.now() / 1000)
+      console.log('currentTime :', currentTime)
+      console.log('exp :', decodedAccess.payload.exp)
 
-      //   // 또는 백엔드에서 사용자 정보를 가져올 수 있습니다.
-      //   // fetchUserData(token)
-      // } catch (error) {
-      //   console.error('Failed to decode token:', error)
-      // }
+      if (decodedAccess.payload.exp < currentTime) {
+        // 가짜로 만료된 척 하는 중...
+        // if (1722826419 < currentTime) {
+        // Access token이 만료된 경우
+        console.log('Access token expired. Attempting to refresh token...')
+        refreshToken(access, refresh)
+        console.log('reissue 성공!')
+      } else {
+        // Access token이 유효한 경우
+        setIsLoggedIn(true)
+        const { username } = decodedAccess.payload
+        setName(username)
+      }
     }
   }, [])
 
+  const refreshToken = async (accessToken, refreshToken) => {
+    // const cookies = new Cookies();
+    try {
+      console.log('reissue 해볼게용')
 
-  const handleLoginSuccess = (name) => {
-    setIsLoggedIn(true)
-    setName(name)
+      const body = {
+        access: accessToken,
+        refresh: refreshToken
+      }
+
+      const response = await axios.post('https://i11e106.p.ssafy.io/api/reissue', JSON.stringify(body), {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // headers: {
+        //   "Authorization": `Bearer ${accessToken}`,
+        //   'X-Access-Token': refreshToken
+        //   // "Cookie": `Access=${accessToken}; Refresh=${refreshToken}`,
+        // },
+        withCredentials: true // 필요 시 추가: 이 옵션을 추가하면 쿠키가 포함된 요청을 서버로 보낼 수 있음
+      })
+      const { access, refresh } = response.data
+      localStorage.setItem('access', access)
+      localStorage.setItem('refresh', refresh)
+      const decodedAccess = decode(access)
+      const { username } = decodedAccess.payload
+      setName(username)
+      setIsLoggedIn(true)
+    } catch (error) {
+      console.error('Failed to refresh token:', error)
+      setIsLoggedIn(false)
+    }
   }
+
+  const handleLoginSuccess = (username) => {
+    setIsLoggedIn(!isLoggedIn)
+    setName(username)
+  }
+
 
   return (
     // <BrowserRouter>
