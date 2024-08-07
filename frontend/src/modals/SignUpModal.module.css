@@ -45,6 +45,15 @@
     color: black;
 }
 
+.inputField.valid {
+    border-color: #02A434
+        /* border: 1.5px solid #02A434; */
+}
+
+.inputField.error {
+    border-color: rgb(220, 0, 0)
+}
+
 .submitButton {
     background-color: #CECACA;
     /* 버튼 배경색 */
