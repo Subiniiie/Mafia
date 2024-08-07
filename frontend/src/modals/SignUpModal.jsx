@@ -67,32 +67,63 @@ const SignUpModal = ({ isOpen, openModal }) => {
         }
     }
 
-    const handleValidKeyDown = async (e, apiEndpoint, setValid, setError, content, nextRef) => {
+    const handleEmailKeyDown = async (e) => {
 
         if (e.key === 'Enter') {
             console.log('Enter를 눌렀네! 유효성 검증을 해볼게')
-            if (content === '') {
-                setValid(false)
-                setError(true)
+            if (email === '') {
+                setEmailValid(false)
+                setEmailError(true)
             } else {
                 try {
-                    const response = await axios.get(`https://i11e106.p.ssafy.io${apiEndpoint}`);
+                    const response = await axios.get(`https://i11e106.p.ssafy.io/api/checkemail?email=${email}`);
                     console.log(response.data)
                     if (response.data.status === 'success') {
-                        setValid(true)
-                        setError(false)
-                        nextRef.current.focus()
+                        setEmailValid(true)
+                        setEmailError(false)
+                        nicknameRef.current.focus()
                     } else {
-                        setValid(false)
-                        setError(true)
+                        setEmailValid(false)
+                        setEmailError(true)
                         alert(response.data.message)
                     }
                     // 개발 error
                 } catch (error) {
                     console.error('유효성 검증 실패 :', error)
                     alert('유효성 검증에 실패했습니다. 다시 시도해주세요.')
-                    setValid(false)
-                    setError(true)
+                    setEmailValid(false)
+                    setEmailError(true)
+                }
+            }
+        }
+    }
+
+    const handleNicknameKeyDown = async (e) => {
+
+        if (e.key === 'Enter') {
+            console.log('Enter를 눌렀네! 유효성 검증을 해볼게')
+            if (nickname === '') {
+                setNicknameValid(false)
+                setNicknameError(true)
+            } else {
+                try {
+                    const response = await axios.get(`https://i11e106.p.ssafy.io/api/checknick?nickname=${nickname}`);
+                    console.log(response.data)
+                    if (response.data.status === 'success') {
+                        setNicknameValid(true)
+                        setNicknameError(false)
+                        passwordRef.current.focus()
+                    } else {
+                        setNicknameValid(false)
+                        setNicknameError(true)
+                        alert(response.data.message)
+                    }
+                    // 개발 error
+                } catch (error) {
+                    console.error('유효성 검증 실패 :', error)
+                    alert('유효성 검증에 실패했습니다. 다시 시도해주세요.')
+                    setNicknameValid(false)
+                    setNicknameError(true)
                 }
             }
         }
@@ -153,7 +184,7 @@ const SignUpModal = ({ isOpen, openModal }) => {
                         className={`${styles.inputField} ${emailValid ? styles.valid : ''} ${emailError ? styles.error : ''}`}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        onKeyDown={(e) => handleValidKeyDown(e, `/api/checkemail?email=${email}`, setEmailValid, setEmailError, email, nicknameRef)}
+                        onKeyDown={handleEmailKeyDown}
                         ref={emailRef}
                     />
 
@@ -165,7 +196,7 @@ const SignUpModal = ({ isOpen, openModal }) => {
                         className={`${styles.inputField} ${nicknameValid ? styles.valid : ''} ${nicknameError ? styles.error : ''}`}
                         value={nickname}
                         onChange={(e) => setNickname(e.target.value)}
-                        onKeyDown={(e) => handleValidKeyDown(e, `/api/checknick?nickname=${nickname}`, setNicknameValid, setNicknameError, nickname, passwordRef)}
+                        onKeyDown={handleNicknameKeyDown}
                         ref={nicknameRef}
                     />
 
