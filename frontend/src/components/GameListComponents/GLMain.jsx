@@ -9,7 +9,13 @@ const GLMain = () => {
     useEffect(() => {
         const fetchRooms = async () => {
             try {
-                const response = await axios.get('https://i11e106.p.ssafy.io/api/rooms')
+                const access = localStorage.getItem('access')
+                const response = await axios.get('https://i11e106.p.ssafy.io/api/rooms', {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${access}`,
+                    }
+                })
                 console.log(response.data)
                 setRooms(response.data)
             } catch (error) {
@@ -28,33 +34,12 @@ const GLMain = () => {
                     <GameRoomCard
                         id={room.id}
                         title={room.title}
-                        ownerName={room.ownerName}
-                        progress={room.progress}
-                        inInProgress={room.isInProgress}
+                        leader={room.ownerName}
+                        progress={room.nowPlayer}
+                        inInProgress={room.maxPlayer}
                     />
                 </div>
             ))}
-
-            {/* 
-
-            <div className={styles.cardWrapper}>
-                <GameRoomCard id="1" title="고국으로" leader="강진" progress={7} isInProgress={false} />
-            </div>
-            <div className={styles.cardWrapper}>
-                <GameRoomCard id="2" title="대한의 독립을 위하여" leader="수빈" progress={6} isInProgress={false} />
-            </div>
-            <div className={styles.cardWrapper}>
-                <GameRoomCard id="3" title="고향의 푸른 산하" leader="최진" progress={8} isInProgress={true} />
-            </div>
-            <div className={styles.cardWrapper}>
-                <GameRoomCard id="1" title="고국으로" leader="강진" progress={7} isInProgress={false} />
-            </div>
-            <div className={styles.cardWrapper}>
-                <GameRoomCard id="2" title="대한의 독립을 위하여" leader="수빈" progress={6} isInProgress={false} />
-            </div>
-            
-
-            필요 시 더 많은 카드 추가 */}
         </div>
     );
 };
