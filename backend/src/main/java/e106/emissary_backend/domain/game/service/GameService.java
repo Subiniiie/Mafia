@@ -144,6 +144,91 @@ public class GameService {
         room.changeState(RoomState.STARTED);
     } // end of startGame
 
+    /**
+    마피아 능력으로 죽이는거
+     */
+    @RedissonLock(value = "#gameId")
+    public void kill(long gameId, long targetId) {
+        GameDTO gameDTO = getGameDTO(gameId);
+
+        Player targetPlayer = gameDTO.getPlayerMap().get(targetId);
+
+        if(!targetPlayer.isAlive()){
+            throw new AlreadyRemoveUserException(CommonErrorCode.ALREADY_REMOVE_USER_EXCEPTION);
+        }
+
+        targetPlayer.setAlive(false);
+
+        update(gameDTO);
+
+        // todo : Redis에 발행해야함
+        publisher.publish(nightEmissaryTopic, NightEmissaryMessage.builder()
+                        .gameId(gameId)
+                        .targetId(targetId)
+                        .result("success")
+                        .build());
+    } // end of Kill
+
+    public void appease(long gameId, long targetId) {
+        GameDTO gameDTO = getGameDTO(gameId);
+
+        if(!Objects.isEmpty(gameDTO.getBetrayer()))
+            throw new AlreadyUseAppeaseException(CommonErrorCode.ALREADY_USE_APPEASE_EXCEPTION);
+
+        Map<Long, Player> playerMap = gameDTO.getPlayerMap();
+        Player targetPlayer = playerMap.get(targetId);
+
+        if(!targetPlayer.isAlive()){
+            throw new AlreadyRemoveUserException(CommonErrorCode.ALREADY_REMOVE_USER_EXCEPTION);
+        }
+
+        if(targetPlayer.getRole() == GameRole.EMISSARY){
+            throw new EmissaryAppeaseEmissaryException(CommonErrorCode.EMISSARY_APPEASE_EMISSARY_EXCEPTION);
+        }
+
+        // todo : game안에 Player상태 변경
+        if (targetPlayer.getRole() == GameRole.POLICE) {
+            // 살아있는 PERSON 중 무작위로 한 명을 선택하여 POLICE로 변경
+            List<Player> alivePerson = playerMap.values().stream()
+                    .filter(player -> player.isAlive() && player.getRole() == GameRole.PERSON)
+                    .collect(Collectors.toList());
+
+            if (!alivePerson.isEmpty()) {
+                Random random = new Random();
+                Player newPolice = alivePerson.get(random.nextInt(alivePerson.size()));
+                newPolice.setRole(GameRole.POLICE);
+            }
+        }
+        targetPlayer.setRole(GameRole.BETRAYER);
+        gameDTO.setBetrayer(targetPlayer);
+
+        update(gameDTO);
+
+        //레디스에 발행
+        publisher.publish(nightEmissaryTopic, NightEmissaryMessage.builder()
+                        .gameId(gameId)
+                        .targetId(targetId)
+                        .result("success")
+                        .build());
+    } // end of appease
+
+    @RedissonLock(value = "#gameId")
+    public void detect(long gameId, long targetId) {
+        // userId로 경찰인지 확인 해줘야하나? -> 해야하면 마피아도..
+        GameDTO gameDTO = getGameDTO(gameId);
+
+        Map<Long, Player> playerMap = gameDTO.getPlayerMap();
+        Player targetPlayer = playerMap.get(targetId);
+
+        if(!targetPlayer.isAlive()){
+            throw new AlreadyRemoveUserException(CommonErrorCode.ALREADY_REMOVE_USER_EXCEPTION);
+        }
+
+        // todo : 이미 조사한 유저에 대해서 어떻게하지? -> 그냥 다 모른다 쳐!
+        NightPoliceMessage nightPoliceMessage = NightPoliceMessage.builder().gameId(gameId).targetId(targetId).result(targetPlayer.getRole()).build();
+        publisher.publish(nightPoliceTopic, nightPoliceMessage);
+    } // end of detect
+
     @RedissonLock(value = "#gameId")
     public void day(long gameId) {
         GameDTO gameDTO = getGameDTO(gameId);
@@ -262,7 +347,7 @@ public class GameService {
     } // end of endConfirm
 
     /**
-     제거하는 로직
+     나간거 로직
      */
     @RedissonLock(value = "#gameId")
     public void removeUser(long gameId, long targetId) {
@@ -274,103 +359,6 @@ public class GameService {
 
         update(gameDTO);
     } // end of removeUser
-
-    /**
-    마피아 능력으로 죽이는거
-     */
-    @RedissonLock(value = "#gameId")
-    public void kill(long gameId, long targetId) {
-        GameDTO gameDTO = getGameDTO(gameId);
-
-        Player targetPlayer = gameDTO.getPlayerMap().get(targetId);
-
-        if(!targetPlayer.isAlive()){
-            throw new AlreadyRemoveUserException(CommonErrorCode.ALREADY_REMOVE_USER_EXCEPTION);
-        }
-
-        targetPlayer.setAlive(false);
-
-        update(gameDTO);
-
-        // todo : Redis에 발행해야함
-        publisher.publish(nightEmissaryTopic, NightEmissaryMessage.builder()
-                        .gameId(gameId)
-                        .targetId(targetId)
-                        .result("success")
-                        .build());
-    } // end of Kill
-
-    public void appease(long gameId, long targetId) {
-        GameDTO gameDTO = getGameDTO(gameId);
-
-        if(!Objects.isEmpty(gameDTO.getBetrayer()))
-            throw new AlreadyUseAppeaseException(CommonErrorCode.ALREADY_USE_APPEASE_EXCEPTION);
-
-        Map<Long, Player> playerMap = gameDTO.getPlayerMap();
-        Player targetPlayer = playerMap.get(targetId);
-
-        if(!targetPlayer.isAlive()){
-            throw new AlreadyRemoveUserException(CommonErrorCode.ALREADY_REMOVE_USER_EXCEPTION);
-        }
-
-        if(targetPlayer.getRole() == GameRole.EMISSARY){
-            throw new EmissaryAppeaseEmissaryException(CommonErrorCode.EMISSARY_APPEASE_EMISSARY_EXCEPTION);
-        }
-
-        // todo : game안에 Player상태 변경
-        if (targetPlayer.getRole() == GameRole.POLICE) {
-            // 살아있는 PERSON 중 무작위로 한 명을 선택하여 POLICE로 변경
-            List<Player> alivePerson = playerMap.values().stream()
-                    .filter(player -> player.isAlive() && player.getRole() == GameRole.PERSON)
-                    .collect(Collectors.toList());
-
-            if (!alivePerson.isEmpty()) {
-                Random random = new Random();
-                Player newPolice = alivePerson.get(random.nextInt(alivePerson.size()));
-                newPolice.setRole(GameRole.POLICE);
-            }
-        }
-        targetPlayer.setRole(GameRole.BETRAYER);
-        gameDTO.setBetrayer(targetPlayer);
-
-        update(gameDTO);
-
-        //레디스에 발행
-        publisher.publish(nightEmissaryTopic, NightEmissaryMessage.builder()
-                        .gameId(gameId)
-                        .targetId(targetId)
-                        .result("success")
-                        .build());
-    } // end of appease
-
-    @RedissonLock(value = "#gameId")
-    public void detect(long gameId, long targetId) {
-        // userId로 경찰인지 확인 해줘야하나? -> 해야하면 마피아도..
-        GameDTO gameDTO = getGameDTO(gameId);
-
-        Map<Long, Player> playerMap = gameDTO.getPlayerMap();
-        Player targetPlayer = playerMap.get(targetId);
-
-        if(!targetPlayer.isAlive()){
-            throw new AlreadyRemoveUserException(CommonErrorCode.ALREADY_REMOVE_USER_EXCEPTION);
-        }
-
-        // todo : 이미 조사한 유저에 대해서 어떻게하지? -> 그냥 다 모른다 쳐!
-        NightPoliceMessage nightPoliceMessage = NightPoliceMessage.builder().gameId(gameId).targetId(targetId).result(targetPlayer.getRole()).build();
-        publisher.publish(nightPoliceTopic, nightPoliceMessage);
-    } // end of detect
-
-    @RedissonLock(value = "#gameId")
-    public void isGameEnd(long gameId){
-
-    }
-
-    @RedissonLock(value = "#gameId")
-    public void gameEnd(long gameId){
-        GameDTO gameDTO = getGameDTO(gameId);
-        gameDTO.setGameState(GameState.END);
-
-    }
 
     @RedissonLock(value = "#gameId")
     private HashMap<Long, Integer> getVoteMapFromRedis(String voteKey) {
