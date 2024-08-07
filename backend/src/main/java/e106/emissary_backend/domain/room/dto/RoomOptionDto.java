@@ -15,14 +15,16 @@ public class RoomOptionDto {
     private Integer maxPlayer;
     private boolean haveBetray;
     private String owner;
+    private String ownerToken;
 
-    public static RoomOptionDto of(String owner, RoomRequestDto roomRequestDto){
+    public static RoomOptionDto of(String owner, String ownerToken, RoomRequestDto roomRequestDto){
         return RoomOptionDto.builder()
                 .title(roomRequestDto.getTitle())
                 .password(roomRequestDto.getPassword())
                 .maxPlayer(roomRequestDto.getMaxPlayer())
                 .haveBetray(roomRequestDto.isHaveBetray())
                 .owner(owner)
+                .ownerToken(ownerToken)
                 .build();
     }
 }
