@@ -1,20 +1,23 @@
 import React, { useState } from "react"
 import styles from "./Monitor.module.css"
 
-// 닉네임 정보 받기 
-// function({ nickname }) 요런 식으로
-// const Monitor = function({ nickname, isMe, isAlive, hasEveryoneVoted, onVote }) {
-const Monitor = function({ nickname, isRoomManager, isMe, isAlive, onVote }) {
+const Monitor = function({ id, isMe, isAlive, onVote, isVote, onVote }) {
 
     // 투표 상태를 나타내는 상태
     const [ isVote, setIsVote ] = useState(false)
     // 투표한 플레이어의 닉네임을 저장하는 변수
     const [ votedPlayer, setVotedPlayer ] = useState(null)
 
+    const [localIsVote, setLocalIsVote] = useState(isVote)
+
+    useEffect(() => {
+        setLocalIsVote(isVote); // Prop으로 받은 isVote 상태 업데이트
+    }, [isVote]);
+
     const handleVote = function() {
         setIsVote(prevState => !prevState)
         // 투표 당한 플레이어의 닉네임을 GamePageMain에 보낼거야
-        onVote(nickname)
+        onVote(id)
     }
 
     const [ isMuteVoice, setIsMuteVoice ] = useState(false)
