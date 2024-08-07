@@ -5,4 +5,6 @@ public interface TaskName {
     String END_VOTE_TASK = "EndVoteTask";
     String START_CONFIRM_TASK = "StartConfirmTask";
     String END_CONFIRM_TASK = "EndConfirmTask";
+    String NIGHT_EMISSARY = "NightEmissary";
+    String NIGHT_POLICE = "NightPolice";
 }

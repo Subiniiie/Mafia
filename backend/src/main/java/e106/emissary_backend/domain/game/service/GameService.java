@@ -127,7 +127,7 @@ public class GameService {
 
         // 타이머 - 토론시간임.
         startVoteTask.setGameId(roomId);
-        scheduler.scheduleTask(roomId, TaskName.START_VOTE_TASK, startVoteTask, 15, TimeUnit.SECONDS);
+        scheduler.scheduleTask(roomId, TaskName.START_VOTE_TASK, startVoteTask, 0, TimeUnit.SECONDS);
 
         publisher.publish(dayTopic, DayMessage.builder()
                 .gameId(roomId)
@@ -151,6 +151,9 @@ public class GameService {
         Player player = playerMap.get(userId);
 
         player.setVoted(true);
+        gameDTO.setGameState(GameState.VOTE_START);
+        gameDTO.setDay(gameDTO.getDay() + 1);
+
         update(gameDTO);
 
         if(GameRole.BETRAYER.equals(player.getRole())){
@@ -202,6 +205,8 @@ public class GameService {
         Player player = playerMap.get(userId);
 
         player.setVoted(true);
+        gameDTO.setGameState(GameState.CONFIRM_START);
+
         update(gameDTO);
 
         if(GameRole.BETRAYER.equals(player.getRole())){
@@ -253,6 +258,9 @@ public class GameService {
         update(gameDTO);
     } // end of removeUser
 
+    /**
+    마피아 능력으로 죽이는거
+     */
     @RedissonLock(value = "#gameId")
     public void kill(long gameId, long targetId) {
         GameDTO gameDTO = getGameDTO(gameId);
@@ -278,7 +286,7 @@ public class GameService {
     public void appease(long gameId, long targetId) {
         GameDTO gameDTO = getGameDTO(gameId);
 
-        if(!Objects.isEmpty(gameDTO.getEmissary()))
+        if(!Objects.isEmpty(gameDTO.getBetrayer()))
             throw new AlreadyUseAppeaseException(CommonErrorCode.ALREADY_USE_APPEASE_EXCEPTION);
 
         Map<Long, Player> playerMap = gameDTO.getPlayerMap();
@@ -294,8 +302,6 @@ public class GameService {
 
         // todo : game안에 Player상태 변경
         if (targetPlayer.getRole() == GameRole.POLICE) {
-            targetPlayer.setRole(GameRole.BETRAYER);
-
             // 살아있는 PERSON 중 무작위로 한 명을 선택하여 POLICE로 변경
             List<Player> alivePerson = playerMap.values().stream()
                     .filter(player -> player.isAlive() && player.getRole() == GameRole.PERSON)
@@ -306,9 +312,9 @@ public class GameService {
                 Player newPolice = alivePerson.get(random.nextInt(alivePerson.size()));
                 newPolice.setRole(GameRole.POLICE);
             }
-        }else {
-            targetPlayer.setRole(GameRole.BETRAYER);
         }
+        targetPlayer.setRole(GameRole.BETRAYER);
+        gameDTO.setBetrayer(targetPlayer);
 
         update(gameDTO);
 
@@ -322,6 +328,7 @@ public class GameService {
 
     @RedissonLock(value = "#gameId")
     public void detect(long gameId, long targetId) {
+        // userId로 경찰인지 확인 해줘야하나? -> 해야하면 마피아도..
         GameDTO gameDTO = getGameDTO(gameId);
 
         Map<Long, Player> playerMap = gameDTO.getPlayerMap();
