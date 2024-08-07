@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RoomOptionDto {
     private String title;
-    private Integer password;
+    private String password;
     private Integer maxPlayer;
     private boolean haveBetray;
     private String owner;

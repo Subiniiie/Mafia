@@ -3,6 +3,7 @@ package e106.emissary_backend.domain.game.service.timer.task;
 import e106.emissary_backend.domain.game.GameConstant;
 import e106.emissary_backend.domain.game.aspect.RedissonLock;
 import e106.emissary_backend.domain.game.entity.Game;
+import e106.emissary_backend.domain.game.enumType.EndType;
 import e106.emissary_backend.domain.game.model.GameDTO;
 import e106.emissary_backend.domain.game.model.Player;
 import e106.emissary_backend.domain.game.repository.RedisGameRepository;
@@ -79,7 +80,8 @@ public class EndConfirmTask implements GameTask {
         // 레디스에 결과 삭제
         voteRedisTemplate.delete(voteKey);
 
-        if(gameUtil.isEnd(gameId)){
+
+        if(!gameUtil.isEnd(gameId).equals(EndType.NO_END)){
             gameUtil.endPublish(gameId);
         }else{
             nightEmissaryTask.setGameId(gameId);

@@ -3,6 +3,7 @@ package e106.emissary_backend.domain.game.util;
 import e106.emissary_backend.domain.game.aspect.RedissonLock;
 import e106.emissary_backend.domain.game.entity.Game;
 import e106.emissary_backend.domain.game.enumType.CommonResult;
+import e106.emissary_backend.domain.game.enumType.EndType;
 import e106.emissary_backend.domain.game.enumType.GameRole;
 import e106.emissary_backend.domain.game.enumType.GameState;
 import e106.emissary_backend.domain.game.model.Player;
@@ -33,7 +34,7 @@ public class GameUtil {
     private final ChannelTopic commonTopic;
 
     @RedissonLock(value = "#gameId")
-    public boolean isEnd(long gameId){
+    public EndType isEnd(long gameId){
         Game game = redisGameRepository.findByGameId(gameId).orElseThrow(
                 () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
 
@@ -44,13 +45,21 @@ public class GameUtil {
 
         long emissaryCnt = roleCounts.getOrDefault(GameRole.EMISSARY, 0L) + roleCounts.getOrDefault(GameRole.BETRAYER, 0L);
         long personCnt = roleCounts.getOrDefault(GameRole.PERSON, 0L) + roleCounts.getOrDefault(GameRole.POLICE, 0L);
+        EndType result;
 
-        return emissaryCnt >= personCnt;
+        if(emissaryCnt == 0){
+            result = EndType.PERSON_WIN;
+        }else if(emissaryCnt >= personCnt){
+            result = EndType.EMISSARY_WIN;
+        }else{
+            result = EndType.NO_END;
+        }
+
+        return result;
     }
 
     public void endPublish(long gameId){
-
-
+        // todo : 반영하기
 
         redisGameRepository.deleteById(gameId);
 

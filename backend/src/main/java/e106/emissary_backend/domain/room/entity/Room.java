@@ -3,6 +3,7 @@ package e106.emissary_backend.domain.room.entity;
 import e106.emissary_backend.domain.room.dto.RoomRequestDto;
 import e106.emissary_backend.domain.room.enumType.RoomState;
 import e106.emissary_backend.global.common.BaseTimeEntity;
+import io.jsonwebtoken.lang.Objects;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,7 +25,9 @@ public class Room extends BaseTimeEntity {
     @Column(length = 20,nullable = false)
     private String title;
 
-    private int password;
+    private String password;
+
+    private boolean isPrivate;
 
     @Column(name = "owner_id", nullable = false)
     private long ownerId;
@@ -46,6 +49,9 @@ public class Room extends BaseTimeEntity {
         password = roomRequestDto.getPassword();
         maxPlayer = roomRequestDto.getMaxPlayer();
         haveBetray = roomRequestDto.isHaveBetray();
+        if(Objects.isEmpty(password)) {
+            isPrivate = true;
+        }
     }
 
     public void changeState(RoomState newState) {
