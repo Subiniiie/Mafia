@@ -21,7 +21,6 @@ public enum CommonErrorCode implements ErrorCode{
     EMISSARY_APPEASE_EMISSARY_EXCEPTION(HttpStatus.CONFLICT, "Emissary Appease Emissary Error"),
     ALREADY_DETECT_USER_EXCEPTION(HttpStatus.CONFLICT, "Already Detect User Error"),
     GAME_FULL_EXCEPTION(HttpStatus.CONFLICT, "Game Not Found Error");
-
     private final HttpStatus httpStatus;
     private String message;
 }

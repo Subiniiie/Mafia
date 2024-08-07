@@ -37,6 +37,9 @@ public class UserInRoom extends BaseTimeEntity {
     @Column(name=  "connect_time")
     private LocalDateTime connectTime;
 
+    @Column(name = "vidu_token")
+    private String viduToken;
+
     @Embeddable
     @Getter
     @EqualsAndHashCode
