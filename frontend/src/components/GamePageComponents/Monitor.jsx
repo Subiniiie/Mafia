@@ -35,8 +35,8 @@ const Monitor = function({ nickname, isRoomManager, isMe, isAlive, onVote, roomI
     const [ isMuteVoice, setIsMuteVoice ] = useState(false)
 
     const handleVoice = function() {
-        if (!isMuteVoice) streamManager.subscribeAudio(false);
-        else streamManager.subscribeAudio(true);
+        if (!isMuteVoice) streamManager.subscribeToAudio(false);
+        else streamManager.subscribeToAudio(true);
 
         setIsMuteVoice(prevState => !prevState)
     }

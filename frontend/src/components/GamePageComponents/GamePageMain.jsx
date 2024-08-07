@@ -109,6 +109,11 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers }) {
             default :
             break
         }
+
+        // players 배열 생성된 시간 순으로 정렬
+        // streamManager와 순서를 맞춰야 하므로 정렬이 필요함
+        setPlayers(players => players.sort((a, b) => a.creationTime - b.creationTime));
+
         // 컴포넌트 언마운트 시 타이머 정리
         return() => clearInterval(timer)
     }, [currentPhase])
@@ -279,11 +284,18 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers }) {
     }
 
  
+    // 두 배열을 하나로 묶는 함수
+    // python의 map과 유사
+    const zip = (arr1, arr2) => {
+        const length = Math.min(arr1.length, arr2.length);
+        return Array.from({ length }, (_, index) => [arr1[index], arr2[index]]);
+    }
+
 
     return (
         <>
             <div className={styles.monitors}>
-                {players.map((player, index) => (
+                {/* {players.map((player, index) => (
                     <Monitor
                         key={index}
                         nickname={player.nickname}
@@ -293,6 +305,18 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers }) {
                         roomId={roomId}
                         //publisher={publisher}
                         streamManager={streamManager}
+                    />
+                ))} */}
+                {zip(players, streamManagers).map((player, index) => (
+                    <Monitor
+                        key={index}
+                        nickname={player[0].nickname}
+                        isRoomManager={player[0].isRoomManager}
+                        isMe={player[0].isMe}
+                        isAlive={player[0].isAlive}
+                        roomId={roomId}
+                        //publisher={publisher}
+                        streamManager={player[1]}
                     />
                 ))}
             </div>
