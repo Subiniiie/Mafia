@@ -1,5 +1,6 @@
 package e106.emissary_backend.domain.room.service;
 
+import e106.emissary_backend.domain.game.aspect.RedissonLock;
 import e106.emissary_backend.domain.game.entity.Game;
 import e106.emissary_backend.domain.game.enumType.GameState;
 import e106.emissary_backend.domain.game.model.GameDTO;
@@ -168,7 +169,7 @@ public class RoomService {
                 .isHaveBetrayer(savedRoom.isHaveBetray())
                 .gameState(GameState.WAIT)
                 .build();
-        Player player = Player.createPlayer(user.getUserId(), user.getNickname());
+        Player player = Player.createPlayer(user.getUserId(), user.getNickname(), userInRoom.getConnectTime());
         gameDTO.addPlayer(player);
 
         Game game = gameDTO.toDao();
@@ -189,6 +190,7 @@ public class RoomService {
     }
 
     // Todo : 분산 트랜잭션 처리 해줘야함.
+    @RedissonLock(value = "#roomId")
     public RoomJoinDto enterRoom(Long roomId, long userId) throws OpenViduJavaClientException, OpenViduHttpException {
         Room room = roomRepository.findByRoomId(roomId).orElseThrow(() -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
         if(userInRoomRepository.countPeopleByRoom_RoomId(roomId) > room.getMaxPlayer()) {
@@ -222,7 +224,7 @@ public class RoomService {
         userInRoomRepository.save(userInRoom);
 
         // Redis 저장 로직
-        Player player = Player.createPlayer(userId, user.getNickname());
+        Player player = Player.createPlayer(userId, user.getNickname(), userInRoom.getConnectTime());
         Game game = redisGameRepository.findByGameId(roomId).orElseThrow(
                 () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
 

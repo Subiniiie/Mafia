@@ -7,6 +7,8 @@ import jakarta.persistence.Enumerated;
 import lombok.*;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.Id;
@@ -43,13 +45,16 @@ public class Player implements Serializable {
     @Builder.Default
     private boolean isWin = false;
 
-    public static Player createPlayer(Long id, String nickname) {
+    private long creationTime;
+
+    public static Player createPlayer(Long id, String nickname, LocalDateTime creationTime) {
         return Player.builder()
                 .id(id)
                 .nickname(nickname)
                 .isReady(false)
                 .isLeft(false)
                 .isVoted(false)
+                .creationTime(creationTime.atZone(ZoneId.systemDefault()).toEpochSecond())
                 .build();
     }
 }
