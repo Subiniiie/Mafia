@@ -4,20 +4,22 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.7);
     /* 배경을 더욱 어둡게 조정 */
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 2000;
 }
 
 .modalContent {
-    background: #220F0F;
-    padding: 20px;
+    background: #12151D;
+    padding: 20px 30px 40px 30px;
+    /* border: 1px solid white; */
+    border: 3px solid #1E2940;
     border-radius: 10px;
     /* 모서리를 둥글게 */
-    width: 400px;
+    width: 500px;
     /* 너비 조정 */
     max-width: 90%;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -30,19 +32,21 @@
 .formContainer {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
     /* 요소 사이 간격 추가 */
+    margin: 15px 50px 0 50px;
 }
 
 .inputField {
-    border: 2px solid #DDD;
+    border: 2px solid #382727;
     /* 입력 필드 테두리 */
-    padding: 8px 10px;
+    padding: 8px 15px;
     border-radius: 5px;
     /* 입력 필드 모서리 둥글게 */
-    font-size: 16px;
+    font-size: 14px;
     /* 글자 크기 조정 */
     color: black;
+    width: 100%;
 }
 
 .inputField.valid {
@@ -75,4 +79,39 @@
 .submitButton:hover {
     background-color: #004494;
     /* 버튼 호버 색상 변경 */
+}
+
+.inputContainer {
+    display: flex;
+    align-items: center;
+}
+
+.validButton {
+    background-color: #CECACA;
+    /* 버튼 배경색 */
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    /* 버튼 모서리 둥글게 */
+    border: none;
+    /* 테두리 제거 */
+    cursor: pointer;
+    /* 커서 포인터 */
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+    /* 호버 효과 */
+    width: 30%;
+}
+
+.validButton:hover {
+    background-color: #004494;
+    /* 버튼 호버 색상 변경 */
+}
+
+.infoMessage {
+    font-size: 12px;
+    color: #02A434;
+    margin-top: 5px;
+    /* 작은 크기와 녹색 텍스트 */
 }
