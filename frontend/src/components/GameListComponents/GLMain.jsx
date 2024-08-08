@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import GameRoomCard from "./GameRoomCard";
 import styles from "./GLMain.module.css";
@@ -24,15 +25,15 @@ const GLMain = () => {
         }
 
         fetchRooms()
-    })
+    }, [])
 
 
     return (
         <div className={styles.container}>
             {rooms.map((room) => (
-                <div className={styles.cardWrapper} key={room.id}>
-                    <GameRoomCard
-                        id={room.id}
+                <div className={styles.cardWrapper} key={room.roomId}>
+                    <GameRoomCard 
+                        id={room.roomId}
                         title={room.title}
                         leader={room.ownerName}
                         progress={room.nowPlayer}
