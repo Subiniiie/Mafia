@@ -136,7 +136,6 @@ function GamePage() {
         strMgrs => [...strMgrs].sort((a, b) => a.stream.creationTime - b.stream.creationTime);
 
 
-    
     const stompClient = useRef(null)
     const { id }  = useParams()
 
