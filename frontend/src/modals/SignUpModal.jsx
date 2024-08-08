@@ -1,8 +1,11 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import classNames from "classnames";
 import ModalHeader from "../components/ModalHeader"
 import styles from "./SignUpModal.module.css"
 import axios from 'axios'
+// import LoginModal from "../modals/LoginModal";
+// import { useLocation } from "react-router-dom"
+
 
 
 const SignUpModal = ({ isOpen, openModal }) => {
@@ -42,6 +45,18 @@ const SignUpModal = ({ isOpen, openModal }) => {
 
     const SignUpModalClass = classNames('kimjungchul-gothic-regular', styles.modalContent)
 
+    // const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+    // const openLoginModal = () => setIsLoginModalOpen(!isLoginModalOpen)
+
+    // const location = useLocation()
+
+    // URL이 변경되면 모달을 닫음
+    // useEffect(() => {
+    //     if (isLoginModalOpen) {
+    //         setIsLoginModalOpen(false)
+    //     }
+    // }, [location])
+
     if (!isOpen) return null; // 모달이 열리지 않았다면 렌더링하지 않음
 
     const handleSignUp = async () => {
@@ -60,6 +75,9 @@ const SignUpModal = ({ isOpen, openModal }) => {
                 },
             })
             console.log('회원가입 성공 :', response.data)
+            openModal()
+            // openLoginModal()
+            // <LoginModal isOpen={isLoginModalOpen} openModal={openLoginModal} onLoginSuccess={onLoginSuccess} />
             // 추가적인 성공 처리 (예: 모달 닫기, 사용자 알림 등)
         } catch (error) {
             console.error('회원가입 실패 :', error)
@@ -79,6 +97,8 @@ const SignUpModal = ({ isOpen, openModal }) => {
                 setEmailValid(true)
                 setEmailError(false)
                 try {
+                    setShowVerificationCodeInput(true)
+                    verificationCodeRef.current.focus()
                     const mailResponse = await axios.post('https://i11e106.p.ssafy.io/api/mail',
                         JSON.stringify(
                             { mail: email }
@@ -89,8 +109,6 @@ const SignUpModal = ({ isOpen, openModal }) => {
                     });
                     console.log(mailResponse.data)
                     setGivenCode(mailResponse.data)
-                    setShowVerificationCodeInput(true)
-                    verificationCodeRef.current.focus()
                 } catch (error) {
                     console.log('mail axios 요청 뭔가 이상해', error)
                 }
@@ -226,107 +244,111 @@ const SignUpModal = ({ isOpen, openModal }) => {
     }
 
     return (
-        <div className={styles.modalOverlay} onClick={openModal}>
-            <div className={SignUpModalClass} onClick={(e) => e.stopPropagation()}>
-                <ModalHeader modalTitle={modalTitle} openModal={openModal} />
-                <div className={styles.formContainer}>
-                    <h5>이메일</h5>
-                    <div className={styles.inputContainer}>
-                        <input
-                            required
-                            type="text"
-                            placeholder="이메일을 입력해주세요"
-                            className={`${styles.inputField} ${emailValid ? styles.valid : ''} ${emailError ? styles.error : ''}`}
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            onKeyDown={handleEmailKeyDown}
-                            ref={emailRef}
-                        />
-                        <button className={styles.validButton} onClick={handleEmailCheck} ref={emailButtonRef}>
-                            인증
-                        </button>
-                    </div>
-                    {emailSentMessage && <p className={styles.infoMessage}>{emailSentMessage}</p>} {/* 이메일 인증 메시지 추가 */}
+        <>
 
-                    {showVerificationCodeInput && (
-                        <div>
-                            <h5>인증번호</h5>
-                            <div className={styles.inputContainer}>
-                                <input
-                                    required
-                                    type="text"
-                                    placeholder='인증번호를 입력해주세요'
-                                    className={`${styles.inputField} ${verificationCodeValid ? styles.valid : ''} ${verificationCodeError ? styles.error : ''}`}
-                                    value={verificationCode}
-                                    onChange={(e) => setVerificationCode(e.target.value)}
-                                    onKeyDown={handleVerificationCodeKeyDown}
-                                    ref={verificationCodeRef}
-                                />
-                                <button className={styles.validButton} onClick={handleVerificationCodeCheck} ref={verificationCodeButtonRef}>
-                                    입력
-                                </button>
-                            </div>
+            <div className={styles.modalOverlay} onClick={openModal}>
+                <div className={SignUpModalClass} onClick={(e) => e.stopPropagation()}>
+                    <ModalHeader modalTitle={modalTitle} openModal={openModal} />
+                    <div className={styles.formContainer}>
+                        <h5>이메일</h5>
+                        <div className={styles.inputContainer}>
+                            <input
+                                required
+                                type="text"
+                                placeholder="이메일을 입력해주세요"
+                                className={`${styles.inputField} ${emailValid ? styles.valid : ''} ${emailError ? styles.error : ''}`}
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                onKeyDown={handleEmailKeyDown}
+                                ref={emailRef}
+                            />
+                            <button className={styles.validButton} onClick={handleEmailCheck} ref={emailButtonRef}>
+                                인증
+                            </button>
                         </div>
-                    )}
+                        {emailSentMessage && <p className={styles.infoMessage}>{emailSentMessage}</p>} {/* 이메일 인증 메시지 추가 */}
 
-                    <h5>닉네임</h5>
-                    <div className={styles.inputContainer}>
-                        <input
-                            required
-                            type="text"
-                            placeholder="닉네임을 입력해주세요"
-                            className={`${styles.inputField} ${nicknameValid ? styles.valid : ''} ${nicknameError ? styles.error : ''}`}
-                            value={nickname}
-                            onChange={(e) => setNickname(e.target.value)}
-                            onKeyDown={handleNicknameKeyDown}
-                            ref={nicknameRef}
-                        />
-                        <button className={styles.validButton} onClick={handleNicknameCheck} ref={nicknameButtonRef}>
-                            입력
+                        {showVerificationCodeInput && (
+                            <div>
+                                <h5>인증번호</h5>
+                                <div className={styles.inputContainer}>
+                                    <input
+                                        required
+                                        type="text"
+                                        placeholder='인증번호를 입력해주세요'
+                                        className={`${styles.inputField} ${verificationCodeValid ? styles.valid : ''} ${verificationCodeError ? styles.error : ''}`}
+                                        value={verificationCode}
+                                        onChange={(e) => setVerificationCode(e.target.value)}
+                                        onKeyDown={handleVerificationCodeKeyDown}
+                                        ref={verificationCodeRef}
+                                    />
+                                    <button className={styles.validButton} onClick={handleVerificationCodeCheck} ref={verificationCodeButtonRef}>
+                                        입력
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        <h5>닉네임</h5>
+                        <div className={styles.inputContainer}>
+                            <input
+                                required
+                                type="text"
+                                placeholder="닉네임을 입력해주세요"
+                                className={`${styles.inputField} ${nicknameValid ? styles.valid : ''} ${nicknameError ? styles.error : ''}`}
+                                value={nickname}
+                                onChange={(e) => setNickname(e.target.value)}
+                                onKeyDown={handleNicknameKeyDown}
+                                ref={nicknameRef}
+                            />
+                            <button className={styles.validButton} onClick={handleNicknameCheck} ref={nicknameButtonRef}>
+                                입력
+                            </button>
+                        </div>
+
+                        <h5>비밀번호</h5>
+                        <div className={styles.inputContainer}>
+                            <input
+                                required
+                                type="password"
+                                placeholder="비밀번호를 입력해주세요"
+                                className={`${styles.inputField} ${passwordValid ? styles.valid : ''} ${passwordError ? styles.error : ''}`}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                onKeyDown={handlePasswordKeyDown}
+                                ref={passwordRef}
+                            />
+                            <button className={styles.validButton} onClick={handlePasswordCheck} ref={submitButtonRef}>
+                                입력
+                            </button>
+                        </div>
+
+                        <h5>비밀번호 확인</h5>
+                        <div className={styles.inputContainer}>
+                            <input
+                                required
+                                type="password"
+                                placeholder="비밀번호를 다시 한번 입력해주세요"
+                                className={`${styles.inputField} ${confirmPasswordValid ? styles.valid : ''} ${confirmPasswordError ? styles.error : ''}`}
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                onKeyDown={handleConfirmPasswordKeyDown}
+                                ref={confirmPasswordRef}
+                            />
+                            <button className={styles.validButton} onClick={handleConfirmPasswordCheck} ref={submitButtonRef}>
+                                입력
+                            </button>
+                        </div>
+
+
+                        <button className={styles.submitButton} onClick={handleSignUp} ref={submitButtonRef}>
+                            입단하기
                         </button>
                     </div>
-
-                    <h5>비밀번호</h5>
-                    <div className={styles.inputContainer}>
-                        <input
-                            required
-                            type="password"
-                            placeholder="비밀번호를 입력해주세요"
-                            className={`${styles.inputField} ${passwordValid ? styles.valid : ''} ${passwordError ? styles.error : ''}`}
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            onKeyDown={handlePasswordKeyDown}
-                            ref={passwordRef}
-                        />
-                        <button className={styles.validButton} onClick={handlePasswordCheck} ref={submitButtonRef}>
-                            입력
-                        </button>
-                    </div>
-
-                    <h5>비밀번호 확인</h5>
-                    <div className={styles.inputContainer}>
-                        <input
-                            required
-                            type="password"
-                            placeholder="비밀번호를 다시 한번 입력해주세요"
-                            className={`${styles.inputField} ${confirmPasswordValid ? styles.valid : ''} ${confirmPasswordError ? styles.error : ''}`}
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            onKeyDown={handleConfirmPasswordKeyDown}
-                            ref={confirmPasswordRef}
-                        />
-                        <button className={styles.validButton} onClick={handleConfirmPasswordCheck} ref={submitButtonRef}>
-                            입력
-                        </button>
-                    </div>
-
-
-                    <button className={styles.submitButton} onClick={handleSignUp} ref={submitButtonRef}>
-                        입단하기
-                    </button>
                 </div>
             </div>
-        </div>
+
+        </>
     );
 }
 
