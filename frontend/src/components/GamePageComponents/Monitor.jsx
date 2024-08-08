@@ -3,23 +3,18 @@ import styles from "./Monitor.module.css"
 import axios from 'axios'
 import { data } from "autoprefixer"
 
-<<<<<<< HEAD
 // 닉네임 정보 받기 
 // function({ nickname }) 요런 식으로
 // const Monitor = function({ nickname, isMe, isAlive, hasEveryoneVoted, onVote }) {
 // streamManager => StreamManager 타입
 // streamManager => 비디오 창에 표시되는 유저, (비디오 표시, 음소거, 강퇴) 기능 구현을 위해 필요
-const Monitor = function({ nickname, isRoomManager, isMe, isAlive, onVote, roomId, streamManager }) {
-=======
-const Monitor = function({ id, isMe, isAlive, onVote, isVote }) {
->>>>>>> 23a3153c37ac5670952fac2e986b5d9677099681
+const Monitor = function({ nickname, isRoomManager, isMe, isAlive, onVote, isVote, roomId, streamManager }) {
 
     // 투표 상태를 나타내는 상태
     // const [ isVote, setIsVote ] = useState(false)
     // 투표한 플레이어의 닉네임을 저장하는 변수
     const [ votedPlayer, setVotedPlayer ] = useState(null)
 
-<<<<<<< HEAD
     // 비디오가 실제로 추가될 부분
     const videoRef = useRef()
 
@@ -30,14 +25,14 @@ const Monitor = function({ id, isMe, isAlive, onVote, isVote }) {
         }
     }, [streamManager]);
 
-=======
+
     const [localIsVote, setLocalIsVote] = useState(isVote)
 
     useEffect(() => {
         setLocalIsVote(isVote); // Prop으로 받은 isVote 상태 업데이트
     }, [isVote]);
->>>>>>> 23a3153c37ac5670952fac2e986b5d9677099681
 
+    
     const handleVote = function() {
         // setIsVote(prevState => !prevState)
         // 투표 당한 플레이어의 닉네임을 GamePageMain에 보낼거야
