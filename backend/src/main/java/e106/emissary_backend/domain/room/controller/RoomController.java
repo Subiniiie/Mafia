@@ -31,7 +31,7 @@ public class RoomController {
         return ResponseEntity.ok(roomService.getRooms(pageable));
     }
 
-    @DeleteMapping("/rooms/{roomId}")
+    @DeleteMapping("/api/rooms/{roomId}")
     public ResponseEntity<CommonResponseDto> deleteRoom(@PathVariable Long roomId){
         return ResponseEntity.ok(roomService.deleteRoom(roomId));
     }
@@ -121,7 +121,7 @@ public class RoomController {
         return ResponseEntity.ok(roomService.leaveRoom(roomId, userId));
     }
 
-    @PostMapping("/options/rooms/{roomId}")
+    @GetMapping("/options/rooms/{roomId}")
     public ResponseEntity<RoomOptionDto> getOption(@PathVariable Long roomId){
         return ResponseEntity.ok(roomService.getOption(roomId));
     }
