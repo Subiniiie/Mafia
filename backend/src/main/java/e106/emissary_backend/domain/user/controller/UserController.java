@@ -1,6 +1,7 @@
 package e106.emissary_backend.domain.user.controller;
 
 import e106.emissary_backend.domain.user.dto.CheckRequest;
+import e106.emissary_backend.domain.user.dto.CustomUserDetails;
 import e106.emissary_backend.domain.user.dto.EditRequest;
 import e106.emissary_backend.domain.user.dto.RegisterRequest;
 import e106.emissary_backend.domain.user.service.UserService;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +24,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/api/checkemail")
-    public ResponseEntity<Map<String, Object>> checkEmail(@RequestParam String email){//(@RequestBody CheckRequest request){
+    public ResponseEntity<Map<String, Object>> checkEmail(@RequestParam String email){
         Map<String, Object> map = new HashMap<>();
         try{
             String ret = userService.emailExists(email);
@@ -37,7 +39,7 @@ public class UserController {
     }
 
     @GetMapping("/api/checknick")
-    public ResponseEntity<Map<String, Object>> checkNick(@RequestParam String nickname){//(@RequestBody CheckRequest request) {
+    public ResponseEntity<Map<String, Object>> checkNick(@RequestParam String nickname){
         Map<String, Object> map = new HashMap<>();
         try{
             String ret = userService.nicknameExists(nickname);
@@ -83,11 +85,11 @@ public class UserController {
     // updateUser(Update)
     @PatchMapping("/api/users")
     @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
-    public ResponseEntity<Map<String,Object>> updateUser(@RequestBody EditRequest request, Authentication authentication) {
+    public ResponseEntity<Map<String,Object>> updateUser(@RequestBody EditRequest request, @AuthenticationPrincipal CustomUserDetails currentUser) {
         Map<String,Object> map = new HashMap<>();
         // 비밀번호를 받아서 처리하는 경우(정상적인 로그인 후 변경처리) 와 비밀번호를 안받아서 처리하는 경우(잃어버렸을때 변경처리)
         try{
-            userService.updateUser(request, authentication.getName());
+            userService.updateUser(request, currentUser.getUserId());
             map.put("status", "success");
             return ResponseEntity.ok(map);
         } catch(Exception e){
@@ -113,11 +115,11 @@ public class UserController {
 
     @DeleteMapping("/api/users")
     @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
-    public ResponseEntity<Map<String, Object>> deleteUser(Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> deleteUser( @AuthenticationPrincipal CustomUserDetails currentUser) {
         Map<String, Object> map = new HashMap<>();
         // 이 경우도 비밀번호 확인로직이 필요하지 않을까...
         try {
-            userService.deleteUser(authentication.getName());
+            userService.deleteUser(currentUser.getUserId());
             map.put("status", "success");
             return ResponseEntity.ok(map);
         } catch (Exception e) {
