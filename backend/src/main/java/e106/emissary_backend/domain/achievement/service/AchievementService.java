@@ -1,15 +1,19 @@
 package e106.emissary_backend.domain.achievement.service;
 
+import e106.emissary_backend.domain.achievement.dto.AchievementListDto;
 import e106.emissary_backend.domain.achievement.entity.Achievement;
 import e106.emissary_backend.domain.achievement.entity.AchievementUsers;
 import e106.emissary_backend.domain.achievement.repository.AchievementRepository;
 import e106.emissary_backend.domain.achievement.repository.AchievementUsersRepository;
 import e106.emissary_backend.domain.user.entity.User;
 import e106.emissary_backend.domain.user.repository.UserRepository;
+import e106.emissary_backend.global.error.CommonErrorCode;
+import e106.emissary_backend.global.error.exception.NotFoundUserException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -56,5 +60,16 @@ public class AchievementService {
         } else {
             throw new RuntimeException("해당 업적을 찾지 못했습니다.");
         }
+    }
+
+    public List<AchievementListDto> getHonors(Long userId){
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION));
+
+        List<AchievementUsers> achievementUsers = achievementUsersRepository.findAllByUser(user);
+
+        return achievementUsers.stream().map(achiv -> AchievementListDto.builder()
+                .achievementId(achiv.getAchievement().getAchieveId())
+                .acheivementDate(achiv.getCreatedDate().toString())
+                .build()).toList();
     }
 }

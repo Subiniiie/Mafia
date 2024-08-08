@@ -66,7 +66,7 @@ public class UserController {
     }
 
     // detailsUser(Read)
-    @GetMapping(value = {"/api/users", "/api/honors"})
+    @GetMapping(value = {"/api/users"})
     @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
     public ResponseEntity<Map<String, Object>> detailsUser(Authentication authentication) {
         UserDetails res = userService.loadUserByUsername(authentication.getName());
