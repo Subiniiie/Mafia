@@ -1,15 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
+import { Stomp } from "@stomp/stompjs";
 import GamePageHeader from "../components/GamePageComponents/GamePageHeader";
 import GamePageMain from "../components/GamePageComponents/GamePageMain";
 import GamePageFooter from "../components/GamePageComponents/GamePageFooter";
 import styles from "./GamePage.module.css"
 
 function GamePage() {
+    const [ gameData, setGameData ] = useState(null)
+    const [ gameResponse, setGameResponse ] = useState(null)
+    const [ systemMessage, setSystemMessage ] = useState(null)
     const [ nowGameState, setNowGameState ] = useState(null)
+
+    const stompClient = useRef(null)
+    const { roomId }  = useParams()
 
     // 방 정보 가져오기
     useEffect(() => {
-        const { roomId } = useParams()
         const gameRoomInfo = async() => {
             try {
                 const response = await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`)
@@ -23,28 +30,36 @@ function GamePage() {
 
     // 구독할래
     useEffect(() => {
-        const stompClient = new Client({
-            brokerURL: 'wss://i11e106.p.ssafy.io/ws',
-            reconnectDelay: 5000,
-            onConnect: () => {
-                stompClient.subscribe(`/sub/${roomId}`, (message) => {
+        if (stompClient.current) {
+            stompClient.current.disconnect()
+        }
+
+        const socket = new WebSocket("wss://i11e106.p.ssafy.io/ws")
+        stompClient.current = Stomp.over(socket)
+        stompClient.current.connect({}, () => {
+            stompClient.current.subscribe(`/sub/${roomId}`, (message) => 
+                {
                     const messageJson = JSON.parse(message.body)
+                    console.log(messageJson)
+                    setGameResponse(messageJson)
                     setNowGameState(messageJson.gameState)
                 })
-            },
-            onStompError: (error) => {
-                console.log('게임 시작 웹소켓 오류', error)
-            }
         })
-    }, [])
+
+        return () => {
+            if (stompClient.current) {
+                stompClient.current.disconnect()
+            }
+        }
+    }, [roomId])
       
     return (
         <>
             <div className={styles.container}>
                 <GamePageHeader />
-                <GamePageMain setSystemMessage={setSystemMessage} nowGameState={nowGameState} roomId={roomId} />
-                <GamePageFooter systemMessage={systemMessage} />
-            </div>
+                <GamePageMain setSystemMessage={setSystemMessage} stompClient={stompClient} gameData={gameData} nowGameState={nowGameState} gameResponse={gameResponse} roomId={roomId} />
+                <GamePageFooter systemMessage={systemMessage} stompClient={stompClient} gameData={gameData} gameResponse={gameResponse} />
+            </div> 
         </>
     )
 }

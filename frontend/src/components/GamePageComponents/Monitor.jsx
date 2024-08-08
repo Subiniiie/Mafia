@@ -1,10 +1,10 @@
 import React, { useState } from "react"
 import styles from "./Monitor.module.css"
 
-const Monitor = function({ id, isMe, isAlive, onVote, isVote, onVote }) {
+const Monitor = function({ id, isMe, isAlive, onVote, isVote }) {
 
     // 투표 상태를 나타내는 상태
-    const [ isVote, setIsVote ] = useState(false)
+    // const [ isVote, setIsVote ] = useState(false)
     // 투표한 플레이어의 닉네임을 저장하는 변수
     const [ votedPlayer, setVotedPlayer ] = useState(null)
 
@@ -15,7 +15,7 @@ const Monitor = function({ id, isMe, isAlive, onVote, isVote, onVote }) {
     }, [isVote]);
 
     const handleVote = function() {
-        setIsVote(prevState => !prevState)
+        // setIsVote(prevState => !prevState)
         // 투표 당한 플레이어의 닉네임을 GamePageMain에 보낼거야
         onVote(id)
     }
