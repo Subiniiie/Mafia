@@ -46,6 +46,9 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers }) {
         let timer
         switch (currentPhase) {
             case 'night' :
+                // 밤이 되었을 때, 비디오/오디오 처리
+                handleVideoAudioAtNight();
+
                 setSystemMessage("밤이 되었습니다. 밀정이 활동 중입니다.")
                 setShowEmissaryModal(true)
                 timer = setInterval(() => {
@@ -77,6 +80,9 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers }) {
                 }, 1000)
                 break
             case 'discussion' :
+                // 낮이 되었을 때, 비디오/오디오 처리
+                handleVideoAudioAtDay();
+
                 // 낮이 되면 간밤의 상황 알려줌
                 // useEffect 이용
                 timer = setInterval(() => {
@@ -110,15 +116,51 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers }) {
             break
         }
 
-        // players 배열 생성된 시간 순으로 정렬
-        // streamManager와 순서를 맞춰야 하므로 정렬이 필요함
-        setPlayers(players => players.sort((a, b) => a.creationTime - b.creationTime));
-
         // 컴포넌트 언마운트 시 타이머 정리
         return() => clearInterval(timer)
-    }, [currentPhase])
+    }, [currentPhase, handleVideoAudioAtNight, handleVideoAudioAtDay])
 
+    const isEmissaryOrBetrayer = (player) => {
+        return player.role === 'emissary' || player.role === 'betrayer';
+    }
 
+    // 밤이 되었을 때 비디오/오디오 처리 handler
+    const handleVideoAudioAtNight = () => {
+        const publisherIdx = streamManagers.findIndex(strMgr => !strMgr.remote);
+
+        // 밀정, 변절자를 제외한 유저는 비디오/오디오를 publish 하지도 않고, 
+        // 다른 유저들의 비디오/오디오를 subscribe 하지도 않는다.
+        if (!isEmissaryOrBetrayer(players[publisherIdx])) {
+            streamManagers[publisherIdx].publishVideo(false);
+            streamManagers[publisherIdx].publishAideo(false);
+
+            streamManagers
+                .filter(strMgr => strMgr.remote)
+                .forEach(strMgr => {
+                    strMgr.subscribeToVideo(false);
+                    strMgr.subscribeToAudio(false);
+                }
+            )
+        }
+    }
+
+    // 낮이 되었을 때 비디오/오디오 처리 handler
+    const handleVideoAudioAtDay = () => {
+        const publisherIdx = streamManagers.findIndex(strMgr => !strMgr.remote);
+
+        if (!isEmissaryOrBetrayer(players[publisherIdx])) {
+            streamManagers[publisherIdx].publishVideo(true);
+            streamManagers[publisherIdx].publishAideo(true);
+
+            streamManagers
+                .filter(strMgr => strMgr.remote)
+                .forEach(strMgr => {
+                    strMgr.subscribeToVideo(true);
+                    strMgr.subscribeToAudio(true);
+                }
+            )
+        }
+    }
 
 
     // 밀정이 밤에 죽일지 / 변절시킬 플레이어를 고름
@@ -290,6 +332,10 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers }) {
         const length = Math.min(arr1.length, arr2.length);
         return Array.from({ length }, (_, index) => [arr1[index], arr2[index]]);
     }
+
+    // players 배열을 생성된 시간 순으로 정렬
+    // streamManager와 순서를 맞춰야 하므로 정렬이 필요함
+    setPlayers(players => players.sort((a, b) => a.creationTime - b.creationTime));
 
 
     return (

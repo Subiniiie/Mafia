@@ -25,6 +25,9 @@ function GamePage() {
     // ViduChat
     const [chatHistory, setChatHistory] = useState([]);
 
+    // System
+    const [ systemMessage, setSystemMessage ] = useState(null)
+
     useEffect( () => {
         // TODO: get nickname & userId from accessToken
         const nickname = "ssafy";
@@ -112,7 +115,9 @@ function GamePage() {
         <>
             <div className={styles.container}>
                 <GamePageHeader />
-                <GamePageMain setSystemMessage={setSystemMessage} roomId={roomId} streamManagers={getSortedStreamManagers(streamManagers)} />
+                <GamePageMain   setSystemMessage={setSystemMessage} 
+                                roomId={roomId} 
+                                streamManagers={getSortedStreamManagers(streamManagers)} />
                 <GamePageFooter systemMessage={systemMessage} />
             </div>
         </>
