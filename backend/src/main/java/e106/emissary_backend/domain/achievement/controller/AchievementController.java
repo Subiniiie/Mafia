@@ -24,7 +24,6 @@ public class AchievementController {
     public ResponseEntity<Map<String, Object>> addHonors(@AuthenticationPrincipal CustomUserDetails currentUser){
         Map<String, Object> map = new HashMap<>();
         try{
-            System.out.println(currentUser.getUserId());
             achievementService.updateAchievement(currentUser.getUserId());
             map.put("status", "success");
             return ResponseEntity.ok(map);
