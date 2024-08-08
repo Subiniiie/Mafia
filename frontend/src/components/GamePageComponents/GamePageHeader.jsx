@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import styles from "./GamePageHeader.module.css"
 import GameSettingsModal from "../../modals/GameSettingsModal";
+import GamePage from "../../pages/GamePage";
 
-function GamePageHeader() {
-    const { gameData, setGameData } = useState(null)
-    
+function GamePageHeader({ gameData }) {
+    console.log('너 오니??',gameData)
     const roomTitle = gameData.title
     const roomManager = gameData.userList.find(user => user.isOwner === true)
     const roomManagerSettings = <button className={styles.settings} onClick={openModal}>게임설정</button>
@@ -21,25 +21,6 @@ function GamePageHeader() {
         setIsModalOpen(!isModalOpen)
         setBlackBackground((preState) => !preState)
     }
-
-    // 방 정보를 가져올거임
-    useEffect(() => {
-        // 주소에서 roomId를 가져옴
-        // 방 클릭할 때 주소 전송하는 걸 누가 해야하지?
-        // 주소에서  roomId인지 id인지 보기
-        const { roomId } = useParams()
-        const gameRoomInfo = async () => {
-            try {
-                // 게임방 API 호출
-                const response = await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`)
-                setGameData(response.data)
-            } catch (error) {
-                console.log("게임방 API를 불러오지 못했습니다", error)
-            }
-        }
-        gameRoomInfo()
-    } , [])
-
     return (
         <>
             <div className={styles.container}>
