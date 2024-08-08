@@ -8,6 +8,5 @@ import lombok.*;
 @Builder
 @ToString
 public class FriendshipRequest {
-    String nickname1;
-    String nickname2;
+    Long userId;
 }
