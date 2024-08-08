@@ -22,6 +22,9 @@ public class GameSetSubscriber {
         try {
             GameSetMessage gameSetMessage = objectMapper.readValue(message, GameSetMessage.class);
             Long gameId = gameSetMessage.getGameId();
+
+            gameSetMessage.getGameDTO().getPlayerMap().get(gameSetMessage.getUserId()).setMe(true);
+
             GameDTO gameDTO = gameSetMessage.getGameDTO();
 
             simpMessagingTemplate.convertAndSend("/sub/" + gameId, gameDTO);

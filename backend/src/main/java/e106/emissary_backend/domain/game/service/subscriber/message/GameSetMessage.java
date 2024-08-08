@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 @Getter
 public class GameSetMessage {
     private long gameId;
+    private long userId;
     private GameDTO gameDTO;
 }
