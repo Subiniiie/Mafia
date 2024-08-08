@@ -1,6 +1,7 @@
 package e106.emissary_backend.global.config;
 
 // import e106.emissary_backend.global.interceptor.FilterChannelInterceptor;
+import e106.emissary_backend.global.interceptor.FilterChannelInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -23,15 +24,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/ws")
 //                .setAllowedOrigins("*")
                 .setAllowedOriginPatterns("*");
+                .setAllowedOriginPatterns("*");
         // 지우니까 잘돼...
-                // .withSockJS();
+                .withSockJS();
     }
 
     /**
      * STOMP 연결 시도시 호출되는 메서드
      */
-    // @Override
-    // public void configureClientInboundChannel(ChannelRegistration registration) {
-    //     registration.interceptors(new FilterChannelInterceptor());
-    // }
+     @Override
+     public void configureClientInboundChannel(ChannelRegistration registration) {
+         registration.interceptors(new FilterChannelInterceptor());
+     }
 }
