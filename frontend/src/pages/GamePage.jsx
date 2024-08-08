@@ -25,7 +25,11 @@ function GamePage() {
     const [nickname, setNickname] = useState();
 
     // ViduChat
+    // chat => { nickname, message } 객체 형식
     const [chatHistory, setChatHistory] = useState([]);
+    // 초기 상태 == 일반 채팅, 모든 유저에게 브로드캐스팅
+    // GamePageMain에서 변경되고, GameChat에서 사용
+    const [chatMode, setChatMode] = useState({ mode: 'signal:chat', to: [] });
 
     // System
     const [ systemMessage, setSystemMessage ] = useState(null)
@@ -62,14 +66,22 @@ function GamePage() {
             event => deleteStreamManager(event.stream.streamManager);
 
         const handleChatSignal = (event) => {
-            const chatData = JSON.parse(event.data);
-            setChatHistory(prevHistory => [...prevHistory, chatData]);
+            const message = event.data;
+            const nickname = JSON.parse(event.from).nickname;
+            setChatHistory(prevHistory => [ ...prevHistory, { nickname, message } ]);
+        }
+
+        const handleSecretChatSignal = (event) => {
+            const message = event.data;
+            const nickname = JSON.parse(event.from).nickname;
+            setChatHistory(prevHistory => [ ...prevHistory, { nickname, message } ]);
         }
 
         // 세션 이벤트 추가
         mySession.on("streamCreated", handleStreamCreated);
         mySession.on("streamDestroyed", handleStreamDestroyed);
         mySession.on("signal:chat", handleChatSignal);
+        mySession.on("signal:secretChat", handleSecretChatSignal);
         mySession.on("exception", exception => console.warn(exception));
 
         // 메타 데이터, Connection 객체에서 꺼내 쓸 수 있음
@@ -184,11 +196,22 @@ function GamePage() {
                 <GamePageMain   setSystemMessage={setSystemMessage} 
                                 roomId={roomId} 
                                 streamManagers={getSortedStreamManagers(streamManagers)}
+                                setChatHistory={setChatHistory}
+                                setChatMode={setChatMode}
                                 stompClient={stompClient}
                                 gameData={gameData}
                                 nowGameState={nowGameState}
-                                gameResponse={gameResponse} />
-                <GamePageFooter systemMessage={systemMessage} stompClient={stompClient} gameData={gameData} gameResponse={gameResponse}/>
+                                gameResponse={gameResponse}
+                                />
+                <GamePageFooter systemMessage={systemMessage} 
+                                stompClient={stompClient} 
+                                gameData={gameData} 
+                                nowGameState={nowGameState}
+                                gameResponse={gameResponse}
+                                session={session}
+                                chatHistory={chatHistory}
+                                chatMode={chatMode}
+                                />
             </div>
         </>
     )
