@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RoomListDto {
     private String title;
+    private long roomId;
     private String ownerName;
     private int nowPlayer;
     private int maxPlayer;

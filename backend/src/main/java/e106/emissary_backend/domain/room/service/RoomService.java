@@ -11,6 +11,7 @@ import e106.emissary_backend.domain.room.entity.Room;
 import e106.emissary_backend.domain.room.enumType.RoomState;
 import e106.emissary_backend.domain.room.enumType.SessionRole;
 import e106.emissary_backend.domain.room.repository.RoomRepository;
+import e106.emissary_backend.domain.user.dto.RoomDetailUserDto;
 import e106.emissary_backend.domain.user.entity.User;
 import e106.emissary_backend.domain.user.repository.UserRepository;
 import e106.emissary_backend.domain.userInRoom.entity.UserInRoom;
@@ -65,6 +66,11 @@ public class RoomService {
         webClient = WebClient.builder().baseUrl(openviduUrl).build();
     }
 
+    public void update(GameDTO gameDTO){
+        Game dao = gameDTO.toDao();
+        redisGameRepository.save(dao);
+    }
+
     private ConnectionProperties createConnectionProperties(String userNickname){
         return new ConnectionProperties.Builder()
                 .type(ConnectionType.WEBRTC)
@@ -84,6 +90,7 @@ public class RoomService {
         Slice<Room> roomList = roomRepository.findAllBy(pageable).orElseThrow(()-> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
         return roomList.stream().map(room -> RoomListDto.builder()
                         .title(room.getTitle())
+                        .roomId(room.getRoomId())
                         .ownerName(userRepository.findNicknameByUserId(room.getOwnerId()).orElseThrow(
                                 () -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION)))
                         .maxPlayer(room.getMaxPlayer())
@@ -138,6 +145,7 @@ public class RoomService {
         }
 
         playerMap.remove(userId);
+        update(gameDTO);
 
         redisKeyValueTemplate.update(gameDTO.toDao());
 
@@ -372,5 +380,19 @@ public class RoomService {
                 .bodyToMono(String.class)
                 .doOnSuccess(response -> System.out.println("Signal Sent Successfully"))
                 .doOnError(error -> System.out.println("Fail to Send Signal: " + error.getMessage()));
+    }
+
+    public RoomDetailDto detailRoom (long roomId){
+        List<UserInRoom> userInRoom = userInRoomRepository.findAllByPk_RoomId(roomId).orElseThrow(
+                () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
+
+        Room room = userInRoom.get(0).getRoom();
+
+        List<RoomDetailUserDto> roomDetailUserDtoList = userInRoom.stream()
+                .map(UserInRoom::getUser)
+                .map(user -> RoomDetailUserDto.of(user, room.getOwnerId()))
+                .toList();
+
+        return RoomDetailDto.toDTO(room, roomDetailUserDtoList);
     }
 }
