@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import axios from "axios";
 import styles from "./GameRoomCard.module.css";
 
-const GameRoomCard = ({ title, leader, progress, isInProgress, id }) => {
+const GameRoomCard = ({ title, leader, progress, isInProgress, id, setViduToken }) => {
 
     // // 방 입장하기
     // const getRoomPlayer = async() => {
     //     console.log('나 들어간다!', id)
-        
-    //     try { 
+    //
+    //     try {
     //         const access = localStorage.getItem('access')
     //         const response = await axios.post(`https://i11e106.p.ssafy.io/api/rooms/${id}`,{},{
     //             headers: {
@@ -18,17 +17,33 @@ const GameRoomCard = ({ title, leader, progress, isInProgress, id }) => {
     //                 "Authorization": `Bearer ${access}`,
     //             },
     //         })
-
+    //
     //         console.log('나 방 잘 들어왔어!', response.data);
     //     } catch (error) {
     //         console.log('나 방에 못 들어왔어', error)
     //     }
     // }
 
+    // const enterRoom = async (e) => {
+    //     e.preventDefault();
+    //
+    //     const access = localStorage.getItem("access");
+    //     await axios.post(`https://i11e106.p.ssafy.io/api/rooms/${id}`,{},{
+    //           headers: {
+    //                               "Content-Type": "application/json",
+    //                               "Authorization": `Bearer ${access}`,
+    //         },
+    //         }).then((resp) => {
+    //             console.log(resp);
+    //     }).catch((err) => {
+    //         console.error(err);
+    //     })
+    // }
+
     return (
         // <div className="kimjungchul-bold" onClick={getRoomPlayer}>
         <div className="kimjungchul-bold">
-            <Link to={`/game-room/${id}`} className={`${isInProgress ? styles.inProgress : styles.notStarted}`}>
+            <Link to={`/game-room/${id}`} className={`${isInProgress ? styles.inProgress : styles.notStarted}`} >
                 <div className={`${styles.cardMain} ${isInProgress ? styles.inProgressMain : styles.notStartedMain}`}>
                     {/* <p className={styles.title}>{title}</p> */}
                     <p className={`${isInProgress ? styles.inProgressTitle : styles.notStartedTitle}`}>{title}</p>

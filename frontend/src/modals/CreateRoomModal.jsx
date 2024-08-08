@@ -8,7 +8,7 @@ import BoxChecked from "../assets/Buttons/BoxChecked.png"
 import BoxUnchecked from "../assets/Buttons/BoxUnchecked.png"
 
 // eslint-disable-next-line react/prop-types
-const CreateRoomModal = ({ isOpen, openModal }) => {
+const CreateRoomModal = ({ isOpen, openModal, setViduToken}) => {
     const navigate = useNavigate()
 
     const modalTitle = '새로운 도전'
@@ -59,8 +59,9 @@ const CreateRoomModal = ({ isOpen, openModal }) => {
             )
             console.log(response.data)
             // openModal()
-            const { roomId } = response.data
-            navigate(`/rooms/${roomId}`)
+            const { roomId,ownerToken } = response.data
+            setViduToken(ownerToken);
+            navigate(`/game-room/${roomId}`, { viduToken: ownerToken });
         } catch (error) {
             console.error("Create Room failed:", error.response ? error.response.data : error.message)
         }

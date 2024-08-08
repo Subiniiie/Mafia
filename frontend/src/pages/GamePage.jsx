@@ -7,8 +7,9 @@ import GamePageMain from "../components/GamePageComponents/GamePageMain";
 import GamePageFooter from "../components/GamePageComponents/GamePageFooter";
 import styles from "./GamePage.module.css"
 import {OpenVidu} from "openvidu-browser";
+import {ASN1 as jwt} from "jwt-js-decode";
 
-function GamePage() {
+function GamePage({viduToken}) {
     // 화면 이동 시 LeaveSession
     window.onbeforeunload = () => leaveSession();
 
@@ -37,9 +38,13 @@ function GamePage() {
 
 
     useEffect( () => {
+        console.log("@IN - "+viduToken);
         // TODO: get nickname & userId from accessToken
+        // const jwtDecoded = jwt.decode(localStorage.getItem("access")).payload();
+        // const nickname = jwtDecoded.nickname;
+        // const userId = jwtDecoded.id;
         const nickname = "ssafy";
-        const userId = "ssafy@ssafy.com";
+        const userId = "tester";
 
         setNickname(nickname);
         setUserId(userId);
@@ -74,7 +79,7 @@ function GamePage() {
 
         // 메타 데이터, Connection 객체에서 꺼내 쓸 수 있음
         const data = {
-            nickname, id
+            nickname, roomId
         };
 
         // 세션 연결 및 publisher 객체 streamManagers 배열에 추가
@@ -126,15 +131,14 @@ function GamePage() {
 
     
     const stompClient = useRef(null)
-    const { id }  = useParams()
-    const { id }  = useParams()
+    // const { roomid }  = useParams()
 
     // 방 정보 가져오기
     useEffect(() => {
         const gameRoomInfo = async() => {
             try {
                 const access = localStorage.getItem('access')
-                const response = await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${id}`, {
+                const response = await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`, {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${access}`,
@@ -156,10 +160,10 @@ function GamePage() {
             stompClient.current.disconnect()
         }
 
-        const socket = new WebSocket("ws://i11e106.p.ssafy.io/ws")
+        const socket = new WebSocket("wss://i11e106.p.ssafy.io/ws")
         stompClient.current = Stomp.over(socket)
         stompClient.current.connect({}, () => {
-            stompClient.current.subscribe(`/sub/${id}`, (message) => 
+            stompClient.current.subscribe(`/ws/sub/${roomId}`, (message) =>
                 {
                     const messageJson = JSON.parse(message.body)
                     console.log(messageJson)
@@ -174,7 +178,7 @@ function GamePage() {
             }
         }
 
-    }, [id])
+    }, [roomId])
       
     return (
         <>
