@@ -105,6 +105,11 @@ function GamePage() {
     const leaveSession = () => {
         const mySession = session;
 
+        // 서버에서 유저 삭제 등 처리를 위해 axios로 API 호출
+        axios.delete(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`)
+             .then(response => console.log('Player left successfully:', response.data))
+             .catch(error => console.error('Error leaving session:', error))
+
         if (mySession) mySession.disconnect();
 
         this.OV = null;
