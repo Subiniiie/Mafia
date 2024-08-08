@@ -1,17 +1,26 @@
 import { useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import classNames from "classnames";
 import axios from 'axios';
 import styles from './CreateRoomModal.module.css'; // 스타일 파일을 별도로 관리합니다.
 import ModalHeader from "../components/ModalHeader"
+import BoxChecked from "../assets/Buttons/BoxChecked.png"
+import BoxUnchecked from "../assets/Buttons/BoxUnchecked.png"
 
 // eslint-disable-next-line react/prop-types
 const CreateRoomModal = ({ isOpen, openModal }) => {
+    const navigate = useNavigate()
 
     const modalTitle = '새로운 도전'
 
     const [roomTitle, setRoomTitle] = useState('')
     const [roomPw, setRoomPw] = useState('')
     const [isPrivateButtonClicked, setIsPrivateButtonClicked] = useState(false)
+
+    const checkButton = () => {
+        setIsPrivateButtonClicked(!isPrivateButtonClicked)
+        setIsSecretRoom(!isSecretRoom)
+    }
 
     const roomTitleRef = useRef()
     const roomPwRef = useRef()
@@ -20,6 +29,7 @@ const CreateRoomModal = ({ isOpen, openModal }) => {
 
     // const [showRoomPwInput, setShowRoomPwInput] = useState(false)
     const [isSecretRoom, setIsSecretRoom] = useState(false)
+
 
     const handleCreateRoom = async () => {
         if (isSecretRoom && !/^\d{4}$/.test(roomPw)) {
@@ -49,6 +59,8 @@ const CreateRoomModal = ({ isOpen, openModal }) => {
             )
             console.log(response.data)
             // openModal()
+            const { roomId } = response.data
+            navigate(`/rooms/${roomId}`)
         } catch (error) {
             console.error("Create Room failed:", error.response ? error.response.data : error.message)
         }
@@ -76,10 +88,10 @@ const CreateRoomModal = ({ isOpen, openModal }) => {
         }
     }
 
-    const handleSecretRoomChange = () => {
-        setIsSecretRoom(!isSecretRoom)
-        setIsPrivateButtonClicked(!isPrivateButtonClicked)
-    }
+    // const handleSecretRoomChange = () => {
+    //     setIsSecretRoom(!isSecretRoom)
+    //     setIsPrivateButtonClicked(!isPrivateButtonClicked)
+    // }
 
     const CreateRoomModalClass = classNames('kimjungchul-gothic-regular', styles.modalContent)
 
@@ -105,18 +117,24 @@ const CreateRoomModal = ({ isOpen, openModal }) => {
                     </div>
 
                     <div className={styles.formContainerMini}>
-                        <div className={styles.privateContainerTitle}>
+                        {/* <div className={styles.privateContainerTitle}>
                             <p className='mr-2'>극비 임무</p>
-                            {/* <button className={styles.privateButton} onClick={handleSecretRoomChange} ref={secretRoomRef} /> */}
                             <button
                                 className={`${styles.privateButton} ${isPrivateButtonClicked ? styles.privateButtonClicked : ''}`}
                                 onClick={handleSecretRoomChange}
                                 ref={secretRoomRef}
                             />
-                        </div>
-                    </div>
+                        </div> */}
 
-                    <div className={styles.formContainerMini}>
+                        <div className={styles.privateContainerTitle}>
+                            <p className='mr-2'>극비 임무</p>
+                            {/* <button className={styles.privateButton} onClick={handleSecretRoomChange} ref={secretRoomRef} /> */}
+                            {isPrivateButtonClicked ? (
+                                <img src={BoxChecked} alt="BoxChecked" className={styles.checkBox} onClick={checkButton} />
+                            ) : (
+                                <img src={BoxUnchecked} alt="BoxUnchecked" className={styles.checkBox} onClick={checkButton} />
+                            )}
+                        </div>
                         {/* <h5>암호 설정</h5> */}
                         <input
                             required

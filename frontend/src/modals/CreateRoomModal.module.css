@@ -124,3 +124,9 @@
 .privateClickedInput {
     background-color: #565656;
 }
+
+.checkBox {
+    margin-top: 3px;
+    width: 20px;
+    height: 20px;
+}
