@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 @ToString
 public class SearchResponse {
+    Long userId;
     String nickname;
     String status;
 }
