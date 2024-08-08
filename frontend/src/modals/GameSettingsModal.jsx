@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import ModalHeader from "../components/ModalHeader"
 import RoomName from "../components/GamePageComponents/RoomName";
 import SecretMode from "../components/GamePageComponents/SecretMode";
 import Password from "../components/GamePageComponents/Password";
 import Turncoat from "../components/GamePageComponents/Turncoat";
-import styles from "./GameSettingsModal.module.css"
+import styles from "./GameSettingsModal.module.css";
+import { decode } from "jwt-js-decode";
 
 function GameSettingsModal({ openModal, roomId }) {
 
@@ -14,36 +16,36 @@ function GameSettingsModal({ openModal, roomId }) {
     const [isTurncoat, setIsTurncoat] = useState(false)
 
     useEffect(() => {
-        const fetchRoomData = async function() {
+        const openGameSettingModal = async() => {
+            console.log(roomId)
             try {
-                const response = await fetch(`https://i11e106.p.ssafy.io/api/options/rooms/${roomId}`)
-                const data = await response.json()
-                console.log(data)
-                // 데이터에서 변수명(?) 어떻게 되어있냐에 따라 넣을 거 바꾸기
-                // 이름 바꾸기
-                 setRoomName(data.roomName || '')
-                //  비밀모드 바꾸기
-                // 비밀모드면 비밀번호 필수 -> 어케함
-                setIsSecret(data.isSecret || false)
-                // 비밀번호 바꾸기
-                // 공개글이면 설정할 필요 없음 -> 어케함
-                setPassword(data.password || '')
-                // 변절자 유무
-                setIsTurncoat(data.turncoat || false)
-            } catch(error) {
-                console.log(error)
+                const access = localStorage.getItem('access')
+                console.log('access를 보자', access)
+                const decodedAccess = decode(access)
+                console.log('디코딩된 access를 보자 :', decodedAccess)
+                const response = await axios.get(`https://i11e106.p.ssafy.io/api/options/rooms/${roomId}`, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${access}`,
+                    }
+                })
+                console.log('게임방 세팅 정보야', response.data)
+            } catch (error) {
+                console.log("게임방 설정 정보를 가져오지 못했습니다", error)
             }
         }
-        fetchRoomData()
+        openGameSettingModal()
     }, [roomId])
 
     // 변경 버튼을 누르면 바뀐 내용이 새롭게 저장됨
     const handleSave = async function() {
         try {
+            const access = localStorage.getItem('access')
             const response = await fetch(`https://i11e106.p.ssafy.io/api/options/rooms/${roomId}`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${access}`,
                 },
                 body: JSON.stringify({
                     roomName,
@@ -55,7 +57,6 @@ function GameSettingsModal({ openModal, roomId }) {
             if (!response.ok) {
                 throw new Error('Failed to update room data')
             }
-
             openModal()
         } catch(error) {
             console.log(error)

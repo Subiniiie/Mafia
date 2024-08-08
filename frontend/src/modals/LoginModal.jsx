@@ -35,14 +35,14 @@ const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
             console.log(response.data);
             // 로그인 성공 시 처리 로직
             const { access, refresh } = response.data
-            // console.log(access)
-            // console.log(refresh)
+            console.log('accessToken :', access)
+            console.log('refreshToken :', refresh)
             const decodedAccess = decode(access)
-            // console.log(decodedAccess)
+            console.log('난 디코딩 된 accessToken :', decodedAccess)
             const { username } = decodedAccess.payload // 디코딩된 토큰에서 이름 추출
             console.log('username :', username)
-            // const decodedRefresh = decode(refresh)
-            // console.log(decodedRefresh)
+            const decodedRefresh = decode(refresh)
+            console.log('난 디코딩 된 refreshToken :', decodedRefresh)
             localStorage.setItem('access', access) // 로컬 스토리지에 토큰 저장
             localStorage.setItem('refresh', refresh)
             onLoginSuccess(username) // 상위 컴포넌트에 로그인 성공 알림

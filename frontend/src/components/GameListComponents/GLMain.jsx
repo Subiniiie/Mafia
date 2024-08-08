@@ -32,7 +32,7 @@ const GLMain = () => {
             {rooms.map((room) => (
                 <div className={styles.cardWrapper} key={room.id}>
                     <GameRoomCard
-                        id={room.id}
+                        id={room.roomId}
                         title={room.title}
                         leader={room.ownerName}
                         progress={room.nowPlayer}
