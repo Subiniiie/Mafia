@@ -22,7 +22,8 @@ function GamePageFooter({ systemMessage, stompClient, gameData, nowGameState, ga
                     <button className={styles.btn} onClick={openModal}>직업</button>
                     <GameChat   systemMessage={systemMessage}
                                 session={session}
-                                chatMode={chatMode} 
+                                chatMode={chatMode}
+                                chatHistory={chatHistory}
                                 />
                     <GameReadyStartBtn stompClient={stompClient} nowGameState={nowGameState} />
                 </div>

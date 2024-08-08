@@ -4,7 +4,7 @@ import GameChatInput from "./GameChatInput";
 import GameChatHistory from "./GameChatHistory";
 import System from "./System";
 
-function GameChat({ systemMessage, session, chatMode }) {
+function GameChat({ systemMessage, session, chatMode, chatHistory }) {
     
 
     const handleChatSubmit = (message) => {
