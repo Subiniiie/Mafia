@@ -75,7 +75,6 @@ function JobModal({ isOpen, openModal }) {
             onConnect: () => {
                 stompClient.subscribe(`/sub/${roomId}`, (message) => {
                     const messageJson = JSON.parse(message.body)
-
                     const { playerMap: updatedPlayerMap, myId } = messageJson
 
                     if (updatedPlayerMap) {
