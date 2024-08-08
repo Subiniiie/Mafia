@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import GameRoomCard from "./GameRoomCard";
 import styles from "./GLMain.module.css";
@@ -24,7 +25,7 @@ const GLMain = () => {
         }
 
         fetchRooms()
-    })
+    }, [])
 
 
     return (

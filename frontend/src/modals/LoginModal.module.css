@@ -61,9 +61,9 @@
     width: 100%;
 }
 
-.inputField::placeholder {
-    /* margin-left:; */
-}
+/* .inputField::placeholder {
+    margin-left:;
+} */
 
 .submitButton {
     display: flex;
@@ -101,6 +101,6 @@
     font-size: 14px;
 }
 
-.findPw:hover {
-    /* border-bottom: 1px solid white; */
-}
+/* .findPw:hover {
+    border-bottom: 1px solid white;
+} */
