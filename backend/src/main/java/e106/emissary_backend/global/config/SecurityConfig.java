@@ -137,4 +137,13 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return web -> web
+            .ignoring()
+            .requestMatchers(PathRequest.toStaticResources().atCommonLocations())
+            .requestMatchers("/h2-console/**")
+            .requestMatchers("/ws/**");
+    }
 }
