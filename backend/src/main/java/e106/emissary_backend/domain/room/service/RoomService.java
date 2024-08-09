@@ -275,6 +275,8 @@ public class RoomService {
                 .map(UserInRoom::getUser)
                 .map(nowUser -> RoomDetailUserDto.of(nowUser, room.getOwnerId()))
                 .toList();
+        userList.add(RoomDetailUserDto.of(user, room.getOwnerId()));
+
         RoomDetailDto roomDetailDto = RoomDetailDto.toDTO(room, userList);
 //        RoomDetailDto roomDetailDto = RoomDetailDto.builder()
 //                    .roomId(roomId)
