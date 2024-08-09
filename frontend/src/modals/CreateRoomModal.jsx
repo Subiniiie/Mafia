@@ -63,7 +63,7 @@ const CreateRoomModal = ({ isOpen, openModal, setViduToken}) => {
             console.log("id"+" : "+roomId);
             console.log("token"+" : "+ownerToken);
             // gameData를 props로 전달해줘야한다.
-            navigate(`/game-room/${roomId}`, {state : response.data});
+            navigate(`/game-room/${roomId}`, {state :ownerToken});
         } catch (error) {
             console.error("Create Room failed:", error.response ? error.response.data : error.message)
         }
