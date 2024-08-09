@@ -23,7 +23,7 @@ public class RoomOptionDto {
                 .title(roomRequestDto.getTitle())
                 .password(roomRequestDto.getPassword())
                 .maxPlayer(roomRequestDto.getMaxPlayer())
-                .haveBetray(roomRequestDto.isHaveBetrayer())
+                .haveBetray(roomRequestDto.isHaveBetray())
                 .owner(owner)
                 .ownerToken(ownerToken)
                 .roomId(roomId)
