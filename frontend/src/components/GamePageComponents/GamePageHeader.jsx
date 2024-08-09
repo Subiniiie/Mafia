@@ -7,7 +7,8 @@ import GamePage from "../../pages/GamePage";
 
 function GamePageHeader({ gameData }) {
     console.log('너 오니??',gameData)
-    const roomTitle = gameData.title
+    const roomTitle = gameData.title;
+    console.log(roomTitle);
     const roomManager = gameData.userList.find(user => user.isOwner === true)
     const roomManagerSettings = <button className={styles.settings} onClick={openModal}>게임설정</button>
 

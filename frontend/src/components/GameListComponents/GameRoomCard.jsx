@@ -14,7 +14,7 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
             //     roomId: id,
             // }
             // console.log('body :', body)
-            const response = await axios.post(`https://i11e106.p.ssafy.io/api/rooms/${id}`, JSON.stringify(), {
+            const response = await axios.post(`https://i11e106.p.ssafy.io/api/rooms/${id}`, {}, {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${access}`,
