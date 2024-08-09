@@ -1,7 +1,9 @@
 package e106.emissary_backend.global.config;
 
 // import e106.emissary_backend.global.interceptor.FilterChannelInterceptor;
+import e106.emissary_backend.domain.security.util.JWTUtil;
 import e106.emissary_backend.global.interceptor.FilterChannelInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -13,10 +15,13 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+    @Autowired
+    private JWTUtil jwtUtil;
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.setApplicationDestinationPrefixes("/pub");
-        registry.enableSimpleBroker("/sub");
+        registry.setApplicationDestinationPrefixes("/ws/pub");
+        registry.enableSimpleBroker("/ws/sub");
     }
 
     @Override
@@ -33,6 +38,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      */
      @Override
      public void configureClientInboundChannel(ChannelRegistration registration) {
-         registration.interceptors(new FilterChannelInterceptor());
+         registration.interceptors(new FilterChannelInterceptor(jwtUtil));
      }
 }
