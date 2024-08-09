@@ -26,10 +26,12 @@ public class RedissonLockAspect {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
         RedissonLock annotation = method.getAnnotation(RedissonLock.class);
-        String lockKey = method.getName() + CustomSpringParser.getDynamicValue(signature.getParameterNames(), joinPoint.getArgs(), annotation.value());
+//        String lockKey = method.getName() + CustomSpringParser.getDynamicValue(signature.getParameterNames(), joinPoint.getArgs(), annotation.value());
+        // 메서드 + id에서
+        String lockKey = "" + CustomSpringParser.getDynamicValue(signature.getParameterNames(), joinPoint.getArgs(), annotation.value());
 
         RLock lock = redissonClient.getLock(lockKey);
-
+        log.info("lock키는 무엇일까요? = {}", lockKey);
         try{
             boolean lockable = lock.tryLock(annotation.waitTime(), annotation.leaseTime(), TimeUnit.MILLISECONDS);
             if(!lockable){
