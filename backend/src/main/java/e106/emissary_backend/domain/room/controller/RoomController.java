@@ -83,9 +83,10 @@ public class RoomController {
             // todo : 메시지 발행하기
             // 참가 성공 시
             RoomJoinDto res = roomService.enterRoom(roomId, userId);
-
+            log.info("컨트롤러로 왔엉 : {}", res);
             return ResponseEntity.ok(res);
         } catch (OpenViduJavaClientException | OpenViduHttpException e){
+            log.info("여길 타는건 진짜 개억깐데?");
             // 참가 실패 시
             return ResponseEntity.internalServerError().body(new RoomJoinDto());
         }
