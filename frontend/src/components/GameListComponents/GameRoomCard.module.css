@@ -3,7 +3,6 @@
 .notStarted {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     border-radius: 22px;
     margin: 10px;
     color: #F6F3E7;
@@ -15,7 +14,6 @@
 .inProgress {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     border-radius: 22px;
     margin: 10px;
     color: #F6F3E7;
@@ -64,6 +62,17 @@
 
 .card:hover {
     border-color: white;
+}
+
+.notStartedTitle,
+.inProgressTitle,
+.leader,
+.progress {
+    background-color: transparent;
+    /* 배경색을 투명하게 설정 */
+    padding: 0;
+    /* 패딩도 제거하여 상자 형태가 나오지 않도록 함 */
+    margin: 0;
 }
 
 .notStartedTitle {
