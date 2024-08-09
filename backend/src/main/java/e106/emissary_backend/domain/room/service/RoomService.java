@@ -436,7 +436,9 @@ public class RoomService {
                 .doOnError(error -> System.out.println("Fail to Send Signal: " + error.getMessage()));
     }
 
+    @RedissonLock(value = "#roomId")
     public RoomDetailDto detailRoom (long roomId){
+        log.info("detail Room run");
         List<UserInRoom> userInRoom = userInRoomRepository.findAllByPk_RoomId(roomId).orElseThrow(
                 () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
 
