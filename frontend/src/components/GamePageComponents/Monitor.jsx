@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, {useEffect, useRef, useState} from "react"
 import styles from "./Monitor.module.css"
 import axios from 'axios'
 import { data } from "autoprefixer"
@@ -16,7 +16,8 @@ const Monitor = function({ nickname, isRoomManager, isMe, isAlive, onVote, isVot
     const [ votedPlayer, setVotedPlayer ] = useState(null)
 
     // 비디오가 실제로 추가될 부분
-    const videoRef = useRef()
+    const videoRef = useRef();
+    console.log("Monitor IN!");
 
     // 비디오 추가
     useEffect(() => {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import axios from "axios";
 import styles from "./GameRoomCard.module.css";
 
@@ -14,7 +14,7 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress, setViduToken 
                 id: id,
             }
             // console.log('body :', body)
-                const response = await axios.post(`https://i11e106.p.ssafy.io/api/rooms/${id}`, null, {
+            const response = await axios.post(`https://i11e106.p.ssafy.io/api/rooms/${id}`, {}, {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${access}`,
@@ -30,9 +30,10 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress, setViduToken 
 
 
     return (
-        <div className="kimjungchul-bold" onClick={getGameRoomInfo}>
-        {/* // <div className="kimjungchul-bold"> */}
-            <Link to={`/game-room/${id}`} className={`${isInProgress ? styles.inProgress : styles.notStarted}`} >
+        // <div className="kimjungchul-bold" onClick={getRoomPlayer}>
+        <div className="kimjungchul-bold">
+            <Link to={`/game-room/${id}`} state={viduToken} className={`${isInProgress ? styles.inProgress : styles.notStarted}`} onClick={handleEnterRoom} >
+            {/*<div className={`${isInProgress ? styles.inProgress : styles.notStarted}`} onClick={getGameRoomInfo}*/}
             <div className={`${isInProgress ? styles.inProgress : styles.notStarted}`}>
                 {/* <Link to={`/game-room/${id}`} className={`${isInProgress ? styles.inProgress : styles.notStarted}`}> */}
                 <div className={`${styles.cardMain} ${isInProgress ? styles.inProgressMain : styles.notStartedMain}`}>
