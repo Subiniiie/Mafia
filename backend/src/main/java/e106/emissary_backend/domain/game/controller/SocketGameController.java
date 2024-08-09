@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,22 +30,22 @@ public class SocketGameController {
     private final GameService gameService;
 
     @MessageMapping("/ready/{roomId}")
-    public void ready(@DestinationVariable Long roomId, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long userId = userDetails.getUserId();
+    public void ready(@DestinationVariable Long roomId, SimpMessageHeaderAccessor headerAccessor) {
+        long userId = getUserIdIAccessor(headerAccessor);
 
         gameService.ready(roomId, userId);
     }
 
     @MessageMapping("/ready/cancel/{roomId}")
-    public void readyCancel(@DestinationVariable Long roomId, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long userId = userDetails.getUserId();
+    public void readyCancel(@DestinationVariable Long roomId, SimpMessageHeaderAccessor headerAccessor) {
+        long userId = getUserIdIAccessor(headerAccessor);
 
         gameService.readyCancel(roomId, userId);
     }
 
     @MessageMapping("/start/{roomId}")
-    public void start( @DestinationVariable Long roomId, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        long userId = userDetails.getUserId();
+    public void start( @DestinationVariable Long roomId, SimpMessageHeaderAccessor headerAccessor) {
+        long userId = getUserIdIAccessor(headerAccessor);
 
         gameService.setGame(roomId, userId);
     }
@@ -72,20 +73,20 @@ public class SocketGameController {
     }
 
     @MessageMapping("/vote/{roomId}")
-    public void vote(@AuthenticationPrincipal CustomUserDetails userDetails
-            , @DestinationVariable Long roomId
-            , @Payload VoteRequestDTO request) {
-        long userId = userDetails.getUserId();
+    public void vote(SimpMessageHeaderAccessor headerAccessor,
+                     @DestinationVariable Long roomId,
+                     @Payload VoteRequestDTO request) {
+        long userId = getUserIdIAccessor(headerAccessor);
         long targetId = request.getTargetId();
 
         gameService.startVote(roomId, userId, targetId);
     }
 
     @MessageMapping("/confirm/{roomId}")
-    public void confirmVote(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public void confirmVote(SimpMessageHeaderAccessor headerAccessor,
                             @DestinationVariable Long roomId,
                             @Payload ConfirmVoteRequestDTO request) {
-        long userId = userDetails.getUserId();
+        long userId = getUserIdIAccessor(headerAccessor);
 
         gameService.startConfirm(roomId, userId, request.isConfirm());
     }
@@ -94,5 +95,17 @@ public class SocketGameController {
     @MessageMapping("/remove/{roomId}/{targetId}")
     public void removeUser(@DestinationVariable Long roomId, @DestinationVariable Long targetId) {
         gameService.removeUser(roomId, targetId);
+    }
+
+    private long getUserIdIAccessor(SimpMessageHeaderAccessor headerAccessor) {
+        CustomUserDetails userDetails = (CustomUserDetails) headerAccessor.getSessionAttributes().get("user");
+        long userId;
+        if (userDetails != null) {
+            log.info("in Accessor userId = {}", userDetails.getUserId());
+            userId = userDetails.getUserId();
+        } else {
+            throw new IllegalStateException("User not authenticated");
+        }
+        return userId;
     }
 }

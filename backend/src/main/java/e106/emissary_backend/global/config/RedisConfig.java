@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import e106.emissary_backend.domain.game.entity.Game;
 import e106.emissary_backend.domain.game.service.subscriber.*;
+import e106.emissary_backend.domain.room.service.subscriber.EnterRoomSubscriber;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -95,7 +96,8 @@ public class RedisConfig {
                                                                        MessageListenerAdapter startConfirmAdapter, ChannelTopic startConfirmTopic,
                                                                        MessageListenerAdapter endConfirmAdapter, ChannelTopic endConfirmTopic,
                                                                        MessageListenerAdapter nightEmissaryAdapter, ChannelTopic nightEmissaryTopic,
-                                                                       MessageListenerAdapter nightPoliceAdapter, ChannelTopic nightPoliceTopic) {
+                                                                       MessageListenerAdapter nightPoliceAdapter, ChannelTopic nightPoliceTopic,
+                                                                       MessageListenerAdapter enterRoomAdapter, ChannelTopic enterRoomTopic) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         // subscriber, topic
@@ -108,6 +110,7 @@ public class RedisConfig {
         container.addMessageListener(endConfirmAdapter, endConfirmTopic);
         container.addMessageListener(nightEmissaryAdapter, nightEmissaryTopic);
         container.addMessageListener(nightPoliceAdapter, nightPoliceTopic);
+        container.addMessageListener(enterRoomAdapter, enterRoomTopic);
 
         return container;
     }
@@ -201,6 +204,16 @@ public class RedisConfig {
     @Bean
     public ChannelTopic nightPoliceTopic() {
         return new ChannelTopic("NIGHT_POLICE");
+    }
+
+    @Bean
+    public MessageListenerAdapter enterRoomAdapter(EnterRoomSubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "sendMessage");
+    }
+
+    @Bean
+    public ChannelTopic enterRoomTopic() {
+        return new ChannelTopic("ENTER_ROOM");
     }
 
 }
