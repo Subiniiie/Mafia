@@ -16,7 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
@@ -46,20 +48,26 @@ public class RoomController {
      * 방 생성
      */
     @PostMapping("/rooms")
-    public ResponseEntity<RoomOptionDto> makeRoom(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody RoomRequestDto roomRequestDto) {
+    public ResponseEntity<Map<String,Object>> makeRoom(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody RoomRequestDto roomRequestDto) {
         // 테스트용으로
         long userId = 1L;
         if(!Objects.isNull(customUserDetails)){
             userId = customUserDetails.getUserId();
         }
+
+        Map<String,Object> map = new HashMap<>();
         try{
             // 방이 성공적으로 생성되었을 시, Room Option Dto에 Token 실어서 전송
             RoomOptionDto res = roomService.makeRoom(userId, roomRequestDto);
-            return ResponseEntity.ok(res);
+            map.put("res", "success");
+            map.put("option", res);
+            map.put("detail", roomService.detailRoom(res.getRoomId()));
+            return ResponseEntity.ok(map);
         } catch (OpenViduJavaClientException | OpenViduHttpException e){
             // 방이 생성 실패 되었을 시, 500 error 전송
-            RoomOptionDto res = new RoomOptionDto();
-            return ResponseEntity.internalServerError().body(res);
+            map.put("res", "fail");
+            map.put("error", e.getMessage());
+            return ResponseEntity.internalServerError().body(map);
         }
     }
 
