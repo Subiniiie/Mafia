@@ -2,12 +2,12 @@ import GLHeader from "../components/GameListComponents/GLHeader";
 import GLMain from "../components/GameListComponents/GLMain";
 import GLFooter from "../components/GameListComponents/GLFooter";
 
-function GameListPage() {
+function GameListPage({setViduToken}) {
     return (
         <div>
-            <GLHeader />
+            <GLHeader setViduToken={setViduToken}/>
             <main>
-                <GLMain />
+                <GLMain setViduToken={setViduToken}/>
             </main>
             <GLFooter />
         </div>

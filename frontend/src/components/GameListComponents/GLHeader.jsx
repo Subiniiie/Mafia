@@ -3,7 +3,7 @@ import FilterBox from "./FilterBox"
 import SearchBar from "../../components/SearchBar"
 import CreateRoomModal from "../../modals/CreateRoomModal"
 
-const GLHeader = () => {
+const GLHeader = ({setViduToken}) => {
 
     const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -20,7 +20,7 @@ const GLHeader = () => {
                 </div>
                 <div>
                     <button onClick={openModal}>새로운 도전</button>
-                    <CreateRoomModal isOpen={isModalOpen} openModal={openModal} />
+                    <CreateRoomModal isOpen={isModalOpen} openModal={openModal} setViduToken={setViduToken}/>
                 </div>
             </div>
         </div >

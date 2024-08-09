@@ -36,6 +36,11 @@ public class RoomController {
         return ResponseEntity.ok(roomService.deleteRoom(roomId));
     }
 
+    @GetMapping("/rooms/{roomId}")
+    public ResponseEntity<RoomDetailDto> detailRoom(@PathVariable Long roomId){
+        return ResponseEntity.ok(roomService.detailRoom(roomId));
+    }
+
     /**
      * 방 생성
      */

@@ -40,6 +40,12 @@ public class LoginController {
     private final AccessRepository accessRepository;
     private final UserRepository userRepository;
 
+    @Value("${REFRESH_TOKEN_EXPTIME}")
+    private Long refreshExptime;
+
+    @Value("${ACCESS_TOKEN_EXPTIME}")
+    private Long accessExptime;
+
 //    @Value("${spring.security.oauth2.client.registration.google.client-id}")
 //    private String ClientId;
 //
@@ -76,14 +82,14 @@ public class LoginController {
                 return ResponseEntity.ok(map);
             }
 
-            String access = jwtUtil.createJwt("Access", userId, username, email, gender,/* birth,*/ role, 600000L);
-            String refresh = jwtUtil.createJwt("Refresh", userId, username, email, gender,/* birth,*/ role, 86400000L);
+            String access = jwtUtil.createJwt("Access", userId, username, email, gender,/* birth,*/ role, accessExptime);
+            String refresh = jwtUtil.createJwt("Refresh", userId, username, email, gender,/* birth,*/ role, refreshExptime);
 
-            addAccess(userId, username, access, 60000L);
-            addRefresh(userId, username, refresh, 86400000L);
+            addAccess(userId, username, access, accessExptime);
+            addRefresh(userId, username, refresh, refreshExptime);
 
-            response.addCookie(createCookie("Access", access));
-            response.addCookie(createCookie("Refresh", refresh));
+            // response.addCookie(createCookie("Access", access));
+            // response.addCookie(createCookie("Refresh", refresh));
 
             map.put("refresh", refresh);
             map.put("access", access);

@@ -23,8 +23,6 @@ public class NightPoliceTask implements GameTask {
     private final RedisPublisher publisher;
 
     private final ChannelTopic commonTopic;
-//    private final SchedulerService scheduler;
-//    private final StartVoteTask startVoteTask;
 
     private final GameUtil gameUtil;
 
@@ -42,10 +40,6 @@ public class NightPoliceTask implements GameTask {
                         .gameState(GameState.NIGHT_POLICE)
                         .result(CommonResult.SUCCESS)
                         .build());
-
-        if(gameUtil.isEnd(gameId)){
-            gameUtil.endPublish(gameId);
-        }
     }
 
     public void setGameId(long gameId){
