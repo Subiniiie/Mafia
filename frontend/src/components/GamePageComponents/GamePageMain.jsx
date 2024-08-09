@@ -8,7 +8,22 @@ import ChoiceDieOrTurncoat from "../../modals/ChoiceDieOrTurncoat";
 import FinalDefensePlayerModal from "../../modals/FinalDefensePlayerModal";
 import styles from "./GamePageMain.module.css"
 
-function GamePageMain({ setSystemMessage, nowGameState, stompClient, gameData, gameResponse, roomId }) {
+function GamePageMain({ setSystemMessage, roomId, streamManagers, nowGameState, stompClient, gameData, gameResponse }) {
+    // 플레이어들의 초기 상태
+    const initialPlayers = [
+        {nickname: 'player1', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+        {nickname: 'player2', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+        {nickname: 'player3', role: 'emissary', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+        {nickname: 'player4', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+        {nickname: 'player5', role: 'police', isRoomManager: true, isMe: false, isAlive: true, hasVoted: false},
+        {nickname: 'player6', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+        {nickname: 'player7', role: 'independenceActivist', isRoomManager: false, isMe: true, isAlive: true, hasVoted: false},
+        {nickname: 'player8', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+    ]
+
+
+    const [ players , setPlayers ] = useState(initialPlayers)                           // Player들의 상태를 관리
+    const [ currentPhase, setCurrentPhase ] = useState('night')                         // 게임 단계(night, police, discussion, finalDefense)
     const [ nightTimer, setNightTimer ] = useState(30)                                  // 밤 타이머   
     const [ policeTimer, setPoliceTimer ] = useState(30)                                // 첩보원 타이머
     const [ discussionTimer, setDiscussionTimer ] = useState(90)                        // 토론(낮) 타이머
@@ -166,6 +181,60 @@ function GamePageMain({ setSystemMessage, nowGameState, stompClient, gameData, g
     }
     }
 
+    const isEmissaryOrBetrayer = (player) => {
+        return player.role === 'emissary' || player.role === 'betrayer';
+    }
+
+    // 밤이 되었을 때 비디오/오디오 처리 handler
+    const handleVideoAudioAtNight = () => {
+        const publisherIdx = streamManagers.findIndex(strMgr => !strMgr.remote);
+
+        // 밀정, 변절자를 제외한 유저는 비디오/오디오를 publish 하지도 않고, 
+        // 다른 유저들의 비디오/오디오를 subscribe 하지도 않는다.
+        if (!isEmissaryOrBetrayer(players[publisherIdx])) {
+            streamManagers[publisherIdx].publishVideo(false);
+            streamManagers[publisherIdx].publishAideo(false);
+
+            streamManagers
+                .filter(strMgr => strMgr.remote)
+                .forEach(strMgr => {
+                    strMgr.subscribeToVideo(false);
+                    strMgr.subscribeToAudio(false);
+                }
+            )
+        }
+    }
+
+    // 낮이 되었을 때 비디오/오디오 처리 handler
+    const handleVideoAudioAtDay = () => {
+        const publisherIdx = streamManagers.findIndex(strMgr => !strMgr.remote);
+
+        if (!isEmissaryOrBetrayer(players[publisherIdx])) {
+            streamManagers[publisherIdx].publishVideo(true);
+            streamManagers[publisherIdx].publishAideo(true);
+
+            streamManagers
+                .filter(strMgr => strMgr.remote)
+                .forEach(strMgr => {
+                    strMgr.subscribeToVideo(true);
+                    strMgr.subscribeToAudio(true);
+                }
+            )
+        }
+    }
+
+ 
+    // 두 배열을 하나로 묶는 함수
+    // python의 map과 유사
+    const zip = (arr1, arr2) => {
+        const length = Math.min(arr1.length, arr2.length);
+        return Array.from({ length }, (_, index) => [arr1[index], arr2[index]]);
+    }
+
+    // players 배열을 생성된 시간 순으로 정렬
+    // streamManager와 순서를 맞춰야 하므로 정렬이 필요함
+    setPlayers(players => players.sort((a, b) => a.creationTime - b.creationTime));
+
     // 재투표를 해야할 때
     const voteAgain = () => {
         setVotes(prevState => {
@@ -282,6 +351,8 @@ function GamePageMain({ setSystemMessage, nowGameState, stompClient, gameData, g
     //         })
     // }
 
+    
+
 
 switch (nowGameState)
     {
@@ -289,6 +360,8 @@ switch (nowGameState)
         gameStart()
         break
     case 'NIGHT_EMISSARY' :
+        // 밤이 되었을 때, 비디오/오디오 처리
+        handleVideoAudioAtNight();
         setSystemMessage('밤이 시작되었습니다. 밀정이 활동 중입니다.')
         emissaryTime()
         break
@@ -296,6 +369,8 @@ switch (nowGameState)
         setSystemMessage('밤이 되었습니다. 첩보원이 활동 중입니다.')
         policeTime()
     case 'VOTE_START' :
+        // 낮이 되었을 때, 비디오/오디오 처리
+        handleVideoAudioAtDay();
         setSystemMessage('낮이 되었습니다. 토론을 하며 투표를 진행하세요.')
         voteStart()
     case 'VOTE_END' :
@@ -321,12 +396,27 @@ switch (nowGameState)
     return (
         <>
             <div className={styles.monitors}>
-                {gameData.playerMap.map((player, index) => (
+                {/* {players.map((player, index) => (
                     <Monitor
                         key={index}
                         id={player.id}
                         isMe={player.isMe}
                         isAlive={player.isAlive}
+                        roomId={roomId}
+                        //publisher={publisher}
+                        streamManager={streamManager}
+                    />
+                ))} */}
+                {zip(players, streamManagers).map((player, index) => (
+                    <Monitor
+                        key={index}
+                        nickname={player[0].nickname}
+                        isRoomManager={player[0].isRoomManager}
+                        isMe={player[0].isMe}
+                        isAlive={player[0].isAlive}
+                        roomId={roomId}
+                        //publisher={publisher}
+                        streamManager={player[1]}
                         isVote={votes[player.id] || false}
                         onVote={handleVote}
                     />

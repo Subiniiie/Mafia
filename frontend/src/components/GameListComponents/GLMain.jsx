@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import GameRoomCard from "./GameRoomCard";
 import styles from "./GLMain.module.css";
 
-const GLMain = () => {
+const GLMain = ({setViduToken}) => {
     const [rooms, setRooms] = useState([])
 
     useEffect(() => {
@@ -24,7 +25,7 @@ const GLMain = () => {
         }
 
         fetchRooms()
-    })
+    }, [])
 
 
     return (
@@ -37,6 +38,7 @@ const GLMain = () => {
                         leader={room.ownerName}
                         progress={room.nowPlayer}
                         inInProgress={room.maxPlayer}
+                        setViduToken={setViduToken}
                     />
                 </div>
             ))}
