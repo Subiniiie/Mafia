@@ -1,49 +1,45 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 import axios from "axios";
 import styles from "./GameRoomCard.module.css";
 
-const GameRoomCard = ({ title, leader, progress, isInProgress, id, setViduToken }) => {
+const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
+    const [gameData, setGameData] = useState({})
 
-    // 방 입장하기
-    // const getRoomPlayer = async() => {
-    //     console.log('나 들어간다!', id)
-    //
-    //     try {
-    //         const access = localStorage.getItem('access')
-    //         const data = {id:id}
-    //         const response = await axios.post(`https://i11e106.p.ssafy.io/api/rooms/${id}`,data,{
-    //             headers: {
-    //                 "Content-Type": "application/json",
-    //                 "Authorization": `Bearer ${access}`,
-    //             },
-    //         })
-    //
-    //         console.log('나 방 잘 들어왔어!', response.data);
-    //     } catch (error) {
-    //         console.log('나 방에 못 들어왔어', error)
-    //     }
+    const getGameRoomInfo = async () => {
+        console.log('GameRoomCard 를 클릭했구나!')
+        try {
+            const access = localStorage.getItem('access')
+            // const body = {
+            //     roomId: id,
+            // }
+            // console.log('body :', body)
+            const response = await axios.post(`https://i11e106.p.ssafy.io/api/rooms/${id}`, JSON.stringify(), {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${access}`,
+                }
+            })
+            console.log('POST 요청에 대한 response :', response)
+            console.log('POST 요청에 대한 response.data :', response.data)
+            setGameData(response.data)
+        } catch (error) {
+            console.log("게임방 API를 불러오지 못했습니다", error)
+        }
+    }
 
-    // const enterRoom = async (e) => {
-    //     e.preventDefault();
-    //
-    //     const access = localStorage.getItem("access");
-    //     await axios.post(`https://i11e106.p.ssafy.io/api/rooms/${id}`,{},{
-    //           headers: {
-    //                               "Content-Type": "application/json",
-    //                               "Authorization": `Bearer ${access}`,
-    //         },
-    //         }).then((resp) => {
-    //             console.log(resp);
-    //     }).catch((err) => {
-    //         console.error(err);
-    //     })
-    // }
+    useEffect(() => {
+        console.log(gameData)
+    }, [gameData])
+
+
 
     return (
         // <div className="kimjungchul-bold" onClick={getRoomPlayer}>
         <div className="kimjungchul-bold">
             <Link to={`/game-room/${id}`} className={`${isInProgress ? styles.inProgress : styles.notStarted}`} >
+            <div className={`${isInProgress ? styles.inProgress : styles.notStarted}`} onClick={getGameRoomInfo}>
+                {/* <Link to={`/game-room/${id}`} className={`${isInProgress ? styles.inProgress : styles.notStarted}`}> */}
                 <div className={`${styles.cardMain} ${isInProgress ? styles.inProgressMain : styles.notStartedMain}`}>
                     {/* <p className={styles.title}>{title}</p> */}
                     <p className={`${isInProgress ? styles.inProgressTitle : styles.notStartedTitle}`}>{title}</p>
@@ -53,6 +49,7 @@ const GameRoomCard = ({ title, leader, progress, isInProgress, id, setViduToken 
                 <div className={`${styles.cardMain} ${isInProgress ? styles.inProgressContent : styles.notStartedContent}`}>
                     <p className={styles.progress}>{progress}/8</p>
                 </div>
+            </div>
             </Link>
         </div>
     );

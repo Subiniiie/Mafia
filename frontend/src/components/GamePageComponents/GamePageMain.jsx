@@ -8,7 +8,7 @@ import ChoiceDieOrTurncoat from "../../modals/ChoiceDieOrTurncoat";
 import FinalDefensePlayerModal from "../../modals/FinalDefensePlayerModal";
 import styles from "./GamePageMain.module.css"
 
-function GamePageMain({ setSystemMessage, roomId, streamManagers, nowGameState, stompClient, gameData, gameResponse }) {
+function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatHistory, setChatMode, stompClient, gameData, nowGameState, gameResponse }) {
     // 플레이어들의 초기 상태
     const initialPlayers = [
         {nickname: 'player1', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
@@ -223,6 +223,20 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, nowGameState, 
         }
     }
 
+    // 밤이 되었을 때, 채팅 모드 변환
+    const changeToSecretChatMode = () => {
+        const enemies = streamManagers
+                            .filter((_, idx) => isEmissaryOrBetrayer(players[idx]))
+                            .map(strMgr => strMgr.stream.connection);
+
+        setChatMode(() => { return { mode: 'signal:secretChat', to: enemies }; });
+    }
+
+    // 낮이 되었을 때, 채팅 모드 변환
+    const changeToNormalChatMode = () => {
+        setChatMode(() => { return { mode: 'signal:chat', to: [] }; });
+    }
+
  
     // 두 배열을 하나로 묶는 함수
     // python의 map과 유사
@@ -362,6 +376,8 @@ switch (nowGameState)
     case 'NIGHT_EMISSARY' :
         // 밤이 되었을 때, 비디오/오디오 처리
         handleVideoAudioAtNight();
+        // 밤이 되었을 때, 채팅 처리
+        changeToSecretChatMode();
         setSystemMessage('밤이 시작되었습니다. 밀정이 활동 중입니다.')
         emissaryTime()
         break
@@ -371,6 +387,8 @@ switch (nowGameState)
     case 'VOTE_START' :
         // 낮이 되었을 때, 비디오/오디오 처리
         handleVideoAudioAtDay();
+        // 낮이 되었을 때, 채팅 처리
+        changeToNormalChatMode();
         setSystemMessage('낮이 되었습니다. 토론을 하며 투표를 진행하세요.')
         voteStart()
     case 'VOTE_END' :

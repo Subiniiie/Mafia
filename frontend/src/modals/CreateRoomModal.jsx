@@ -62,6 +62,8 @@ const CreateRoomModal = ({ isOpen, openModal, setViduToken}) => {
             const { roomId,ownerToken } = response.data
             setViduToken(ownerToken);
             navigate(`/game-room/${roomId}`, { viduToken: ownerToken });
+            // const { roomId } = response.data
+            // navigate(`/game-rooms/${roomId}`)
         } catch (error) {
             console.error("Create Room failed:", error.response ? error.response.data : error.message)
         }
