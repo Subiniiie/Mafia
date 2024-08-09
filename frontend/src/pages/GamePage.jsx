@@ -41,15 +41,119 @@ function GamePage({viduToken}) {
     const [ systemMessage, setSystemMessage ] = useState(null)
 
     // Game
-    const [ gameData, setGameData ] = useState(null)
+    const [ gameData, setGameData ] = useState({})
     const [ gameResponse, setGameResponse ] = useState(null)
     const [ nowGameState, setNowGameState ] = useState(null)
+
+    const access = localStorage.getItem('access')
+
+    useEffect( () => {
+        console.log("@IN - "+viduToken);
+        // TODO: get nickname & userId from accessToken
+        // const jwtDecoded = jwt.decode(localStorage.getItem("access")).payload();
+        // const nickname = jwtDecoded.nickname;
+        // const userId = jwtDecoded.id;
+        const nickname = "ssafy";
+        const userId = "tester";
+
+        setNickname(nickname);
+        setUserId(userId);
+
+        const mySession = OV.initSession();
+        setSession(mySession);
+
+        const addStreamManager = 
+            strMgr => setStreamManagers(subs => [...subs, strMgr]);
+
+        const deleteStreamManager =
+            strMgr => setStreamManagers(subs => subs.filter(s => s !== strMgr));
+        
+        const handleStreamCreated = (event) => {
+            mySession.subscribeAsync(event.stream, undefined)
+                     .then(strMgr => addStreamManager(strMgr));
+        }
+
+        const handleStreamDestroyed =
+            event => deleteStreamManager(event.stream.streamManager);
+
+        const handleChatSignal = (event) => {
+            const message = event.data;
+            const nickname = JSON.parse(event.from).nickname;
+            setChatHistory(prevHistory => [ ...prevHistory, { nickname, message } ]);
+        }
+
+        const handleSecretChatSignal = (event) => {
+            const message = event.data;
+            const nickname = JSON.parse(event.from).nickname;
+            setChatHistory(prevHistory => [ ...prevHistory, { nickname, message } ]);
+        }
+
+        // 세션 이벤트 추가
+        mySession.on("streamCreated", handleStreamCreated);
+        mySession.on("streamDestroyed", handleStreamDestroyed);
+        mySession.on("signal:chat", handleChatSignal);
+        mySession.on("signal:secretChat", handleSecretChatSignal);
+        mySession.on("exception", exception => console.warn(exception));
+
+        // 메타 데이터, Connection 객체에서 꺼내 쓸 수 있음
+        const data = {
+            nickname, roomId
+        };
+
+        // 세션 연결 및 publisher 객체 streamManagers 배열에 추가
+        mySession.connect(viduToken, data)
+            .then(async () => {
+                const publisher = OV.initPublisher(undefined, {
+                    audioSource: undefined,
+                    videoSource: undefined,
+                    publishAudio: true,
+                    publishVideo: true,
+                    resolution: '300x200',
+                    frameRate: 30,
+                    insertMode: 'APPEND',
+                    mirror: true,
+                });
+
+                await mySession.publish(publisher);
+                addStreamManager(publisher);
+            })
+            .catch(error => console.warn(error));
+        
+        return () => {
+            window.onbeforeunload = () => {};
+        }
+
+    }, [] );
+
+
+    const leaveSession = () => {
+        const mySession = session;
+
+        // 서버에서 유저 삭제 등 처리를 위해 axios로 API 호출
+        axios.delete(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`)
+             .then(response => console.log('Player left successfully:', response.data))
+             .catch(error => console.error('Error leaving session:', error))
+
+        if (mySession) mySession.disconnect();
+
+        this.OV = null;
+        setSession(undefined);
+        setStreamManagers([]);
+        window.location.reload();
+    }
+
+    // creationTime 순으로 정렬된 streamManagers 배열을 반환
+    const getSortedStreamManagers = 
+        strMgrs => [...strMgrs].sort((a, b) => a.stream.creationTime - b.stream.creationTime);
+
+
+    const stompClient = useRef(null)
+    // const { roomid }  = useParams()
 
     // 방 정보 가져오기
     useEffect(() => {
         const gameRoomInfo = async() => {
             try {
-                const access = localStorage.getItem('access')
                 const response = await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`, {
                     headers: {
                         "Content-Type": "application/json",
@@ -175,15 +279,18 @@ function GamePage({viduToken}) {
         // 원래 했던 거
         if (stompClient.current) {
             stompClient.current.disconnect()
+            console.log("구독 안됐는지 확인")
         }
 
         const socket = new WebSocket("wss://i11e106.p.ssafy.io/ws")
         stompClient.current = Stomp.over(socket)
-        stompClient.current.connect({}, () => {
+        stompClient.current.connect({
+            'Authorization': `Bearer ${access}`
+        }, () => {
             stompClient.current.subscribe(`/ws/sub/${roomId}`, (message) =>
                 {
                     const messageJson = JSON.parse(message.body)
-                    console.log(messageJson)
+                    console.log("입장 데이터 확인 : ", messageJson)
                     setGameResponse(messageJson)
                     setNowGameState(messageJson.gameState)
                 })
@@ -196,13 +303,28 @@ function GamePage({viduToken}) {
         }
 
     }, [roomId])
+
+    const handleButtonClick = () => {
+        // 버튼 클릭 시 실행할 로직을 여기에 작성합니다.
+        console.log('버튼이 클릭되었습니다.');
+        gameStart();
+      };
+
+    const gameStart = () => {
+        if (stompClient.current) {
+            stompClient.current.send(`/ws/pub/start/${roomId}`, {
+                'Authorization': `Bearer ${access}`
+            }, JSON.stringify({ action: 'start' }));
+        }
+    }
       
     return (
         <>
             <div className={styles.container}>
+                <button onClick={handleButtonClick}>야호</button>
                 {/* 게임데이터 있는지 확인 -> 게임데이터에 유저리스트가 있는지 확인 -> 그 유저리스트 array인지 확인  */}
                 {gameData && gameData.userList && Array.isArray(gameData.userList) &&
-                    <GamePageHeader gameData={gameData} />
+                    <GamePageHeader gameData={gameData} id={roomId} />
                 }
                 {gameData && gameData.userList && Array.isArray(gameData.useList) && 
                     <GamePageMain 

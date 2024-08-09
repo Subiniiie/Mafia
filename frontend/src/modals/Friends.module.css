@@ -1,18 +1,4 @@
-.btn {
-    border: none;
-    background-color: transparent;
-}
-
-.btn:focus, .btn:active {
-    outline: none;
-    border: none;
-}
-
-.btn:hover {
-    color: blue;
-}
-
-.container {
+.modal {
    position: absolute;
    top: 50%;
    left: 50%;
@@ -20,8 +6,50 @@
    width: 630px;
    height: 420px;
    color: black;
-   background-color: #fafafa;
+   background: #12151D;
    border: 1px solid black;
    border-radius: 20px;
+   color: white;
    z-index: 100;
 }
+
+.container {
+    background: #12151D;
+    border: 3px solid #1E2940;
+    border-radius: 20px;
+    width: 630px;
+    height:100%;
+    max-width: 100%;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.content {
+    color: black;
+}
+
+.modalTitle {
+    margin-top: 30px;
+    padding-right: 30px;
+}
+
+
+.btns {
+    border: none;
+    background-color: transparent;
+    color: white;
+}
+
+.btns:clicked {
+    color: #80aeff;
+}
+/* .btn:focus, .btn:active {
+    outline: none;
+    border: none;
+}
+
+.btn:hover {
+    color: blue;
+} */
