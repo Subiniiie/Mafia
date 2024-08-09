@@ -6,7 +6,7 @@ import CreateRoomModal from "../../modals/CreateRoomModal"
 import styles from "./GLHeader.module.css";
 
 
-const GLHeader = ({setViduToken}) => {
+const GLHeader = ({ setViduToken }) => {
 
     const [isModalOpen, setIsModalOpen] = useState(false)
     const openModal = () => setIsModalOpen(!isModalOpen)
@@ -14,9 +14,16 @@ const GLHeader = ({setViduToken}) => {
     const GLHeaderClass = classNames('east-sea-dokdo-regular', styles.container)
 
     return (
-        <div className={GLHeaderClass}>
+        <header className={GLHeaderClass}>
             <div className={styles.filterBoxContainer}>
-                <FilterBox />
+                {/* <FilterBox /> */}
+                <div className={styles.filterBoxContainerLarge}>
+                    <div className={styles.filterContainer}>공개 임무</div>
+                    <div className={styles.filterContainer}>극비 임무</div>
+                </div>
+                <div className={styles.filterBoxContainerMini}>
+                    <div className={styles.filterContainer}>임무 시작 전</div>
+                </div>
             </div>
             <div className={styles.searchBarContainer}>
                 <SearchBar placeholder="터전을 찾아보세요." />
@@ -25,7 +32,7 @@ const GLHeader = ({setViduToken}) => {
                 <button onClick={openModal}>새로운 도전</button>
                 <CreateRoomModal isOpen={isModalOpen} openModal={openModal} setViduToken={setViduToken} />
             </div>
-        </div >
+        </header >
     )
 }
 
