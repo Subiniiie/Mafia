@@ -234,9 +234,12 @@ public class RoomService {
 
         // Join OpenVidu Session
         Session session = getOrCreateSession(String.valueOf(roomId));
+        log.info("session열었어");
         session.fetch();
+        log.info("Fetch했어");
 
         ConnectionProperties connectionProperties = createConnectionProperties(user.getNickname());
+        log.info("connection어쩌고 저쩌고 성공");
 
         String token = session.createConnection(connectionProperties).getToken();
         updateSessionTokens(session.getSessionId(), token, SessionRole.USER);
@@ -246,7 +249,9 @@ public class RoomService {
                 .filter(userInRoom -> userInRoom.getUser().getUserId().equals(userId))
                 .findAny()
                 .ifPresent(userInRoom -> {
+                    log.info("userInRoom에 있다요");
                     userInRoomRepository.deleteByPk_UserId(userId);
+                    log.info("삭제까지 했따요");
 //                    throw new AlreadyUserInRoomException(CommonErrorCode.ALREADY_USER_IN_ROOM_EXCEPTION);
                 });
 
@@ -264,23 +269,20 @@ public class RoomService {
         Player player = Player.createPlayer(userId, user.getNickname(), userInRoom.getConnectTime());
         Game game = redisGameRepository.findByGameId(roomId).orElseThrow(
                 () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
-
         GameDTO gameDTO = GameDTO.toDto(game);
         gameDTO.addPlayer(player);
         Game updateGame = gameDTO.toDao();
 
         redisKeyValueTemplate.update(updateGame);
+        log.info("레디스에 저장했따요 {}", redisGameRepository.findByGameId(game.getGameId()));
 
         // Redis 발행 로직
         List<RoomDetailUserDto> userList = userInRoomList.stream()
                 .map(UserInRoom::getUser)
                 .map(nowUser -> RoomDetailUserDto.of(nowUser, room.getOwnerId()))
                 .collect(Collectors.toList());
-
         RoomDetailUserDto dto = RoomDetailUserDto.of(user, room.getOwnerId());
-        log.info("dto = {}", dto.getUserId());
         userList.add(dto);
-        log.info("씨빨?");
 
         RoomDetailDto roomDetailDto = RoomDetailDto.toDTO(room, userList);
 
@@ -289,8 +291,10 @@ public class RoomService {
                         .roomDetailDto(roomDetailDto)
                         .build());
         // 다했으면 leave나 kick할시에 발행하는것도 해야해
+        log.info("발행완료");
 
-        return new RoomJoinDto(String.valueOf(room.getRoomId()), token);
+        RoomJoinDto roomJoinDto = new RoomJoinDto(String.valueOf(room.getRoomId()), token);
+        return roomJoinDto;
     } // end of EnterRoom
 
     @RedissonLock(value = "#roomId")
