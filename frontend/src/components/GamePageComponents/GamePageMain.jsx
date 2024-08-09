@@ -22,7 +22,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // ]
 
 
-    setPlayers(initialPlayers)                                                          // Player들의 상태를 관리
+    // setPlayers(initialPlayers)                                                          // Player들의 상태를 관리
     // players 배열을 생성된 시간 순으로 정렬
     // streamManagers와 순서를 맞춰야 하므로 정렬이 필요함
     setPlayers(players => players.sort((a, b) => a.creationTime - b.creationTime));

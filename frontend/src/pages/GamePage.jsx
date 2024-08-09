@@ -62,6 +62,7 @@ function GamePage() {
         {nickname: 'player8', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
     ]);
 
+
     // 방 정보 가져오기
     useEffect(() => {
         const access = localStorage.getItem('access');
