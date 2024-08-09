@@ -35,8 +35,9 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
 
 
     return (
-        // <div className="kimjungchul-bold" onClick={getGameRoomInfo}>
+        // <div className="kimjungchul-bold" onClick={getRoomPlayer}>
         <div className="kimjungchul-bold">
+            <Link to={`/game-room/${id}`} className={`${isInProgress ? styles.inProgress : styles.notStarted}`} >
             <div className={`${isInProgress ? styles.inProgress : styles.notStarted}`} onClick={getGameRoomInfo}>
                 {/* <Link to={`/game-room/${id}`} className={`${isInProgress ? styles.inProgress : styles.notStarted}`}> */}
                 <div className={`${styles.cardMain} ${isInProgress ? styles.inProgressMain : styles.notStartedMain}`}>
@@ -48,8 +49,8 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
                 <div className={`${styles.cardMain} ${isInProgress ? styles.inProgressContent : styles.notStartedContent}`}>
                     <p className={styles.progress}>{progress}/8</p>
                 </div>
-                {/* </Link> */}
             </div>
+            </Link>
         </div>
     );
 };

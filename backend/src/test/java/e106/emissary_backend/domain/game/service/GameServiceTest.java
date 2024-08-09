@@ -116,7 +116,7 @@ class GameServiceTest {
     void setGame_GameNotFound() {
         when(redisGameRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundGameException.class, () -> gameService.setGame(1L));
+        assertThrows(NotFoundGameException.class, () -> gameService.setGame(1L,1L));
     }
 
 //    @Test

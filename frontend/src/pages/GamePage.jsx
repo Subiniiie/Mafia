@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import { Stomp } from "@stomp/stompjs";
+import { Client, Stomp } from "@stomp/stompjs";
 import GamePageHeader from "../components/GamePageComponents/GamePageHeader";
 import GamePageMain from "../components/GamePageComponents/GamePageMain";
 import GamePageFooter from "../components/GamePageComponents/GamePageFooter";
 import styles from "./GamePage.module.css"
 import {OpenVidu} from "openvidu-browser";
+import {ASN1 as jwt} from "jwt-js-decode";
 
-function GamePage() {
+function GamePage({viduToken}) {
     // 화면 이동 시 LeaveSession
     window.onbeforeunload = () => leaveSession();
 
@@ -41,9 +42,13 @@ function GamePage() {
 
 
     useEffect( () => {
+        console.log("@IN - "+viduToken);
         // TODO: get nickname & userId from accessToken
+        // const jwtDecoded = jwt.decode(localStorage.getItem("access")).payload();
+        // const nickname = jwtDecoded.nickname;
+        // const userId = jwtDecoded.id;
         const nickname = "ssafy";
-        const userId = "ssafy@ssafy.com";
+        const userId = "tester";
 
         setNickname(nickname);
         setUserId(userId);
@@ -86,7 +91,7 @@ function GamePage() {
 
         // 메타 데이터, Connection 객체에서 꺼내 쓸 수 있음
         const data = {
-            nickname, id
+            nickname, roomId
         };
 
         // 세션 연결 및 publisher 객체 streamManagers 배열에 추가
@@ -137,20 +142,20 @@ function GamePage() {
 
 
     const stompClient = useRef(null)
-    const { id }  = useParams()
+    // const { roomid }  = useParams()
 
     // 방 정보 가져오기
     useEffect(() => {
         const gameRoomInfo = async() => {
             try {
                 const access = localStorage.getItem('access')
-                const response = await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${id}`, {
+                const response = await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`, {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${access}`,
                 }
                 })
-                console.log('안녕', response.data)
+                console.log(response.data)
                 setGameData(response.data)
             } catch (error) {
                 console.log("게임방 API를 불러오지 못했습니다", error)
@@ -161,6 +166,7 @@ function GamePage() {
 
     // 구독할래
     useEffect(() => {
+        // 원래 했던 거
         if (stompClient.current) {
             stompClient.current.disconnect()
         }
@@ -168,7 +174,7 @@ function GamePage() {
         const socket = new WebSocket("wss://i11e106.p.ssafy.io/ws")
         stompClient.current = Stomp.over(socket)
         stompClient.current.connect({}, () => {
-            stompClient.current.subscribe(`/sub/${roomId}`, (message) => 
+            stompClient.current.subscribe(`/ws/sub/${roomId}`, (message) =>
                 {
                     const messageJson = JSON.parse(message.body)
                     console.log(messageJson)
@@ -182,15 +188,43 @@ function GamePage() {
                 stompClient.current.disconnect()
             }
         }
-    }, [id])
 
-    useEffect(() => {
-        console.log('저장한 데이터는', gameData)
-    }, [gameData])
+    }, [roomId])
       
     return (
         <>
             <div className={styles.container}>
+                {/* 게임데이터 있는지 확인 -> 게임데이터에 유저리스트가 있는지 확인 -> 그 유저리스트 array인지 확인  */}
+                {gameData && gameData.userList && Array.isArray(gameData.userList) &&
+                    <GamePageHeader gameData={gameData} />
+                }
+                {gameData && gameData.userList && Array.isArray(gameData.useList) && 
+                    <GamePageMain 
+                        setSystemMessage={setSystemMessage} 
+                        roomId={roomId} 
+                        streamManagers={getSortedStreamManagers(streamManagers)}
+                        setChatHistory={setChatHistory}
+                        setChatMode={setChatMode}
+                        stompClient={stompClient}
+                        gameData={gameData}
+                        nowGameState={nowGameState}
+                        gameResponse={gameResponse}
+                    />
+                }
+                {gameData && gameData.userList && Array.isArray(gameData.userList) &&
+                    <GamePageFooter 
+                        systemMessage={systemMessage} 
+                        stompClient={stompClient} 
+                        gameData={gameData} 
+                        nowGameState={nowGameState}
+                        gameResponse={gameResponse}
+                        session={session}
+                        chatHistory={chatHistory}
+                        chatMode={chatMode}
+                    />
+                }
+            </div>  
+            {/* <div>
                 <GamePageHeader />
                 <GamePageMain   setSystemMessage={setSystemMessage} 
                                 roomId={roomId} 
@@ -211,7 +245,7 @@ function GamePage() {
                                 chatHistory={chatHistory}
                                 chatMode={chatMode}
                                 />
-            </div>
+            </div> */}
         </>
     )
 }
