@@ -77,6 +77,7 @@ public class JWTUtil {
     public boolean validateToken(String token) {
         try {
             Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
+            log.info(token);
             return false;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("유효하지않은 토큰입니다", e);
