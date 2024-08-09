@@ -4,7 +4,7 @@ import axios from 'axios';
 import GameRoomCard from "./GameRoomCard";
 import styles from "./GLMain.module.css";
 
-const GLMain = () => {
+const GLMain = ({setViduToken}) => {
     const [rooms, setRooms] = useState([])
 
     useEffect(() => {
@@ -31,13 +31,18 @@ const GLMain = () => {
     return (
         <div className={styles.container}>
             {rooms.map((room) => (
+<<<<<<< HEAD
                 <div className={styles.cardWrapper} key={room.roomId}>
-                    <GameRoomCard 
+=======
+                <div className={styles.cardWrapper} key={room.id}>
+>>>>>>> e2c5f4ddfbe6e4956d714d3c6c51e658f12d301b
+                    <GameRoomCard
                         id={room.roomId}
                         title={room.title}
                         leader={room.ownerName}
                         progress={room.nowPlayer}
                         inInProgress={room.maxPlayer}
+                        setViduToken={setViduToken}
                     />
                 </div>
             ))}

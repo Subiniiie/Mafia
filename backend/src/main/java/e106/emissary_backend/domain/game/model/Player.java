@@ -45,6 +45,9 @@ public class Player implements Serializable {
     @Builder.Default
     private boolean isWin = false;
 
+    @Builder.Default
+    private boolean isMe = false;
+
     private long creationTime;
 
     public static Player createPlayer(Long id, String nickname, LocalDateTime creationTime) {
@@ -55,6 +58,7 @@ public class Player implements Serializable {
                 .isLeft(false)
                 .isVoted(false)
                 .creationTime(creationTime.atZone(ZoneId.systemDefault()).toEpochSecond())
+                .isAlive(true)
                 .build();
     }
 }

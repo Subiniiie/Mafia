@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import {useLocation, useParams} from "react-router-dom";
 import axios from "axios";
-import { Stomp } from "@stomp/stompjs";
+import { Client, Stomp } from "@stomp/stompjs";
 import GamePageHeader from "../components/GamePageComponents/GamePageHeader";
 import GamePageMain from "../components/GamePageComponents/GamePageMain";
 import GamePageFooter from "../components/GamePageComponents/GamePageFooter";
 import styles from "./GamePage.module.css"
 import {OpenVidu} from "openvidu-browser";
+import {ASN1 as jwt} from "jwt-js-decode";
 
-function GamePage() {
+function GamePage({viduToken}) {
     // 화면 이동 시 LeaveSession
     useEffect(()=>{
         window.onbeforeunload = () => leaveSession();
@@ -170,60 +171,87 @@ function GamePage() {
 
 
     // 구독할래
-    // useEffect(() => {
-    //     if (stompClient.current) {
-    //         stompClient.current.disconnect()
-    //     }
-    //
-    //     const socket = new WebSocket("wss://i11e106.p.ssafy.io/ws")
-    //     stompClient.current = Stomp.over(socket)
-    //     stompClient.current.connect({}, () => {
-    //         stompClient.current.subscribe(`/ws/sub/${roomId}`, (message) =>
-    //             {
-    //                 const messageJson = JSON.parse(message.body)
-    //                 console.log(messageJson)
-    //                 setGameResponse(messageJson)
-    //                 setNowGameState(messageJson.gameState)
-    //             })
-    //     })
-    //
-    //     return () => {
-    //         if (stompClient.current) {
-    //             stompClient.current.disconnect()
-    //         }
-    //     }
-    // }, [roomId])
-
     useEffect(() => {
-        console.log('저장한 데이터는', gameData)
-    }, [gameData])
+        // 원래 했던 거
+        if (stompClient.current) {
+            stompClient.current.disconnect()
+        }
+
+        const socket = new WebSocket("wss://i11e106.p.ssafy.io/ws")
+        stompClient.current = Stomp.over(socket)
+        stompClient.current.connect({}, () => {
+            stompClient.current.subscribe(`/ws/sub/${roomId}`, (message) =>
+                {
+                    const messageJson = JSON.parse(message.body)
+                    console.log(messageJson)
+                    setGameResponse(messageJson)
+                    setNowGameState(messageJson.gameState)
+                })
+        })
+
+        return () => {
+            if (stompClient.current) {
+                stompClient.current.disconnect()
+            }
+        }
+
+    }, [roomId])
       
     return (
         <>
             <div className={styles.container}>
-                <h5>gameDate 찍어볼게</h5>
-                <h5>{gameData.title}</h5>
-                {/*<GamePageHeader gameData={gameData}/>*/}
-                {/*<GamePageMain   setSystemMessage={setSystemMessage}*/}
-                {/*                roomId={roomId}*/}
-                {/*                streamManagers={getSortedStreamManagers(streamManagers)}*/}
-                {/*                setChatHistory={setChatHistory}*/}
-                {/*                setChatMode={setChatMode}*/}
-                {/*                stompClient={stompClient}*/}
-                {/*                gameData={gameData}*/}
-                {/*                nowGameState={nowGameState}*/}
-                {/*                gameResponse={gameResponse}*/}
-                {/*                />*/}
-                {/*<GamePageFooter systemMessage={systemMessage}*/}
-                {/*                stompClient={stompClient}*/}
-                {/*                gameData={gameData}*/}
-                {/*                nowGameState={nowGameState}*/}
-                {/*                gameResponse={gameResponse}*/}
-                {/*                session={session}*/}
-                {/*                chatHistory={chatHistory}*/}
-                {/*                chatMode={chatMode}*/}
-                {/*                />*/}
-            </div>
+                {/* 게임데이터 있는지 확인 -> 게임데이터에 유저리스트가 있는지 확인 -> 그 유저리스트 array인지 확인  */}
+                {gameData && gameData.userList && Array.isArray(gameData.userList) &&
+                    <GamePageHeader gameData={gameData} />
+                }
+                {gameData && gameData.userList && Array.isArray(gameData.useList) && 
+                    <GamePageMain 
+                        setSystemMessage={setSystemMessage} 
+                        roomId={roomId} 
+                        streamManagers={getSortedStreamManagers(streamManagers)}
+                        setChatHistory={setChatHistory}
+                        setChatMode={setChatMode}
+                        stompClient={stompClient}
+                        gameData={gameData}
+                        nowGameState={nowGameState}
+                        gameResponse={gameResponse}
+                    />
+                }
+                {gameData && gameData.userList && Array.isArray(gameData.userList) &&
+                    <GamePageFooter 
+                        systemMessage={systemMessage} 
+                        stompClient={stompClient} 
+                        gameData={gameData} 
+                        nowGameState={nowGameState}
+                        gameResponse={gameResponse}
+                        session={session}
+                        chatHistory={chatHistory}
+                        chatMode={chatMode}
+                    />
+                }
+            </div>  
+            {/* <div>
+                <GamePageHeader />
+                <GamePageMain   setSystemMessage={setSystemMessage} 
+                                roomId={roomId} 
+                                streamManagers={getSortedStreamManagers(streamManagers)}
+                                setChatHistory={setChatHistory}
+                                setChatMode={setChatMode}
+                                stompClient={stompClient}
+                                gameData={gameData}
+                                nowGameState={nowGameState}
+                                gameResponse={gameResponse}
+                                />
+                <GamePageFooter systemMessage={systemMessage} 
+                                stompClient={stompClient} 
+                                gameData={gameData} 
+                                nowGameState={nowGameState}
+                                gameResponse={gameResponse}
+                                session={session}
+                                chatHistory={chatHistory}
+                                chatMode={chatMode}
+                                />
+            </div> */}
         </>
     )
 }

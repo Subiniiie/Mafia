@@ -89,7 +89,7 @@ public class RedisConfig {
     public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory connectionFactory,
                                                                        MessageListenerAdapter commonAdapter, ChannelTopic commonTopic,
                                                                        MessageListenerAdapter readyCompleteAdapter, ChannelTopic readyCompleteTopic,
-                                                                       MessageListenerAdapter dayListenerAdapter, ChannelTopic dayTopic,
+                                                                       MessageListenerAdapter gameSetAdapter, ChannelTopic gameSetTopic,
                                                                        MessageListenerAdapter startVoteAdapter, ChannelTopic startVoteTopic,
                                                                        MessageListenerAdapter endVoteAdapter, ChannelTopic endVoteTopic,
                                                                        MessageListenerAdapter startConfirmAdapter, ChannelTopic startConfirmTopic,
@@ -101,7 +101,7 @@ public class RedisConfig {
         // subscriber, topic
         container.addMessageListener(commonAdapter, commonTopic);
         container.addMessageListener(readyCompleteAdapter, readyCompleteTopic);
-        container.addMessageListener(dayListenerAdapter, dayTopic);
+        container.addMessageListener(gameSetAdapter, gameSetTopic);
         container.addMessageListener(startVoteAdapter, startVoteTopic);
         container.addMessageListener(endVoteAdapter, endVoteTopic);
         container.addMessageListener(startConfirmAdapter, startConfirmTopic);
@@ -133,13 +133,13 @@ public class RedisConfig {
     }
 
     @Bean
-    public MessageListenerAdapter dayListenerAdapter(DaySubscriber subscriber) {
+    public MessageListenerAdapter gameSetAdapter(GameSetSubscriber subscriber) {
         return new MessageListenerAdapter(subscriber, "sendMessage");
     }
 
     @Bean
-    public ChannelTopic dayTopic() {
-        return new ChannelTopic("DAY");
+    public ChannelTopic gameSetTopic() {
+        return new ChannelTopic("GAME_SET");
     }
 
     @Bean

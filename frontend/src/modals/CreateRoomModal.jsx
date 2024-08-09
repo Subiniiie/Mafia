@@ -8,7 +8,7 @@ import BoxChecked from "../assets/Buttons/BoxChecked.png"
 import BoxUnchecked from "../assets/Buttons/BoxUnchecked.png"
 
 // eslint-disable-next-line react/prop-types
-const CreateRoomModal = ({ isOpen, openModal }) => {
+const CreateRoomModal = ({ isOpen, openModal, setViduToken}) => {
     const navigate = useNavigate()
 
     const modalTitle = '새로운 도전'

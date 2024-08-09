@@ -14,7 +14,7 @@ function GamePageFooter({ systemMessage, stompClient, gameData, nowGameState, ga
         setBlackBackground(preState => !preState)
     }
 
-    const jobModalOpen = <JobModal isOpen={isModalOpen} openModal={openModal} />
+    const jobModalOpen = <JobModal isOpen={isModalOpen} openModal={openModal} gameData={gameData}/>
     return (
         <>
             <div className={styles.container}>
