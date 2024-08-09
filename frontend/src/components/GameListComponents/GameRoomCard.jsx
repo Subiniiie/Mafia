@@ -5,6 +5,9 @@ import styles from "./GameRoomCard.module.css";
 
 const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
     const [gameData, setGameData] = useState({})
+    const [viduToken, setViduToken] = useState("");
+
+    // 입장 시 로직 변경
 
     const getGameRoomInfo = async () => {
         console.log('GameRoomCard 를 클릭했구나!')
@@ -22,6 +25,7 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
             })
             console.log('POST 요청에 대한 response :', response)
             console.log('POST 요청에 대한 response.data :', response.data)
+            setViduToken(response.data.token);
             setGameData(response.data)
         } catch (error) {
             console.log("나 못 가", error)
@@ -37,7 +41,7 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
     return (
         // <div className="kimjungchul-bold" onClick={getRoomPlayer}>
         <div className="kimjungchul-bold">
-            <Link to={`/game-room/${id}`} className={`${isInProgress ? styles.inProgress : styles.notStarted}`} >
+            <Link to={`/game-room/${id}`} state={viduToken} className={`${isInProgress ? styles.inProgress : styles.notStarted}`} >
             <div className={`${isInProgress ? styles.inProgress : styles.notStarted}`} onClick={getGameRoomInfo}>
                 {/* <Link to={`/game-room/${id}`} className={`${isInProgress ? styles.inProgress : styles.notStarted}`}> */}
                 <div className={`${styles.cardMain} ${isInProgress ? styles.inProgressMain : styles.notStartedMain}`}>

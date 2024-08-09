@@ -45,6 +45,7 @@ const CreateRoomModal = ({ isOpen, openModal, setViduToken}) => {
                 maxPlayer: '8',
                 haveBetray: true
             }
+            console.log(roomTitle);
 
             const access = localStorage.getItem('access')
 
