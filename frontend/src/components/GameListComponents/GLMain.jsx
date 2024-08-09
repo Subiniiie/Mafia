@@ -31,7 +31,11 @@ const GLMain = ({setViduToken}) => {
     return (
         <div className={styles.container}>
             {rooms.map((room) => (
+<<<<<<< HEAD
+                <div className={styles.cardWrapper} key={room.roomId}>
+=======
                 <div className={styles.cardWrapper} key={room.id}>
+>>>>>>> e2c5f4ddfbe6e4956d714d3c6c51e658f12d301b
                     <GameRoomCard
                         id={room.roomId}
                         title={room.title}

@@ -1,5 +1,7 @@
 import { useState } from 'react';
+// import classNames from 'classnames';
 import Filter from './Filter';
+import styles from './FilterBox.module.css'
 
 const FilterBox = () => {
     const [selectedFilters, setSelectedFilters] = useState([]);
@@ -17,8 +19,10 @@ const FilterBox = () => {
         });
     };
 
+    // const FilterBoxClass = {}
+
     return (
-        <div>
+        <div className={styles.filterBoxContainer}>
             <div>
                 <div>
                     <Filter
