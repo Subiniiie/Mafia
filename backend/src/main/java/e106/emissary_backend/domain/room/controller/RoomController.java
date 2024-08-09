@@ -9,6 +9,7 @@ import io.openvidu.java.client.OpenViduJavaClientException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.Response;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +32,7 @@ public class RoomController {
         return ResponseEntity.ok(roomService.getRooms(pageable));
     }
 
-    @DeleteMapping("/api/rooms/{roomId}")
+    @DeleteMapping("/rooms/{roomId}")
     public ResponseEntity<CommonResponseDto> deleteRoom(@PathVariable Long roomId){
         return ResponseEntity.ok(roomService.deleteRoom(roomId));
     }
@@ -121,12 +122,12 @@ public class RoomController {
         return ResponseEntity.ok(roomService.leaveRoom(roomId, userId));
     }
 
-    @GetMapping("/options/rooms/{roomId}")
+    @GetMapping("/rooms/{roomId}/options")
     public ResponseEntity<RoomOptionDto> getOption(@PathVariable Long roomId){
         return ResponseEntity.ok(roomService.getOption(roomId));
     }
 
-    @PatchMapping("/options/rooms/{roomId}")
+    @PatchMapping("/rooms/{roomId}/options")
     public ResponseEntity<CommonResponseDto> updateOption(@PathVariable Long roomId, RoomRequestDto roomRequestDto){
         return ResponseEntity.ok(roomService.updateOption(roomId, roomRequestDto));
     }
