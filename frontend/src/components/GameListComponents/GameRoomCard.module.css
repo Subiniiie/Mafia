@@ -16,7 +16,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    border-radius: 25px;
+    border-radius: 22px;
     margin: 10px;
     color: #F6F3E7;
     /* border: 1px solid transparent; */
@@ -38,27 +38,27 @@
 .notStartedMain {
     background-color: #102A21;
     padding: 8px;
-    border-radius: 25px 25px 0 0;
+    border-radius: 22px 22px 0 0;
 }
 
 .inProgressMain {
     background-color: #35373D;
     padding: 8px;
-    border-radius: 25px 25px 0 0;
+    border-radius: 22px 22px 0 0;
 
 }
 
 .notStartedContent {
     background-color: #11201F;
     padding: 8px;
-    border-radius: 0 0 25px 25px;
+    border-radius: 0 0 22px 22px;
 
 }
 
 .inProgressContent {
     background-color: #2A2C34;
     padding: 8px;
-    border-radius: 0 0 25px 25px;
+    border-radius: 0 0 22px 22px;
 
 }
 
