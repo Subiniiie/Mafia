@@ -8,7 +8,7 @@ import ChoiceDieOrTurncoat from "../../modals/ChoiceDieOrTurncoat";
 import FinalDefensePlayerModal from "../../modals/FinalDefensePlayerModal";
 import styles from "./GamePageMain.module.css"
 
-function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, stompClient, gameData, nowGameState, gameResponse, players, setPlayers }) {
+function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, stompClient, gameData, nowGameState, players, setPlayers }) {
     // 플레이어들의 초기 상태
     const initialPlayers = [
         {nickname: 'player1', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
@@ -27,7 +27,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // streamManagers와 순서를 맞춰야 하므로 정렬이 필요함
     setPlayers(players => players.sort((a, b) => a.creationTime - b.creationTime));
 
-    const [ currentPhase, setCurrentPhase ] = useState('night')                         // 게임 단계(night, police, discussion, finalDefense)
+    // const [ currentPhase, setCurrentPhase ] = useState('night')                         // 게임 단계(night, police, discussion, finalDefense)
     const [ nightTimer, setNightTimer ] = useState(30)                                  // 밤 타이머   
     const [ policeTimer, setPoliceTimer ] = useState(30)                                // 첩보원 타이머
     const [ discussionTimer, setDiscussionTimer ] = useState(90)                        // 토론(낮) 타이머
@@ -441,10 +441,10 @@ switch (nowGameState)
                 ))}
             </div>
             <div className={styles.timer}>
-                {currentPhase === 'night' && <p>밤 시간: {nightTimer}초</p>}
+                {/* {currentPhase === 'night' && <p>밤 시간: {nightTimer}초</p>}
                 {currentPhase === 'police' && <p>첩보원 시간: {policeTimer}초</p>}
                 {currentPhase === 'discussion' && <p>토론 시간: {discussionTimer}초</p>}
-                {currentPhase === 'finalDefense' && <p>최후 변론 시간: {finalDefensePlayer}초</p>}
+                {currentPhase === 'finalDefense' && <p>최후 변론 시간: {finalDefensePlayer}초</p>} */}
             </div>
             <div>
                 {showEmissaryModal ? <EmissaryModal gameData={gameData} onAction={choicePlayer}/>

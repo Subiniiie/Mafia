@@ -36,13 +36,18 @@
 }
 
 
-.btns {
+.btn {
     border: none;
     background-color: transparent;
     color: white;
 }
 
-.btns:clicked {
+.btn:hover,
+.btn:active {
+    color: #80aeff;
+}
+
+.btn:click {
     color: #80aeff;
 }
 /* .btn:focus, .btn:active {
