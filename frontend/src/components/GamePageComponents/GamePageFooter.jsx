@@ -26,7 +26,7 @@ function GamePageFooter({ systemMessage, stompClient, gameData, nowGameState, ga
                                 chatHistory={chatHistory}
                                 players={players}
                                 />
-                    <GameReadyStartBtn stompClient={stompClient} nowGameState={nowGameState} />
+                    <GameReadyStartBtn stompClient={stompClient} nowGameState={nowGameState} gameData={gameData}/>
                 </div>
                 <div className="job-modals">
                     { isModalOpen ? jobModalOpen : null}
