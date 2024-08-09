@@ -36,10 +36,11 @@ function GamePage({viduToken}) {
     const [ systemMessage, setSystemMessage ] = useState(null)
 
     // Game
-    const [ gameData, setGameData ] = useState(null)
+    const [ gameData, setGameData ] = useState({})
     const [ gameResponse, setGameResponse ] = useState(null)
     const [ nowGameState, setNowGameState ] = useState(null)
 
+    const access = localStorage.getItem('access')
 
     useEffect( () => {
         console.log("@IN - "+viduToken);
@@ -148,7 +149,6 @@ function GamePage({viduToken}) {
     useEffect(() => {
         const gameRoomInfo = async() => {
             try {
-                const access = localStorage.getItem('access')
                 const response = await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`, {
                 headers: {
                     "Content-Type": "application/json",
@@ -169,15 +169,18 @@ function GamePage({viduToken}) {
         // 원래 했던 거
         if (stompClient.current) {
             stompClient.current.disconnect()
+            console.log("구독 안됐는지 확인")
         }
 
         const socket = new WebSocket("wss://i11e106.p.ssafy.io/ws")
         stompClient.current = Stomp.over(socket)
-        stompClient.current.connect({}, () => {
+        stompClient.current.connect({
+            'Authorization': `Bearer ${access}`
+        }, () => {
             stompClient.current.subscribe(`/ws/sub/${roomId}`, (message) =>
                 {
                     const messageJson = JSON.parse(message.body)
-                    console.log(messageJson)
+                    console.log("입장 데이터 확인 : ", messageJson)
                     setGameResponse(messageJson)
                     setNowGameState(messageJson.gameState)
                 })
@@ -190,13 +193,28 @@ function GamePage({viduToken}) {
         }
 
     }, [roomId])
+
+    const handleButtonClick = () => {
+        // 버튼 클릭 시 실행할 로직을 여기에 작성합니다.
+        console.log('버튼이 클릭되었습니다.');
+        gameStart();
+      };
+
+    const gameStart = () => {
+        if (stompClient.current) {
+            stompClient.current.send(`/ws/pub/start/${roomId}`, {
+                'Authorization': `Bearer ${access}`
+            }, JSON.stringify({ action: 'start' }));
+        }
+    }
       
     return (
         <>
             <div className={styles.container}>
+                <button onClick={handleButtonClick}>야호</button>
                 {/* 게임데이터 있는지 확인 -> 게임데이터에 유저리스트가 있는지 확인 -> 그 유저리스트 array인지 확인  */}
                 {gameData && gameData.userList && Array.isArray(gameData.userList) &&
-                    <GamePageHeader gameData={gameData} />
+                    <GamePageHeader gameData={gameData} id={roomId} />
                 }
                 {gameData && gameData.userList && Array.isArray(gameData.useList) && 
                     <GamePageMain 
