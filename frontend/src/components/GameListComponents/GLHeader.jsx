@@ -23,7 +23,7 @@ const GLHeader = ({setViduToken}) => {
             </div>
             <div className={styles.CreateRoomButtonContainer}>
                 <button onClick={openModal}>새로운 도전</button>
-                <CreateRoomModal isOpen={isModalOpen} openModal={openModal} />
+                <CreateRoomModal isOpen={isModalOpen} openModal={openModal} setViduToken={setViduToken} />
             </div>
         </div >
     )

@@ -10,11 +10,11 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
         console.log('GameRoomCard 를 클릭했구나!')
         try {
             const access = localStorage.getItem('access')
-            // const body = {
-            //     roomId: id,
-            // }
+            const body = {
+                id: id,
+            }
             // console.log('body :', body)
-            const response = await axios.post(`https://i11e106.p.ssafy.io/api/rooms/${id}`, JSON.stringify(), {
+            const response = await axios.post(`https://i11e106.p.ssafy.io/api/rooms/${id}`, JSON.stringify(body), {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${access}`,
@@ -24,12 +24,12 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
             console.log('POST 요청에 대한 response.data :', response.data)
             setGameData(response.data)
         } catch (error) {
-            console.log("게임방 API를 불러오지 못했습니다", error)
+            console.log("나 못 가", error)
         }
     }
 
     useEffect(() => {
-        console.log(gameData)
+        console.log('안녕 너와?????', gameData)
     }, [gameData])
 
 

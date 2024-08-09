@@ -36,7 +36,7 @@ function GamePage({viduToken}) {
     const [ systemMessage, setSystemMessage ] = useState(null)
 
     // Game
-    const [ gameData, setGameData ] = useState(null)
+    const [ gameData, setGameData ] = useState({})
     const [ gameResponse, setGameResponse ] = useState(null)
     const [ nowGameState, setNowGameState ] = useState(null)
 
