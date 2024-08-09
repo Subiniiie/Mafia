@@ -169,6 +169,7 @@ function GamePage({viduToken}) {
         // 원래 했던 거
         if (stompClient.current) {
             stompClient.current.disconnect()
+            console.log("구독 안됐는지 확인")
         }
 
         const socket = new WebSocket("wss://i11e106.p.ssafy.io/ws")
@@ -177,7 +178,7 @@ function GamePage({viduToken}) {
             stompClient.current.subscribe(`/ws/sub/${roomId}`, (message) =>
                 {
                     const messageJson = JSON.parse(message.body)
-                    console.log(messageJson)
+                    console.log("입장 데이터 확인 : ", messageJson)
                     setGameResponse(messageJson)
                     setNowGameState(messageJson.gameState)
                 })
@@ -196,7 +197,7 @@ function GamePage({viduToken}) {
             <div className={styles.container}>
                 {/* 게임데이터 있는지 확인 -> 게임데이터에 유저리스트가 있는지 확인 -> 그 유저리스트 array인지 확인  */}
                 {gameData && gameData.userList && Array.isArray(gameData.userList) &&
-                    <GamePageHeader gameData={gameData} />
+                    <GamePageHeader gameData={gameData} id={roomId} />
                 }
                 {gameData && gameData.userList && Array.isArray(gameData.useList) && 
                     <GamePageMain 

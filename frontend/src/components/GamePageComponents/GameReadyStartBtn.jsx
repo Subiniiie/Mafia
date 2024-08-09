@@ -8,6 +8,7 @@ function GameReadyStartBtn({ stompClient, nowGameState, gameData }) {
     const [ gameReady, setGameReady ] = useState(false)
     const [ showModal, setShowModal ] = useState(false)
 
+    console.log('게임 데이터를 볼거야!', gameData)
     const roomManagerCheck = gameData.userList.find(user => user.owner === true)
     console.log('너 방장이야?', roomManagerCheck)
     const roomManager = roomManagerCheck.owner
