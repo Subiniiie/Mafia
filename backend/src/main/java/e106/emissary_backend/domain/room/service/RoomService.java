@@ -246,7 +246,8 @@ public class RoomService {
                 .filter(userInRoom -> userInRoom.getUser().getUserId().equals(userId))
                 .findAny()
                 .ifPresent(userInRoom -> {
-                    throw new AlreadyUserInRoomException(CommonErrorCode.ALREADY_USER_IN_ROOM_EXCEPTION);
+                    userInRoomRepository.deleteByPk_UserId(userId);
+//                    throw new AlreadyUserInRoomException(CommonErrorCode.ALREADY_USER_IN_ROOM_EXCEPTION);
                 });
 
         UserInRoom userInRoom = UserInRoom.builder()
