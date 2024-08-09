@@ -109,14 +109,13 @@ public class RoomController {
     /**
      * 방 떠나기
      */
-    @DeleteMapping("/rooms/{roomId}")
+    @DeleteMapping("/rooms/users/{roomId}")
     public ResponseEntity<CommonResponseDto> leaveRoom(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long roomId) {
         // 테스트용으로
         long userId = 1L;
         String nickname = "";
         if(!Objects.isNull(customUserDetails)){
             userId = customUserDetails.getUserId();
-            nickname = customUserDetails.getUsername();
         }
 
         return ResponseEntity.ok(roomService.leaveRoom(roomId, userId));
