@@ -14,7 +14,8 @@ public class RoomRequestDto {
     private String title;
     private String password;
     private int maxPlayer;
-    private boolean haveBetrayer;
+    @JsonProperty("haveBetray")
+    private boolean haveBetray;
 
     public Room toEntity(long userId){
         boolean isPrivate = false;
