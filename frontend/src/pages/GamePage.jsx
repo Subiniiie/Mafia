@@ -10,6 +10,7 @@ import {OpenVidu} from "openvidu-browser";
 import {ASN1 as jwt} from "jwt-js-decode";
 
 function GamePage({viduToken}) {
+    // getGameRoomInfo()
     // 화면 이동 시 LeaveSession
     useEffect(()=>{
         window.onbeforeunload = () => leaveSession();
@@ -160,6 +161,7 @@ function GamePage({viduToken}) {
     // 방 정보 가져오기
     useEffect(() => {
         const gameRoomInfo = async() => {
+            console.log('장하오')
             try {
                 const response = await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`, {
                     headers: {
@@ -167,16 +169,22 @@ function GamePage({viduToken}) {
                         "Authorization": `Bearer ${access}`,
                     }
                 })
-                // console.log("resp", response.data)
+                console.log("resp", response.data)
                 setGameData(response.data)
-                // console.log(gameData);
-                console.log(gameData.title)
+                console.log('제발 나와라!!!11', gameData);
+                console.log('너 나와!!!!!', gameData.title)
+                console.log('너도 나와!!!!!!', gameData.title)
             } catch (error) {
                 console.log("게임방 API를 불러오지 못했습니다", error)
             }
         }
         gameRoomInfo()
     }, [])
+
+    useEffect(() => {
+        console.log('나 들어감??', gameData)
+        console.log('나 갔따', gameData.title)
+    }, [gameData, gameData.title])
 
     // useEffect( () => {
     //
@@ -299,7 +307,7 @@ function GamePage({viduToken}) {
                     const messageJson = JSON.parse(message.body)
                     console.log("입장 데이터 확인 : ", messageJson)
                     setGameResponse(messageJson)
-                    setNowGameState(messageJson.gameState)
+                    setNowGameState('입장 하고 데이터 받는다ㅏㅏ', messageJson.gameState)
                 })
         })
 
@@ -309,7 +317,7 @@ function GamePage({viduToken}) {
             }
         }
 
-    }, [roomId])
+    }, [])
 
     const handleButtonClick = () => {
         // 버튼 클릭 시 실행할 로직을 여기에 작성합니다.
