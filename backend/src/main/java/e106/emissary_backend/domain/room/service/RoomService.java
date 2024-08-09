@@ -443,6 +443,11 @@ public class RoomService {
         List<UserInRoom> userInRoom = userInRoomRepository.findAllByPk_RoomId(roomId).orElseThrow(
                 () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
 
+        if(Objects.isEmpty(userInRoom)){
+            log.info("userInRoom이 비어있어요");
+            throw new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION);
+        }
+
         Room room = userInRoom.get(0).getRoom();
 
         List<RoomDetailUserDto> roomDetailUserDtoList = userInRoom.stream()
