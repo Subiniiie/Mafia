@@ -3,7 +3,7 @@
 .notStarted {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    /* justify-content: space-between; */
     border-radius: 22px;
     margin: 10px;
     color: #F6F3E7;
@@ -15,7 +15,7 @@
 .inProgress {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    /* justify-content: space-between; */
     border-radius: 22px;
     margin: 10px;
     color: #F6F3E7;
