@@ -20,6 +20,7 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
                     "Authorization": `Bearer ${access}`,
                 }
             })
+            console.log('POST 요청에 대한 response :', response)
             console.log('POST 요청에 대한 response.data :', response.data)
             setGameData(response.data)
         } catch (error) {

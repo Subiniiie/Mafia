@@ -4,13 +4,14 @@ import GameChatInput from "./GameChatInput";
 import GameChatHistory from "./GameChatHistory";
 import System from "./System";
 
-function GameChat({ systemMessage }) {
+function GameChat({ systemMessage, session, chatMode, chatHistory }) {
     
 
-    const [ chatHistory, setChatHistory ] = useState([])
-
     const handleChatSubmit = (message) => {
-        setChatHistory(prevHistory => [...prevHistory, message])
+        session.signal(chatMode.mode, {
+            data: message,
+            to: chatMode.to
+        });
     }
        
 
