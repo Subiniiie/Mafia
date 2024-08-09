@@ -80,8 +80,8 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public void updateUser(EditRequest request, String email){
-        Optional<User> present = userRepository.findByEmail(email);
+    public void updateUser(EditRequest request, Long userId){
+        Optional<User> present = userRepository.findByUserId(userId);
         if(present.isPresent()){
             User user = present.get();
             user.setNickname(request.getNickname() != null ? request.getNickname() : present.get().getNickname());
@@ -156,8 +156,8 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public int deleteUser(String nickname){
-        Optional<User> present = userRepository.findByNickname(nickname);
+    public int deleteUser(Long userId){
+        Optional<User> present = userRepository.findByUserId(userId);
         if(present.isPresent()){
             User user = present.get();
             user.setIsDeleted(true);

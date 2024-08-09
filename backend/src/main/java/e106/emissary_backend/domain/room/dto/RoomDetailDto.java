@@ -22,7 +22,7 @@ public class RoomDetailDto {
 
     private String title;
 
-    private int password;
+    private String password;
 
     private long ownerId;
 

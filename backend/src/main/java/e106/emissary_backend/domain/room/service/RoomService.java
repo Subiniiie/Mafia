@@ -11,6 +11,7 @@ import e106.emissary_backend.domain.room.entity.Room;
 import e106.emissary_backend.domain.room.enumType.RoomState;
 import e106.emissary_backend.domain.room.enumType.SessionRole;
 import e106.emissary_backend.domain.room.repository.RoomRepository;
+import e106.emissary_backend.domain.user.dto.RoomDetailUserDto;
 import e106.emissary_backend.domain.user.entity.User;
 import e106.emissary_backend.domain.user.repository.UserRepository;
 import e106.emissary_backend.domain.userInRoom.entity.UserInRoom;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.redis.core.RedisKeyValueTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -47,6 +49,7 @@ public class RoomService {
     private final UserInRoomRepository userInRoomRepository;
     private final UserRepository userRepository;
     private final RedisGameRepository redisGameRepository;
+    private final RedisKeyValueTemplate redisKeyValueTemplate;
     private final TaskExecutor brokerChannelExecutor;
 //    private final RedisTemplate<Long, GameDTO> redisGameTemplate;
 
@@ -61,6 +64,11 @@ public class RoomService {
     public void init() {
         openVidu = new OpenVidu(openviduUrl, openviduSecret);
         webClient = WebClient.builder().baseUrl(openviduUrl).build();
+    }
+
+    public void update(GameDTO gameDTO){
+        Game dao = gameDTO.toDao();
+        redisGameRepository.save(dao);
     }
 
     private ConnectionProperties createConnectionProperties(String userNickname){
@@ -82,10 +90,13 @@ public class RoomService {
         Slice<Room> roomList = roomRepository.findAllBy(pageable).orElseThrow(()-> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
         return roomList.stream().map(room -> RoomListDto.builder()
                         .title(room.getTitle())
+                        .roomId(room.getRoomId())
                         .ownerName(userRepository.findNicknameByUserId(room.getOwnerId()).orElseThrow(
                                 () -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION)))
                         .maxPlayer(room.getMaxPlayer())
                         .nowPlayer(userInRoomRepository.countPeopleByRoom_RoomId(room.getRoomId()))
+                        .password(room.getPassword())
+                        .isPrivate(room.isPrivate())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -106,6 +117,7 @@ public class RoomService {
 
     public CommonResponseDto updateOption(Long roomId, RoomRequestDto roomRequestDto) {
         Room room = roomRepository.findByRoomId(roomId).orElseThrow(() -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
+
         room.update(roomRequestDto);
         return new CommonResponseDto("ok");
     }
@@ -113,13 +125,29 @@ public class RoomService {
     public CommonResponseDto deleteRoom(Long roomId) {
         roomRepository.findByRoomId(roomId).orElseThrow(() -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
         roomRepository.deleteById(roomId);
+
+        redisGameRepository.deleteById(roomId);
         return new CommonResponseDto("ok");
     }
 
+    @RedissonLock(value = "#roomId")
     public CommonResponseDto deleteUser(Long roomId, Long userId) {
         roomRepository.findByRoomId(roomId).orElseThrow(() -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
         userInRoomRepository.findByPk_UserId(userId).orElseThrow(() -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION));
         userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
+
+        Game game = redisGameRepository.findByGameId(roomId).orElseThrow(() -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+        GameDTO gameDTO = GameDTO.toDto(game);
+        Map<Long, Player> playerMap = gameDTO.getPlayerMap();
+
+        if(!playerMap.containsKey(userId)){
+            throw new NoUserInRoomException(CommonErrorCode.NO_USER_IN_ROOM_EXCEPTION);
+        }
+
+        playerMap.remove(userId);
+        update(gameDTO);
+
+        redisKeyValueTemplate.update(gameDTO.toDao());
 
         return new CommonResponseDto("ok");
     }
@@ -129,14 +157,8 @@ public class RoomService {
         if(!userInRoomRepository.findByPk_UserId(userId).isEmpty())
             throw new AlreadyUserInRoomException(CommonErrorCode.ALREADY_USER_IN_ROOM_EXCEPTION);
 
-        Room room = Room.builder()
-                .title(roomRequestDto.getTitle())
-                .password(roomRequestDto.getPassword())
-                .haveBetray(roomRequestDto.isHaveBetray())
-                .maxPlayer(roomRequestDto.getMaxPlayer())
-                .ownerId(userId)
-                .roomState(RoomState.WAIT)
-                .build();
+        Room room = roomRequestDto.toEntity(userId);
+
         User user = userRepository.findByUserId(userId).orElseThrow(() -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION));
         log.info("user = {}",user.getNickname());
 
@@ -238,6 +260,7 @@ public class RoomService {
         return new RoomJoinDto(String.valueOf(room.getRoomId()), token);
     }
 
+    @RedissonLock(value = "#roomId")
     public CommonResponseDto leaveRoom(Long roomId, long userId) {
         Session session = mapSessions.get(String.valueOf(roomId));
 
@@ -357,5 +380,19 @@ public class RoomService {
                 .bodyToMono(String.class)
                 .doOnSuccess(response -> System.out.println("Signal Sent Successfully"))
                 .doOnError(error -> System.out.println("Fail to Send Signal: " + error.getMessage()));
+    }
+
+    public RoomDetailDto detailRoom (long roomId){
+        List<UserInRoom> userInRoom = userInRoomRepository.findAllByPk_RoomId(roomId).orElseThrow(
+                () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
+
+        Room room = userInRoom.get(0).getRoom();
+
+        List<RoomDetailUserDto> roomDetailUserDtoList = userInRoom.stream()
+                .map(UserInRoom::getUser)
+                .map(user -> RoomDetailUserDto.of(user, room.getOwnerId()))
+                .toList();
+
+        return RoomDetailDto.toDTO(room, roomDetailUserDtoList);
     }
 }
