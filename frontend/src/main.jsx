@@ -9,11 +9,11 @@ import LoginStatus from "./LoginStatus.jsx";
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>
-        <React.StrictMode>
+        {/*<React.StrictMode>*/}
             <Provider store={store}>
                 <LoginStatus />
                 <App />
             </Provider>
-        </React.StrictMode>,
+        {/*</React.StrictMode>,*/}
     </BrowserRouter>
 )
