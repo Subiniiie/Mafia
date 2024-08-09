@@ -24,7 +24,6 @@ function GameChat({ systemMessage, session, chatMode, chatHistory, players }) {
             });
         }
     }
-       
 
     const [ clickUpBtn, setClickUpBtn ] = useState(false)
 
