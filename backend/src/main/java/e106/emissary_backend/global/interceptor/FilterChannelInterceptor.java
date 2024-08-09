@@ -4,6 +4,7 @@ package e106.emissary_backend.global.interceptor;
 import e106.emissary_backend.domain.security.util.JWTUtil;
 import e106.emissary_backend.domain.user.dto.CustomUserDetails;
 import e106.emissary_backend.domain.user.entity.User;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
@@ -19,8 +20,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,31 +31,30 @@ import java.util.List;
 @Slf4j
 @Order(Ordered.HIGHEST_PRECEDENCE * 99)
 @Component
+@RequiredArgsConstructor
 public class FilterChannelInterceptor implements ChannelInterceptor {
 
-    @Autowired
-    private JWTUtil jwtUtil;
+    private final JWTUtil jwtUtil;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        log.info("개씨발");
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-
         log.info("accessor = {}", accessor.getCommand().toString());
-        log.info("T씨발");
 
-        if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+        if (StompCommand.SEND.equals(accessor.getCommand())) {
             log.info("Stomp connected");
 //             log.info(accessor.getMessage());
             String jwtToken = extractJwtFromHeader(accessor);
-            log.info(jwtToken);
+            log.info("jwtToken = {} ", jwtToken);
             if (jwtToken != null) {
                 try {
-                    if (jwtUtil.validateToken(jwtToken)) {
+                    log.info("jwtUtil = {} ", jwtUtil);
+                    log.info("try jwt validation");
+                    if (!jwtUtil.validateToken(jwtToken)) {
 //                         String username = jwtUtil.getUsername(jwtToken);
 //                         Long userId = Long.parseLong(jwtUtil.getUserId(jwtToken));
 //                         String role = jwtUtil.getRole(jwtToken);
-
+                        log.info("jwt validation in");
                         User user = User.builder()
                                 .userId(Long.parseLong(jwtUtil.getUserId(jwtToken)))
                                 .email(jwtUtil.getEmail(jwtToken))
@@ -60,18 +62,15 @@ public class FilterChannelInterceptor implements ChannelInterceptor {
                                 .role(jwtUtil.getRole(jwtToken))
                                 .build();
 
-                        CustomUserDetails customUserDetails = new CustomUserDetails(user);
-                        Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
-                        log.info("authToken = {}", authToken);
-//                         accessor.setUser(new UsernamePasswordAuthenticationToken(
-//                                 userId,
-//                                 null,
-//                                 Collections.singletonList(new SimpleGrantedAuthority(role)))
-//                         );
+                        log.info("getUserId = {}", user.getUserId());
 
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                        CustomUserDetails customUserDetails = new CustomUserDetails(user);
+
+                        accessor.setSessionAttributes(Collections.singletonMap("user", customUserDetails));
+                        log.info("저장완료");
 
                     } else {
+                        log.info("jwt token invalid");
                         throw new MessageDeliveryException("Invalid JWT token");
                     }
                 }catch(Exception e) {
