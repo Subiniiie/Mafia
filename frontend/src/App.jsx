@@ -89,9 +89,9 @@ function App() {
       <Navbar isLoggedIn={isLoggedIn} name={name} onLoginSuccess={handleLoginSuccess} />
 
       <Routes>
-        <Route path='/' element={<MainPage />}></Route>
-        <Route path='/game-list' element={<GameListPage setViduToken={setViduToken}/>}></Route>
-        <Route path={'/game-room/:roomId'} element={<GamePage viduToken={viduToken}/>}></Route>
+        <Route path='/' element={<MainPage isLoggedIn={isLoggedIn} />}></Route>
+        <Route path='/game-list' element={<GameListPage setViduToken={setViduToken} />}></Route>
+        <Route path={'/game-room/:roomId'} element={<GamePage viduToken={viduToken} />}></Route>
         <Route path='/achievements' element={<AchievementsPage />}></Route>
         <Route path='/profile' element={<ProfilePage />}></Route>
       </Routes>
