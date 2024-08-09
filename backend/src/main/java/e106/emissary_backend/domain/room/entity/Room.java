@@ -61,6 +61,10 @@ public class Room extends BaseTimeEntity {
         }
     }
 
+    public void changeOwner(long ownerId){
+        this.ownerId = ownerId;
+    }
+
     public void changeState(RoomState newState) {
         roomState = newState;
     }

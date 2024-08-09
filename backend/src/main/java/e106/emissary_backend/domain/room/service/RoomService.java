@@ -255,7 +255,7 @@ public class RoomService {
 
         Game updateGame = gameDTO.toDao();
 
-        redisGameRepository.save(updateGame);
+        redisKeyValueTemplate.update(updateGame);
 
         return new RoomJoinDto(String.valueOf(room.getRoomId()), token);
     }
@@ -268,6 +268,10 @@ public class RoomService {
             throw new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION);
         }
 
+        // 레디스에서 삭제
+        deleteUserInRedis(roomId, userId);
+        
+        // 비두와 DB에서 삭제
         Map<String, SessionRole> users = mapSessionNamesTokens.get(session.getSessionId());
         Optional<UserInRoom> userInRoom = userInRoomRepository.findByPk_UserId(userId);
         if (userInRoom.isPresent()){
@@ -279,7 +283,14 @@ public class RoomService {
             } else if (users.get(token) == SessionRole.HOST){
                 // 방장 위임
                 users.remove(token);
-                changeSessionOwner(session);
+                String nextOwnerToken = changeSessionOwner(session);
+
+                User owner = userInRoomRepository.findUserByViduToken(nextOwnerToken).orElseThrow(
+                        () -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION));
+                Long ownerId = owner.getUserId();
+                Room room = userInRoom.get().getRoom();
+                room.changeOwner(ownerId);
+
                 userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
             }
 
@@ -296,7 +307,7 @@ public class RoomService {
     }
 
     // 방장 변경 기능... 완성 안된거 같은데 ..?
-    public boolean changeSessionOwner(Session session){
+    public String changeSessionOwner(Session session){
         try{
             session.fetch();
             // 다음 먼저 들어온 유처 확인
@@ -307,9 +318,9 @@ public class RoomService {
             Map<String, SessionRole> users = mapSessionNamesTokens.get(session.getSessionId());
             users.put(nextOwner.getToken(), SessionRole.HOST);
 
-            return true;
+            return nextOwner.getToken();
         } catch (OpenViduJavaClientException | OpenViduHttpException e) {
-            return false;
+            return null;
         }
     }
 
@@ -350,6 +361,10 @@ public class RoomService {
                 kickedToken = kickedUser.get().getViduToken();
                 userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomKickDto.getRoomId(), userId);
             }
+
+            // 레디스 처리하고
+            deleteUserInRedis(roomKickDto.getRoomId(), userId);
+
 
             // Map 삭제하고
             Map<String, SessionRole> users = mapSessionNamesTokens.get(session.getSessionId());
@@ -394,5 +409,16 @@ public class RoomService {
                 .toList();
 
         return RoomDetailDto.toDTO(room, roomDetailUserDtoList);
+    }
+
+    private void deleteUserInRedis(long roomId, long userId){
+        Game game = redisGameRepository.findByGameId(roomId).orElseThrow(
+                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+
+        GameDTO gameDTO = GameDTO.toDto(game);
+        gameDTO.getPlayerMap().remove(userId);
+        Game updateGame = gameDTO.toDao();
+
+        redisKeyValueTemplate.update(updateGame);
     }
 }

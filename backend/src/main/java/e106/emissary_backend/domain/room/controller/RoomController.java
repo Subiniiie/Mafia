@@ -65,7 +65,6 @@ public class RoomController {
     /**
      * 방 입장
      */
-    // Todo : JWT 처리하는거 추가.
     @PostMapping("/rooms/{roomId}")
     public ResponseEntity<RoomJoinDto> enterRoom(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long roomId) {
         // 테스트용으로
@@ -75,6 +74,7 @@ public class RoomController {
         }
 
         try{
+            // todo : 메시지 발행하기
             // 참가 성공 시
             RoomJoinDto res = roomService.enterRoom(roomId, userId);
             return ResponseEntity.ok(res);
