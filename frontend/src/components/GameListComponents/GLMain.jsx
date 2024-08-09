@@ -17,8 +17,8 @@ const GLMain = ({ setViduToken }) => {
                         "Authorization": `Bearer ${access}`,
                     }
                 })
-                console.log(response.data)
                 setRooms(response.data)
+                
             } catch (error) {
                 console.error("Failed to fetch rooms :", error)
             }
@@ -27,6 +27,8 @@ const GLMain = ({ setViduToken }) => {
         fetchRooms()
     }, [])
 
+
+  
 
     return (
         <div className={styles.container}>
@@ -43,7 +45,8 @@ const GLMain = ({ setViduToken }) => {
                 />
             ))} */}
             {rooms.map((room) => (
-                <div className={styles.cardWrapper} key={room.id}>
+                // <div className={styles.cardWrapper} key={room.roomId}>
+                <div className={styles.cardWrapper} key={room.roomId}>
                     <GameRoomCard
                         id={room.roomId}
                         title={room.title}

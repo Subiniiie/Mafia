@@ -14,6 +14,9 @@ function AchievementsPage() {
         {id: 5, achievementName: "리액트 잘하고 싶다", achievementDate: new Date('2024-07-18'), description: "현규의 꿈은 리액트 마스터다."},
         {id: 6, achievementName: "리액트 잘하고 싶다", achievementDate: new Date('2024-07-18'), description: "현규의 꿈은 리액트 마스터다."},
         {id: 7, achievementName: "리액트 잘하고 싶다", achievementDate: new Date('2024-07-18'), description: "현규의 꿈은 리액트 마스터다."},
+        {id: 8, achievementName: "리액트 잘하고 싶다", achievementDate: new Date('2024-07-18'), description: "현규의 꿈은 리액트 마스터다."},
+        {id: 9, achievementName: "리액트 잘하고 싶다", achievementDate: new Date('2024-07-18'), description: "현규의 꿈은 리액트 마스터다."},
+        {id: 10, achievementName: "리액트 잘하고 싶다", achievementDate: new Date('2024-07-18'), description: "현규의 꿈은 리액트 마스터다."},
     ]
 
     // 업적 정보를 저장할 변수
@@ -33,20 +36,40 @@ function AchievementsPage() {
     //     fetchAchievements()
     // }, [])
 
+//     return (
+//         <div className={styles.container}>
+//             <div className={styles.main}>
+//                 {myAchievementsCard.map((achievement) => (
+//                         <AchievementsCard 
+//                             key={achievement.id}
+//                             achievementName={achievement.achievementName}
+//                             achievementDate={achievement.achievementDate}
+//                             description={achievement.description}
+//                             image={achievement.image}
+//                         />
+//                 ))}
+//             </div>
+//         </div>
+//     )
+// }
+
+
     return (
-        <div className={styles.container}>
-            <div className={styles.main}>
-                {myAchievementsCard.map((achievement) => (
-                        <AchievementsCard 
-                            key={achievement.id}
-                            achievementName={achievement.achievementName}
-                            achievementDate={achievement.achievementDate}
-                            description={achievement.description}
-                            image={achievement.image}
-                        />
-                ))}
-            </div>
-        </div>
+        // <div className={styles.container}>
+        //     <div className={styles.main}>
+                <div className={styles.slides}>
+                    {myAchievementsCard.concat(myAchievementsCard).map((achievement) => (
+                            <AchievementsCard 
+                                key={achievement.id}
+                                achievementName={achievement.achievementName}
+                                achievementDate={achievement.achievementDate}
+                                description={achievement.description}
+                                image={achievement.image}
+                            />
+                    ))}
+                </div>
+        //  </div>
+        // </div>
     )
 }
 

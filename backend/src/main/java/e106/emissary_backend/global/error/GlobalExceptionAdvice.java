@@ -27,6 +27,12 @@ public class GlobalExceptionAdvice {
     }
 
     @ExceptionHandler
+    public ResponseEntity<Object> notFoundUserInRoom(NotFoundUserInRoomException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return handleExceptionInternal(errorCode);
+    }
+
+    @ExceptionHandler
     public ResponseEntity<Object> alreadyExistUser(AlreadyExistUserException e) {
         ErrorCode errorCode = e.getErrorCode();
         return handleExceptionInternal(errorCode);
