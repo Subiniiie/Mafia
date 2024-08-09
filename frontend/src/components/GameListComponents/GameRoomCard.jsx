@@ -43,11 +43,6 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
                     <p className={`${isInProgress ? styles.inProgressTitle : styles.notStartedTitle}`}>{title}</p>
                     <p className={styles.leader}>대장 동지 : {leader}</p>
                 </div>
-                {/* <div className={styles.cardContent}> */}
-                <div className={`${styles.cardMain} ${isInProgress ? styles.inProgressContent : styles.notStartedContent}`}>
-                    <p className={styles.progress}>{progress}/8</p>
-                </div>
-            </div>
             </Link>
         </div>
     );

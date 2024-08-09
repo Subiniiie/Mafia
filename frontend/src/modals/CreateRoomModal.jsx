@@ -8,7 +8,7 @@ import BoxChecked from "../assets/Buttons/BoxChecked.png"
 import BoxUnchecked from "../assets/Buttons/BoxUnchecked.png"
 
 // eslint-disable-next-line react/prop-types
-const CreateRoomModal = ({ isOpen, openModal, setViduToken}) => {
+const CreateRoomModal = ({ isOpen, openModal, setViduToken }) => {
     const navigate = useNavigate()
 
     const modalTitle = '새로운 도전'
@@ -56,13 +56,13 @@ const CreateRoomModal = ({ isOpen, openModal, setViduToken}) => {
                     "Authorization": `Bearer ${access}`,
                 },
                 withCredentials: true // 필요 시 추가: 이 옵션을 추가하면 쿠키가 포함된 요청을 서버로 보낼 수 있음
-                }
+            }
             )
             console.log(response.data)
             // openModal()
-            const { roomId,ownerToken } = response.data.option;
-            console.log("id"+" : "+roomId);
-            console.log("token"+" : "+ownerToken);
+            const { roomId, ownerToken } = response.data.option;
+            console.log("id" + " : " + roomId);
+            console.log("token" + " : " + ownerToken);
             // gameData를 props로 전달해줘야한다.
             navigate(`/game-room/${roomId}`, {state :ownerToken});
         } catch (error) {
