@@ -198,7 +198,7 @@ public class RoomService {
 
         redisGameRepository.save(game);
 
-        return RoomOptionDto.of(user.getNickname(), token, roomRequestDto);
+        return RoomOptionDto.of(savedRoom.getRoomId(), user.getNickname(), token, roomRequestDto);
     }// end of makeRoom
 
     private Session getOrCreateSession(String sessionNo) throws OpenViduJavaClientException, OpenViduHttpException {
