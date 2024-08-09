@@ -23,7 +23,7 @@ function GameSettingsModal({ openModal, roomId }) {
                 console.log('access를 보자', access)
                 const decodedAccess = decode(access)
                 console.log('디코딩된 access를 보자 :', decodedAccess)
-                const response = await axios.get(`https://i11e106.p.ssafy.io/api/options/rooms/${roomId}`, {
+                const response = await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}/options`, {
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${access}`,

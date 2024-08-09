@@ -4,13 +4,14 @@ import styles from "./GameRoomCard.module.css";
 
 const GameRoomCard = ({ title, leader, progress, isInProgress, id }) => {
 
-    // // 방 입장하기
+    // 방 입장하기
     // const getRoomPlayer = async() => {
     //     console.log('나 들어간다!', id)
         
     //     try { 
     //         const access = localStorage.getItem('access')
-    //         const response = await axios.post(`https://i11e106.p.ssafy.io/api/rooms/${id}`,{},{
+    //         const data = {id:id}
+    //         const response = await axios.post(`https://i11e106.p.ssafy.io/api/rooms/${id}`,data,{
     //             headers: {
     //                 "Content-Type": "application/json",
     //                 "Authorization": `Bearer ${access}`,
@@ -21,7 +22,6 @@ const GameRoomCard = ({ title, leader, progress, isInProgress, id }) => {
     //     } catch (error) {
     //         console.log('나 방에 못 들어왔어', error)
     //     }
-    // }
 
     return (
         // <div className="kimjungchul-bold" onClick={getRoomPlayer}>
