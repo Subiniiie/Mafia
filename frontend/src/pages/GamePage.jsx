@@ -183,7 +183,136 @@ function GamePage() {
         strMgrs => [...strMgrs].sort((a, b) => a.stream.creationTime - b.stream.creationTime);
 
 
-    const stompClient = useRef(null);
+    const stompClient = useRef(null)
+    // const { roomid }  = useParams()
+
+    // 방 정보 가져오기
+    useEffect(() => {
+        const gameRoomInfo = async() => {
+            console.log('장하오')
+            try {
+                const response = await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${access}`,
+                    }
+                })
+                console.log("resp", response.data)
+                setGameData(response.data)
+                console.log('제발 나와라!!!11', gameData);
+                console.log('너 나와!!!!!', gameData.title)
+                console.log('너도 나와!!!!!!', gameData.title)
+            } catch (error) {
+                console.log("게임방 API를 불러오지 못했습니다", error)
+            }
+        }
+        gameRoomInfo()
+    }, [])
+
+    useEffect(() => {
+        console.log('나 들어감??', gameData)
+        console.log('나 갔따', gameData.title)
+    }, [gameData, gameData.title])
+
+    // useEffect( () => {
+    //
+    //     // TODO: get nickname & userId from accessToken
+    //     const nickname = "ssafy";
+    //     const userId = "ssafy@ssafy.com";
+    //
+    //     setNickname(nickname);
+    //     setUserId(userId);
+    //
+    //
+    //     const mySession = OV.initSession();
+    //     setSession(mySession);
+    //
+    //     const addStreamManager =
+    //         strMgr => setStreamManagers(subs => [...subs, strMgr]);
+    //
+    //     const deleteStreamManager =
+    //         strMgr => setStreamManagers(subs => subs.filter(s => s !== strMgr));
+    //
+    //     const handleStreamCreated = (event) => {
+    //         mySession.subscribeAsync(event.stream, undefined)
+    //                  .then(strMgr => addStreamManager(strMgr));
+    //     }
+    //
+    //     const handleStreamDestroyed =
+    //         event => deleteStreamManager(event.stream.streamManager);
+    //
+    //     const handleChatSignal = (event) => {
+    //         const message = event.data;
+    //         const nickname = JSON.parse(event.from).nickname;
+    //         setChatHistory(prevHistory => [ ...prevHistory, { nickname, message } ]);
+    //     }
+    //
+    //     const handleSecretChatSignal = (event) => {
+    //         const message = event.data;
+    //         const nickname = JSON.parse(event.from).nickname;
+    //         setChatHistory(prevHistory => [ ...prevHistory, { nickname, message } ]);
+    //     }
+    //
+    //     // 세션 이벤트 추가
+    //     mySession.on("streamCreated", handleStreamCreated);
+    //     mySession.on("streamDestroyed", handleStreamDestroyed);
+    //     mySession.on("signal:chat", handleChatSignal);
+    //     mySession.on("signal:secretChat", handleSecretChatSignal);
+    //     mySession.on("exception", exception => console.warn(exception));
+    //
+    //     // 메타 데이터, Connection 객체에서 꺼내 쓸 수 있음
+    //     const data = {
+    //         nickname, id
+    //     };
+    //
+    //     // 세션 연결 및 publisher 객체 streamManagers 배열에 추가
+    //     mySession.connect(location.state.option.ownerToken, data)
+    //         .then(async () => {
+    //             const publisher = OV.initPublisher(undefined, {
+    //                 audioSource: undefined,
+    //                 videoSource: undefined,
+    //                 publishAudio: true,
+    //                 publishVideo: true,
+    //                 resolution: '300x200',
+    //                 frameRate: 30,
+    //                 insertMode: 'APPEND',
+    //                 mirror: true,
+    //             });
+    //
+    //             await mySession.publish(publisher);
+    //             addStreamManager(publisher);
+    //         })
+    //         .catch(error => console.warn(error));
+    //
+    //     return () => {
+    //         window.onbeforeunload = () => {};
+    //     }
+    //
+    // }, [location] );
+
+
+    // const leaveSession = () => {
+    //     const mySession = session;
+    //
+    //     // 서버에서 유저 삭제 등 처리를 위해 axios로 API 호출
+    //     axios.delete(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`)
+    //          .then(response => console.log('Player left successfully:', response.data))
+    //          .catch(error => console.error('Error leaving session:', error))
+    //
+    //     if (mySession) mySession.disconnect();
+    //
+    //     this.OV = null;
+    //     setSession(undefined);
+    //     setStreamManagers([]);
+    //     window.location.reload();
+    // }
+
+    // creationTime 순으로 정렬된 streamManagers 배열을 반환
+    // const getSortedStreamManagers =
+    //     strMgrs => [...strMgrs].sort((a, b) => a.stream.creationTime - b.stream.creationTime);
+    //
+    //
+    // const stompClient = useRef(null)
     // const { id }  = useParams()
 
     // 구독할래
@@ -206,7 +335,7 @@ function GamePage() {
                     const messageJson = JSON.parse(message.body)
                     console.log("입장 데이터 확인 : ", messageJson)
                     setGameResponse(messageJson)
-                    setNowGameState(messageJson.gameState)
+                    setNowGameState('입장 하고 데이터 받는다ㅏㅏ', messageJson.gameState)
                 })
         })
 
@@ -216,7 +345,7 @@ function GamePage() {
             }
         }
 
-    }, [roomId])
+    }, [])
 
     const handleButtonClick = () => {
         // 버튼 클릭 시 실행할 로직을 여기에 작성합니다.

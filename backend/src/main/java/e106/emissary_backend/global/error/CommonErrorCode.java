@@ -13,6 +13,7 @@ public enum CommonErrorCode implements ErrorCode{
     NOT_FOUND_USER_EXCEPTION(HttpStatus.NO_CONTENT, "User Not Found Error"),
     NOT_FOUND_ROOM_EXCEPTION(HttpStatus.NO_CONTENT, "Room Not Found Error"),
     NOT_FOUND_GAME_EXCEPTION(HttpStatus.NO_CONTENT, "Game Not Found Error"),
+    NOT_FOUND_USER_IN_ROOM_EXCEPTION(HttpStatus.NO_CONTENT, "User not in Room Error"),
     ALREADY_EXIST_USER_EXCEPTION(HttpStatus.CONFLICT, "Already Exist User Error"),
     ALREADY_USE_APPEASE_EXCEPTION(HttpStatus.CONFLICT, "Already Use Appease Error"),
     ALREADY_USER_IN_ROOM_EXCEPTION(HttpStatus.CONFLICT, "Already User In Room Error"),

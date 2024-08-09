@@ -14,7 +14,7 @@ public class RoomRequestDto {
     private String title;
     private String password;
     private int maxPlayer;
-    private boolean haveBetray;
+    private boolean haveBetrayer;
 
     public Room toEntity(long userId){
         boolean isPrivate = false;
@@ -25,7 +25,7 @@ public class RoomRequestDto {
         return Room.builder()
                 .title(getTitle())
                 .password(getPassword())
-                .haveBetray(isHaveBetray())
+                .haveBetray(isHaveBetrayer())
                 .maxPlayer(getMaxPlayer())
                 .ownerId(userId)
                 .isPrivate(isPrivate)
