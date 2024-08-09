@@ -60,7 +60,7 @@ const CreateRoomModal = ({ isOpen, openModal }) => {
             console.log(response.data)
             // openModal()
             const { roomId } = response.data
-            navigate(`/rooms/${roomId}`)
+            navigate(`/game-rooms/${roomId}`)
         } catch (error) {
             console.error("Create Room failed:", error.response ? error.response.data : error.message)
         }
