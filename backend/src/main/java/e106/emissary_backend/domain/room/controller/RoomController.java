@@ -65,18 +65,16 @@ public class RoomController {
     /**
      * 방 입장
      */
-    // Todo : JWT 처리하는거 추가.
     @PostMapping("/rooms/{roomId}")
     public ResponseEntity<RoomJoinDto> enterRoom(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long roomId) {
-        // 테스트용으로
-        long userId = 1L;
-        if(!Objects.isNull(customUserDetails)){
-            userId = customUserDetails.getUserId();
-        }
+        log.info("enterRoom controller run");
+        long userId = customUserDetails.getUserId();
 
         try{
+            // todo : 메시지 발행하기
             // 참가 성공 시
             RoomJoinDto res = roomService.enterRoom(roomId, userId);
+
             return ResponseEntity.ok(res);
         } catch (OpenViduJavaClientException | OpenViduHttpException e){
             // 참가 실패 시
