@@ -33,6 +33,7 @@ function GamePage({viduToken}) {
     // ViduChat
     // chat => { nickname, message } 객체 형식
     const [chatHistory, setChatHistory] = useState([]);
+    // 일반 채팅: signal:chat, 밤 채팅: signal:signal:secretChat
     // 초기 상태 == 일반 채팅, 모든 유저에게 브로드캐스팅
     // GamePageMain에서 변경되고, GameChat에서 사용
     const [chatMode, setChatMode] = useState({ mode: 'signal:chat', to: [] });
@@ -44,6 +45,7 @@ function GamePage({viduToken}) {
     const [ gameData, setGameData ] = useState({})
     const [ gameResponse, setGameResponse ] = useState(null)
     const [ nowGameState, setNowGameState ] = useState(null)
+    const [ players, setPlayers ] = useState([]);
 
     const access = localStorage.getItem('access')
 
@@ -68,6 +70,10 @@ function GamePage({viduToken}) {
         const deleteStreamManager =
             strMgr => setStreamManagers(subs => subs.filter(s => s !== strMgr));
         
+        // const handleSessionDisconnected = (event) => {
+
+        // }
+            
         const handleStreamCreated = (event) => {
             mySession.subscribeAsync(event.stream, undefined)
                      .then(strMgr => addStreamManager(strMgr));
@@ -89,6 +95,7 @@ function GamePage({viduToken}) {
         }
 
         // 세션 이벤트 추가
+        // mySession.on("sessionDisconnected", handleSessionDisconnected);
         mySession.on("streamCreated", handleStreamCreated);
         mySession.on("streamDestroyed", handleStreamDestroyed);
         mySession.on("signal:chat", handleChatSignal);
@@ -337,6 +344,8 @@ function GamePage({viduToken}) {
                         gameData={gameData}
                         nowGameState={nowGameState}
                         gameResponse={gameResponse}
+                        players={players}
+                        setPlayers={setPlayers}
                     />
                 }
                 {gameData && gameData.userList && Array.isArray(gameData.userList) &&
@@ -349,6 +358,7 @@ function GamePage({viduToken}) {
                         session={session}
                         chatHistory={chatHistory}
                         chatMode={chatMode}
+                        players={players}
                     />
                 }
             </div>  
@@ -357,12 +367,13 @@ function GamePage({viduToken}) {
                 <GamePageMain   setSystemMessage={setSystemMessage} 
                                 roomId={roomId} 
                                 streamManagers={getSortedStreamManagers(streamManagers)}
-                                setChatHistory={setChatHistory}
                                 setChatMode={setChatMode}
                                 stompClient={stompClient}
                                 gameData={gameData}
                                 nowGameState={nowGameState}
                                 gameResponse={gameResponse}
+                                players={players}
+                                setPlayers={setPlayers}
                                 />
                 <GamePageFooter systemMessage={systemMessage} 
                                 stompClient={stompClient} 
@@ -372,6 +383,7 @@ function GamePage({viduToken}) {
                                 session={session}
                                 chatHistory={chatHistory}
                                 chatMode={chatMode}
+                                players={players}
                                 />
             </div> */}
         </>

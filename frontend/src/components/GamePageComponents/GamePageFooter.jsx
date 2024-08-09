@@ -4,7 +4,7 @@ import GameChat from "./GameChat";
 import GameReadyStartBtn from "./GameReadyStartBtn";
 import styles from "./GamePageFooter.module.css"
 
-function GamePageFooter({ systemMessage, stompClient, gameData, nowGameState, gameResponse, session, chatHistory, chatMode }) {
+function GamePageFooter({ systemMessage, stompClient, gameData, nowGameState, gameResponse, session, chatHistory, chatMode, players }) {
     // 모달을 열고 닫을 변수
     const [ isModalOpen, setIsModalOpen ] = useState(false)
     const [ blackBackground, setBlackBackground ] = useState(false)
@@ -24,6 +24,7 @@ function GamePageFooter({ systemMessage, stompClient, gameData, nowGameState, ga
                                 session={session}
                                 chatMode={chatMode}
                                 chatHistory={chatHistory}
+                                players={players}
                                 />
                     <GameReadyStartBtn stompClient={stompClient} nowGameState={nowGameState} gameData={gameData}/>
                 </div>

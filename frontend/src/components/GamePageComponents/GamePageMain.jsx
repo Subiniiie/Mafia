@@ -8,7 +8,7 @@ import ChoiceDieOrTurncoat from "../../modals/ChoiceDieOrTurncoat";
 import FinalDefensePlayerModal from "../../modals/FinalDefensePlayerModal";
 import styles from "./GamePageMain.module.css"
 
-function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatHistory, setChatMode, stompClient, gameData, nowGameState, gameResponse }) {
+function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, stompClient, gameData, nowGameState, gameResponse, players, setPlayers }) {
     // 플레이어들의 초기 상태
     const initialPlayers = [
         {nickname: 'player1', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
@@ -22,7 +22,11 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatHistory
     ]
 
 
-    const [ players , setPlayers ] = useState(initialPlayers)                           // Player들의 상태를 관리
+    setPlayers(initialPlayers)                                                          // Player들의 상태를 관리
+    // players 배열을 생성된 시간 순으로 정렬
+    // streamManagers와 순서를 맞춰야 하므로 정렬이 필요함
+    setPlayers(players => players.sort((a, b) => a.creationTime - b.creationTime));
+
     const [ currentPhase, setCurrentPhase ] = useState('night')                         // 게임 단계(night, police, discussion, finalDefense)
     const [ nightTimer, setNightTimer ] = useState(30)                                  // 밤 타이머   
     const [ policeTimer, setPoliceTimer ] = useState(30)                                // 첩보원 타이머
@@ -244,10 +248,6 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatHistory
         const length = Math.min(arr1.length, arr2.length);
         return Array.from({ length }, (_, index) => [arr1[index], arr2[index]]);
     }
-
-    // players 배열을 생성된 시간 순으로 정렬
-    // streamManager와 순서를 맞춰야 하므로 정렬이 필요함
-    setPlayers(players => players.sort((a, b) => a.creationTime - b.creationTime));
 
     // 재투표를 해야할 때
     const voteAgain = () => {
