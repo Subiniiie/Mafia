@@ -38,6 +38,7 @@ function GamePage() {
     const [ gameData, setGameData ] = useState(null)
     const [ gameResponse, setGameResponse ] = useState(null)
     const [ nowGameState, setNowGameState ] = useState(null)
+    const [ players, setPlayers ] = useState([]);
 
 
     useEffect( () => {
@@ -195,12 +196,13 @@ function GamePage() {
                 <GamePageMain   setSystemMessage={setSystemMessage} 
                                 roomId={roomId} 
                                 streamManagers={getSortedStreamManagers(streamManagers)}
-                                setChatHistory={setChatHistory}
                                 setChatMode={setChatMode}
                                 stompClient={stompClient}
                                 gameData={gameData}
                                 nowGameState={nowGameState}
                                 gameResponse={gameResponse}
+                                players={players}
+                                setPlayers={setPlayers}
                                 />
                 <GamePageFooter systemMessage={systemMessage} 
                                 stompClient={stompClient} 
@@ -210,6 +212,7 @@ function GamePage() {
                                 session={session}
                                 chatHistory={chatHistory}
                                 chatMode={chatMode}
+                                players={players}
                                 />
             </div>
         </>
