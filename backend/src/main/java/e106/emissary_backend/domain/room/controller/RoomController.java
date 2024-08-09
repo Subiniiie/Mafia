@@ -41,6 +41,7 @@ public class RoomController {
 
     @GetMapping("/rooms/{roomId}")
     public ResponseEntity<RoomDetailDto> detailRoom(@PathVariable Long roomId){
+        log.info("detail Room Controller run");
         return ResponseEntity.ok(roomService.detailRoom(roomId));
     }
 
