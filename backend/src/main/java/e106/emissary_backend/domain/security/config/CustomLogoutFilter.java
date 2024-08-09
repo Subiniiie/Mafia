@@ -99,6 +99,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
+
         jwtService.deleteByRefresh(refresh);
         jwtService.deleteByAccess(access);
 

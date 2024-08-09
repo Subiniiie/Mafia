@@ -6,11 +6,13 @@ import e106.emissary_backend.domain.game.enumType.GameState;
 import e106.emissary_backend.domain.game.model.GameDTO;
 import e106.emissary_backend.domain.game.model.Player;
 import e106.emissary_backend.domain.game.repository.RedisGameRepository;
+import e106.emissary_backend.domain.game.service.publisher.RedisPublisher;
 import e106.emissary_backend.domain.room.dto.*;
 import e106.emissary_backend.domain.room.entity.Room;
 import e106.emissary_backend.domain.room.enumType.RoomState;
 import e106.emissary_backend.domain.room.enumType.SessionRole;
 import e106.emissary_backend.domain.room.repository.RoomRepository;
+import e106.emissary_backend.domain.room.service.subscriber.message.EnterRoomMessage;
 import e106.emissary_backend.domain.user.dto.RoomDetailUserDto;
 import e106.emissary_backend.domain.user.entity.User;
 import e106.emissary_backend.domain.user.repository.UserRepository;
@@ -30,6 +32,7 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.redis.core.RedisKeyValueTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -52,6 +55,9 @@ public class RoomService {
     private final RedisKeyValueTemplate redisKeyValueTemplate;
     private final TaskExecutor brokerChannelExecutor;
 //    private final RedisTemplate<Long, GameDTO> redisGameTemplate;
+
+    private final RedisPublisher redisPublisher;
+    private final ChannelTopic enterRoomTopic;
 
     @Value("${OPENVIDU_URL}")
     private String openviduUrl;
@@ -116,7 +122,8 @@ public class RoomService {
 
 
     public CommonResponseDto updateOption(Long roomId, RoomRequestDto roomRequestDto) {
-        Room room = roomRepository.findByRoomId(roomId).orElseThrow(() -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
+        Room room = roomRepository.findByRoomId(roomId).orElseThrow(
+                () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
 
         room.update(roomRequestDto);
         return new CommonResponseDto("ok");
@@ -198,7 +205,7 @@ public class RoomService {
 
         redisGameRepository.save(game);
 
-        return RoomOptionDto.of(user.getNickname(), token, roomRequestDto);
+        return RoomOptionDto.of(savedRoom.getRoomId(), user.getNickname(), token, roomRequestDto);
     }// end of makeRoom
 
     private Session getOrCreateSession(String sessionNo) throws OpenViduJavaClientException, OpenViduHttpException {
@@ -209,13 +216,17 @@ public class RoomService {
             mapSessionNamesTokens.put(session.getSessionId(), new ConcurrentHashMap<>());
         }
         return session;
-    }
+    } // end of getOrCreateSession
 
     // Todo : 분산 트랜잭션 처리 해줘야함.
     @RedissonLock(value = "#roomId")
     public RoomJoinDto enterRoom(Long roomId, long userId) throws OpenViduJavaClientException, OpenViduHttpException {
-        Room room = roomRepository.findByRoomId(roomId).orElseThrow(() -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
-        if(userInRoomRepository.countPeopleByRoom_RoomId(roomId) > room.getMaxPlayer()) {
+        List<UserInRoom> userInRoomList = userInRoomRepository.findAllByPk_RoomId(roomId).orElseThrow(
+                () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
+
+        Room room = userInRoomList.get(0).getRoom();
+
+        if(userInRoomList.size() > room.getMaxPlayer()) {
             throw new GameFullException(CommonErrorCode.GAME_FULL_EXCEPTION);
         }
 
@@ -231,9 +242,12 @@ public class RoomService {
         updateSessionTokens(session.getSessionId(), token, SessionRole.USER);
 
         log.info("user : " + user.getUserId());
-        if(userInRoomRepository.findByPk_UserId(userId).isPresent()){
-            throw new AlreadyExistUserException(CommonErrorCode.ALREADY_EXIST_USER_EXCEPTION);
-        }
+        userInRoomList.stream()
+                .filter(userInRoom -> userInRoom.getUser().getUserId().equals(userId))
+                .findAny()
+                .ifPresent(userInRoom -> {
+                    throw new AlreadyUserInRoomException(CommonErrorCode.ALREADY_USER_IN_ROOM_EXCEPTION);
+                });
 
         UserInRoom userInRoom = UserInRoom.builder()
                 .pk(new UserInRoom.Pk(roomId, userId))
@@ -252,13 +266,33 @@ public class RoomService {
 
         GameDTO gameDTO = GameDTO.toDto(game);
         gameDTO.addPlayer(player);
-
         Game updateGame = gameDTO.toDao();
 
-        redisGameRepository.save(updateGame);
+        redisKeyValueTemplate.update(updateGame);
+
+        // Redis 발행 로직
+        List<RoomDetailUserDto> userList = userInRoomList.stream()
+                .map(UserInRoom::getUser)
+                .map(nowUser -> RoomDetailUserDto.of(nowUser, room.getOwnerId()))
+                .toList();
+        RoomDetailDto roomDetailDto = RoomDetailDto.toDTO(room, userList);
+//        RoomDetailDto roomDetailDto = RoomDetailDto.builder()
+//                    .roomId(roomId)
+//                    .roomState(RoomState.WAIT)
+//                    .title(room.getTitle())
+//                    .ownerId(room.getOwnerId())
+//                    .maxPlayer(room.getMaxPlayer())
+//                    .haveBetray(room.isHaveBetray())
+//                    .userList(userList)
+//                    .build();
+        redisPublisher.publish(enterRoomTopic, EnterRoomMessage.builder()
+                        .gameState(GameState.ENTER)
+                        .roomDetailDto(roomDetailDto)
+                        .build());
+        // 다했으면 leave나 kick할시에 발행하는것도 해야해
 
         return new RoomJoinDto(String.valueOf(room.getRoomId()), token);
-    }
+    } // end of EnterRoom
 
     @RedissonLock(value = "#roomId")
     public CommonResponseDto leaveRoom(Long roomId, long userId) {
@@ -268,35 +302,48 @@ public class RoomService {
             throw new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION);
         }
 
+        // 레디스에서 삭제
+        deleteUserInRedis(roomId, userId);
+        
+        // Vidu와 DB에서 삭제
         Map<String, SessionRole> users = mapSessionNamesTokens.get(session.getSessionId());
-        Optional<UserInRoom> userInRoom = userInRoomRepository.findByPk_UserId(userId);
-        if (userInRoom.isPresent()){
-            String token = userInRoom.get().getViduToken();
-            if (users.get(token) == SessionRole.USER){
-                // 유저일 경우 나가기 처리
-                users.remove(token);
-                userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
-            } else if (users.get(token) == SessionRole.HOST){
-                // 방장 위임
-                users.remove(token);
-                changeSessionOwner(session);
-                userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
-            }
+        UserInRoom userInRoom = userInRoomRepository.findByPk_UserId(userId).orElseThrow(
+                () -> new NotFoundUserInRoomException(CommonErrorCode.NOT_FOUND_USER_IN_ROOM_EXCEPTION));
 
-            // users empty 되면 방 삭제
-            if(users.isEmpty()){
-                mapSessions.remove(session.getSessionId());
-                mapSessionNamesTokens.remove(session.getSessionId());
-                roomRepository.deleteById(roomId);
-            }
-        } else {
-            throw new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION);
+        String token = userInRoom.getViduToken();
+        if (users.get(token) == SessionRole.USER){
+            // 유저일 경우 나가기 처리
+            users.remove(token);
+            userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
+        } else if (users.get(token) == SessionRole.HOST){
+            // 방장 위임
+            users.remove(token);
+            String nextOwnerToken = changeSessionOwner(session);
+
+            User owner = userInRoomRepository.findUserByViduToken(nextOwnerToken).orElseThrow(
+                    () -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION));
+            Long ownerId = owner.getUserId();
+            Room room = userInRoom.getRoom();
+            room.changeOwner(ownerId);
+
+            userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
         }
+
+        // users empty 되면 방 삭제
+        if(users.isEmpty()){
+            mapSessions.remove(session.getSessionId());
+            mapSessionNamesTokens.remove(session.getSessionId());
+            roomRepository.deleteById(roomId);
+        }else{
+            // 발행하기
+            publishRemoveUser(roomId);
+        }
+
         return new CommonResponseDto("ok");
     }
 
     // 방장 변경 기능... 완성 안된거 같은데 ..?
-    public boolean changeSessionOwner(Session session){
+    public String changeSessionOwner(Session session){
         try{
             session.fetch();
             // 다음 먼저 들어온 유처 확인
@@ -307,9 +354,9 @@ public class RoomService {
             Map<String, SessionRole> users = mapSessionNamesTokens.get(session.getSessionId());
             users.put(nextOwner.getToken(), SessionRole.HOST);
 
-            return true;
+            return nextOwner.getToken();
         } catch (OpenViduJavaClientException | OpenViduHttpException e) {
-            return false;
+            return null;
         }
     }
 
@@ -350,6 +397,10 @@ public class RoomService {
                 kickedToken = kickedUser.get().getViduToken();
                 userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomKickDto.getRoomId(), userId);
             }
+
+            // 레디스 처리하고
+            deleteUserInRedis(roomKickDto.getRoomId(), userId);
+            publishRemoveUser(roomKickDto.getRoomId());
 
             // Map 삭제하고
             Map<String, SessionRole> users = mapSessionNamesTokens.get(session.getSessionId());
@@ -394,5 +445,39 @@ public class RoomService {
                 .toList();
 
         return RoomDetailDto.toDTO(room, roomDetailUserDtoList);
+    }
+
+    private void deleteUserInRedis(long roomId, long userId){
+        Game game = redisGameRepository.findByGameId(roomId).orElseThrow(
+                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+
+        GameDTO gameDTO = GameDTO.toDto(game);
+        gameDTO.getPlayerMap().remove(userId);
+        Game updateGame = gameDTO.toDao();
+
+        redisKeyValueTemplate.update(updateGame);
+    }
+
+    private void publishRemoveUser(Long roomId) {
+        List<UserInRoom> userInRoomList = userInRoomRepository.findAllByPk_RoomId(roomId).orElseThrow(
+                () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
+        Room room = userInRoomList.get(0).getRoom();
+        List<RoomDetailUserDto> userList = userInRoomList.stream()
+                .map(UserInRoom::getUser)
+                .map(nowUser -> RoomDetailUserDto.of(nowUser, room.getOwnerId()))
+                .toList();
+        RoomDetailDto roomDetailDto = RoomDetailDto.builder()
+                .roomId(roomId)
+                .roomState(RoomState.WAIT)
+                .title(room.getTitle())
+                .ownerId(room.getOwnerId())
+                .maxPlayer(room.getMaxPlayer())
+                .haveBetray(room.isHaveBetray())
+                .userList(userList)
+                .build();
+        redisPublisher.publish(enterRoomTopic, EnterRoomMessage.builder()
+                        .gameState(GameState.ENTER)
+                        .roomDetailDto(roomDetailDto)
+                        .build());
     }
 }
