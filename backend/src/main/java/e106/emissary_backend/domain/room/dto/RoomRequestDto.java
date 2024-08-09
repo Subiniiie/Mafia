@@ -1,5 +1,6 @@
 package e106.emissary_backend.domain.room.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import e106.emissary_backend.domain.room.entity.Room;
 import e106.emissary_backend.domain.room.enumType.RoomState;
 import io.jsonwebtoken.lang.Objects;
@@ -14,7 +15,8 @@ public class RoomRequestDto {
     private String title;
     private String password;
     private int maxPlayer;
-    private boolean haveBetrayer;
+    @JsonProperty("haveBetray")
+    private boolean haveBetray;
 
     public Room toEntity(long userId){
         boolean isPrivate = false;
@@ -25,7 +27,7 @@ public class RoomRequestDto {
         return Room.builder()
                 .title(getTitle())
                 .password(getPassword())
-                .haveBetray(isHaveBetrayer())
+                .haveBetray(isHaveBetray())
                 .maxPlayer(getMaxPlayer())
                 .ownerId(userId)
                 .isPrivate(isPrivate)
