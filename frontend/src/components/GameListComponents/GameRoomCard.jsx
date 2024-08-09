@@ -37,19 +37,16 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
     return (
         // <div className="kimjungchul-bold" onClick={getRoomPlayer}>
         <div className="kimjungchul-bold">
-            <Link to={`/game-room/${id}`} className={`${isInProgress ? styles.inProgress : styles.notStarted}`} >
-            <div className={`${isInProgress ? styles.inProgress : styles.notStarted}`} onClick={getGameRoomInfo}>
-                {/* <Link to={`/game-room/${id}`} className={`${isInProgress ? styles.inProgress : styles.notStarted}`}> */}
-                <div className={`${styles.cardMain} ${isInProgress ? styles.inProgressMain : styles.notStartedMain}`}>
-                    {/* <p className={styles.title}>{title}</p> */}
-                    <p className={`${isInProgress ? styles.inProgressTitle : styles.notStartedTitle}`}>{title}</p>
-                    <p className={styles.leader}>대장 동지 : {leader}</p>
+            <Link to={`/game-room/${id}`}>
+                <div className={`${isInProgress ? styles.inProgress : styles.notStarted}`} onClick={getGameRoomInfo}>
+                    <div className={`${styles.cardMain} ${isInProgress ? styles.inProgressMain : styles.notStartedMain}`}>
+                        <p className={`${isInProgress ? styles.inProgressTitle : styles.notStartedTitle}`}>{title}</p>
+                        <p className={styles.leader}>대장 동지 : {leader}</p>
+                    </div>
+                    <div className={`${styles.cardMain} ${isInProgress ? styles.inProgressContent : styles.notStartedContent}`}>
+                        <p className={styles.progress}>{progress}/8</p>
+                    </div>
                 </div>
-                {/* <div className={styles.cardContent}> */}
-                <div className={`${styles.cardMain} ${isInProgress ? styles.inProgressContent : styles.notStartedContent}`}>
-                    <p className={styles.progress}>{progress}/8</p>
-                </div>
-            </div>
             </Link>
         </div>
     );
