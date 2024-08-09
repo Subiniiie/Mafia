@@ -68,7 +68,9 @@ function GameSettingsModal({ openModal, roomId }) {
             {/* 각 컴포넌트들이랑 값을 주고 받아서 바뀌는 걸 알아야 함 */}
             <div className={styles.modal}>
                 <div className={styles.box}>
-                    <ModalHeader modalTitle="게임 설정" openModal={openModal} />
+                    <div className={styles.modalTitle}>
+                        <ModalHeader modalTitle="게임 설정" openModal={openModal} />
+                    </div>
                     <div className={styles.container}>
                         <div className={styles.content}>
                             <RoomName value={roomName} onChange={setRoomName} />
@@ -80,9 +82,10 @@ function GameSettingsModal({ openModal, roomId }) {
                                     required={isSecret}  //비공개일 때 필수임
                                 />
                             </div>
-                            <Turncoat checked={isTurncoat} />
-                            <div>
+                            {/* <Turncoat checked={isTurncoat} />
+                            <div> */}
                                 {/* 변경 버튼을 누르면 변경된 내용이 서버에 적용되고 모달 닫힘 */}
+                            <div className={styles.btnBox}>
                                 <button className={styles.btn} onClick={handleSave}>변경</button>
                             </div>
                         </div>

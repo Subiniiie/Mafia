@@ -26,16 +26,18 @@
     width: 630px;
     height:100%;
     max-width: 100%;
+    position: relative;
+    justify-content: center;
+    align-items: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .container {
     display: flex;
     flex-direction: column;
-    width: 100px;
+    /* width: 100px; */
     gap: 20px;
     padding: 20px;
-    display: flex;
     justify-content: center;
     align-items: center;
     position: absolute;
@@ -45,6 +47,12 @@
     /* background: #12151D; */
 } 
 
+/* 추가함 */
+.modalTitle {
+    margin-top: 30px;
+    padding-right: 30px;
+}
+
 
 .rowStyle {
     display: flex;
@@ -53,12 +61,19 @@
     margin: 10px 0;
 }
 
+.btnBox {
+    position: absolute;
+    align-self: center;
+    justify-content: center;
+}
+
 .btn {
     display: flex;
     align-self: center;
     justify-content: center;
     background-color: #091a14;
     border: 1.8px solid #014015;
+    position: relative;
     font-size: 16px;
     font-weight: bold;
     transition: background-color 0.3s;
@@ -71,4 +86,6 @@
     color: white;
     padding: 10px 15px;
     border-radius: 12px;
+    left: 120%;
+    width: 110px;
 }
