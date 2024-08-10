@@ -2,6 +2,7 @@ package e106.emissary_backend.domain.game.service.publisher;
 
 import e106.emissary_backend.domain.game.entity.Game;
 import e106.emissary_backend.domain.game.service.subscriber.message.*;
+import e106.emissary_backend.domain.room.service.subscriber.message.EnterRoomMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
@@ -21,7 +22,7 @@ public class RedisPublisher {
         redisTemplate.convertAndSend(topic.getTopic(), message);
     }
 
-    public void publish(ChannelTopic topic, DayMessage message) {
+    public void publish(ChannelTopic topic, GameSetMessage message) {
         redisTemplate.convertAndSend(topic.getTopic(), message);
     }
 
@@ -46,6 +47,10 @@ public class RedisPublisher {
     }
 
     public void publish(ChannelTopic topic, NightEmissaryMessage message) {
+        redisTemplate.convertAndSend(topic.getTopic(), message);
+    }
+
+    public void publish(ChannelTopic topic, EnterRoomMessage message) {
         redisTemplate.convertAndSend(topic.getTopic(), message);
     }
 }

@@ -1,16 +1,26 @@
 import { useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import classNames from "classnames";
 import axios from 'axios';
 import styles from './CreateRoomModal.module.css'; // 스타일 파일을 별도로 관리합니다.
 import ModalHeader from "../components/ModalHeader"
+import BoxChecked from "../assets/Buttons/BoxChecked.png"
+import BoxUnchecked from "../assets/Buttons/BoxUnchecked.png"
 
 // eslint-disable-next-line react/prop-types
-const CreateRoomModal = ({ isOpen, openModal }) => {
+const CreateRoomModal = ({ isOpen, openModal, setViduToken }) => {
+    const navigate = useNavigate()
 
     const modalTitle = '새로운 도전'
 
     const [roomTitle, setRoomTitle] = useState('')
     const [roomPw, setRoomPw] = useState('')
+    const [isPrivateButtonClicked, setIsPrivateButtonClicked] = useState(false)
+
+    const checkButton = () => {
+        setIsPrivateButtonClicked(!isPrivateButtonClicked)
+        setIsSecretRoom(!isSecretRoom)
+    }
 
     const roomTitleRef = useRef()
     const roomPwRef = useRef()
@@ -19,6 +29,7 @@ const CreateRoomModal = ({ isOpen, openModal }) => {
 
     // const [showRoomPwInput, setShowRoomPwInput] = useState(false)
     const [isSecretRoom, setIsSecretRoom] = useState(false)
+
 
     const handleCreateRoom = async () => {
         if (isSecretRoom && !/^\d{4}$/.test(roomPw)) {
@@ -34,6 +45,7 @@ const CreateRoomModal = ({ isOpen, openModal }) => {
                 maxPlayer: '8',
                 haveBetray: true
             }
+            console.log(roomTitle);
 
             const access = localStorage.getItem('access')
 
@@ -48,6 +60,11 @@ const CreateRoomModal = ({ isOpen, openModal }) => {
             )
             console.log(response.data)
             // openModal()
+            const { roomId, ownerToken } = response.data.option;
+            console.log("id" + " : " + roomId);
+            console.log("token" + " : " + ownerToken);
+            // gameData를 props로 전달해줘야한다.
+            navigate(`/game-room/${roomId}`, {state :ownerToken});
         } catch (error) {
             console.error("Create Room failed:", error.response ? error.response.data : error.message)
         }
@@ -75,9 +92,10 @@ const CreateRoomModal = ({ isOpen, openModal }) => {
         }
     }
 
-    const handleSecretRoomChange = (e) => {
-        setIsSecretRoom(e.target.checked)
-    }
+    // const handleSecretRoomChange = () => {
+    //     setIsSecretRoom(!isSecretRoom)
+    //     setIsPrivateButtonClicked(!isPrivateButtonClicked)
+    // }
 
     const CreateRoomModalClass = classNames('kimjungchul-gothic-regular', styles.modalContent)
 
@@ -87,12 +105,9 @@ const CreateRoomModal = ({ isOpen, openModal }) => {
         <div className={styles.modalOverlay}>
             <div className={CreateRoomModalClass} onClick={(e) => e.stopPropagation()}>
                 <ModalHeader modalTitle={modalTitle} openModal={openModal} />
-
                 <div className={styles.formContainer}>
-                    <h5>터전</h5>
-                    <form
-                        className="border border-solid border-gray-300 rounded-lg w-[300px] h-[35px] flex items-center"
-                    >
+                    <div className={styles.formContainerMini}>
+                        <h5>터전</h5>
                         <input
                             required
                             type="text"
@@ -103,46 +118,39 @@ const CreateRoomModal = ({ isOpen, openModal }) => {
                             onKeyDown={handleRoomTitleKeyDown}
                             ref={roomTitleRef}
                         />
-                        {/* <button type="button" className="w-[10%]">
-                            입력
-                        </button> */}
-                    </form>
-
-
-                    <div className="w-full flex items-center mt-2">
-                        <label htmlFor="secretRoom" className="text-sm mr-1">
-                            비밀방
-                        </label>
-                        <input
-                            type="checkbox"
-                            id="secretRoom"
-                            className="mr-1"
-                            onChange={handleSecretRoomChange}
-                            onKeyDown={handleRoomPwKeyDown}
-                            ref={secretRoomRef}
-                        />
                     </div>
 
-                    <div className='mt-2'>
-                        <h5>암호 설정</h5>
-                        <form
-                            className="border border-solid border-gray-300 rounded-lg w-[300px] h-[35px] flex items-center"
-                        >
-                            <input
-                                required
-                                type="text"
-                                placeholder="비밀번호를 입력해주세요."
-                                className={styles.inputField}
-                                value={roomPw}
-                                onChange={(e) => setRoomPw(e.target.value)}
-                                onKeyDown={handleRoomPwKeyDown}
-                                ref={roomPwRef}
-                                disabled={!isSecretRoom}
+                    <div className={styles.formContainerMini}>
+                        {/* <div className={styles.privateContainerTitle}>
+                            <p className='mr-2'>극비 임무</p>
+                            <button
+                                className={`${styles.privateButton} ${isPrivateButtonClicked ? styles.privateButtonClicked : ''}`}
+                                onClick={handleSecretRoomChange}
+                                ref={secretRoomRef}
                             />
-                            {/* <button type="button" className="w-[10%]">
-                                입력
-                            </button> */}
-                        </form>
+                        </div> */}
+
+                        <div className={styles.privateContainerTitle}>
+                            <p className='mr-2'>극비 임무</p>
+                            {/* <button className={styles.privateButton} onClick={handleSecretRoomChange} ref={secretRoomRef} /> */}
+                            {isPrivateButtonClicked ? (
+                                <img src={BoxChecked} alt="BoxChecked" className={styles.checkBox} onClick={checkButton} />
+                            ) : (
+                                <img src={BoxUnchecked} alt="BoxUnchecked" className={styles.checkBox} onClick={checkButton} />
+                            )}
+                        </div>
+                        {/* <h5>암호 설정</h5> */}
+                        <input
+                            required
+                            type="text"
+                            placeholder="비밀번호를 입력해주세요."
+                            className={`${styles.inputField} ${isPrivateButtonClicked ? '' : styles.privateClickedInput}`}
+                            value={roomPw}
+                            onChange={(e) => setRoomPw(e.target.value)}
+                            onKeyDown={handleRoomPwKeyDown}
+                            ref={roomPwRef}
+                            disabled={!isSecretRoom}
+                        />
                     </div>
                 </div>
                 <button className={styles.submitButton} onClick={handleCreateRoom} ref={submitButtonRef}>

@@ -20,8 +20,8 @@ public class AchievementService {
     private final AchievementUsersRepository achievementUsersRepository;
 
     @Transactional
-    public void updateAchievement(String email) {
-        Optional<User> present = userRepository.findByEmail(email);
+    public void updateAchievement(Long id) {
+        Optional<User> present = userRepository.findByUserId(id);
         if(present.isPresent()){
             User user = present.get();
             extracted(user, 2L, user.getMafiaPlayCnt() + user.getPolicePlayCnt() + user.getTurncoatGameCnt() + user.getCitizenGameCnt(), 50);

@@ -37,11 +37,11 @@ public class FriendsService {
         friendsRepository.save(friendship);
     }
 
-    public Friends getFriendRequest(String user1, String user2) {
+    public Friends getFriendRequest(Long user1, Long user2) {
         return friendsRepository.findFriendRequest(user1, user2);
     }
 
-    public Friends getFriend(String user1, String user2) {
+    public Friends getFriend(Long user1, Long user2) {
         return friendsRepository.findFriend(user1, user2);
     }
 
@@ -57,11 +57,11 @@ public class FriendsService {
                 .collect(Collectors.toList());
     }
 
-    public List<String> getReceiveFriends(String user) {
+    public List<User> getReceiveFriends(Long user) {
         List<Friends> friendship =  friendsRepository.receiveRequest(user);
-        List<String> users = new ArrayList<>();
+        List<User> users = new ArrayList<>();
         for (Friends f : friendship) {
-            users.add(f.getUser1().getNickname());
+            users.add(f.getUser1());
         }
         return users;
     }

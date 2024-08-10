@@ -3,12 +3,15 @@ import axios from "axios";
 import { Client } from '@stomp/stompjs';
 import styles from './GameReadyStartBtn.module.css';
 
-function GameReadyStartBtn({ stompClient, nowGameState }) {
+function GameReadyStartBtn({ stompClient, nowGameState, gameData }) {
     const [ clickedBtn, setClickedBtn ] = useState(false)
     const [ gameReady, setGameReady ] = useState(false)
     const [ showModal, setShowModal ] = useState(false)
 
-    const roomManager = nowGameState.userList.find(user => user.isOwner === true)
+    console.log('게임 데이터를 볼거야!', gameData)
+    const roomManagerCheck = gameData.userList.find(user => user.owner === true)
+    console.log('너 방장이야?', roomManagerCheck)
+    const roomManager = roomManagerCheck.owner
 
 
     // 일반 플레이어가 준비 버튼을 누름
@@ -16,7 +19,7 @@ function GameReadyStartBtn({ stompClient, nowGameState }) {
         if (stompClient.current) {
             console.log("일반 플레이어가 준비 버튼을 누른 걸 알려주자")
         }
-        stompClient.current.send(`/pub/ready/${roomId}`, {}, "")
+        stompClient.current.send(`/pub/ready/${id}`, {}, "")
         setClickedBtn(true)
     }
 
@@ -25,7 +28,7 @@ function GameReadyStartBtn({ stompClient, nowGameState }) {
         if (stompClient.current) {
             console.log("일반 플레이어가 준비 취소 버튼을 누른 걸 알려주자")
         }
-        stompClient.current.send(`/pub/ready/cancel/${roomId}`, {}, "")
+        stompClient.current.send(`/pub/ready/cancel/${id}`, {}, "")
         setClickedBtn(true)
     } 
 
@@ -38,7 +41,7 @@ function GameReadyStartBtn({ stompClient, nowGameState }) {
             if (stompClient.current) {
                 console.log("방장이 게임 시작 요청을 보냈다")
             }
-            stompClient.current.send(`/pub/start/${roomId}`, {}, "")
+            stompClient.current.send(`/pub/start/${id}`, {}, "")
         }, 1500)
     }
 

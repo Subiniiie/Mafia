@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,64 +24,32 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class SocketGameController {
 
-    // webSocket의 기능 (SimpMessageSendingOperations 써도 됨.)
-    private final SimpMessagingTemplate messagingTemplate;
+    // 혹시나 연결이 끊어지면 의미없는 데이터 응답용..
+//    private final SimpMessagingTemplate messagingTemplate;
 
     private final GameService gameService;
 
     @MessageMapping("/ready/{roomId}")
-    public void ready(@DestinationVariable Long roomId, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long userId = userDetails.getUserId();
+    public void ready(@DestinationVariable Long roomId, SimpMessageHeaderAccessor headerAccessor) {
+        long userId = getUserIdIAccessor(headerAccessor);
 
         gameService.ready(roomId, userId);
     }
 
     @MessageMapping("/ready/cancel/{roomId}")
-    public void readyCancel(@DestinationVariable Long roomId, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        Long userId = userDetails.getUserId();
+    public void readyCancel(@DestinationVariable Long roomId, SimpMessageHeaderAccessor headerAccessor) {
+        long userId = getUserIdIAccessor(headerAccessor);
 
         gameService.readyCancel(roomId, userId);
     }
 
-    // Ready는 프론트에서 처리한다고 하여서 안함.
     @MessageMapping("/start/{roomId}")
-    public void start( @DestinationVariable Long roomId) {
-//        @AuthenticationPrincipal CustomUserDetails userDetails,
-        // todo : 한번 JWT로 요청해보고 안되면 고치기. 일단 이렇게 해놓음
-        log.info("hi");
-//        long userId = userDetails.getUserId();
+    public void start( @DestinationVariable Long roomId, SimpMessageHeaderAccessor headerAccessor) {
+        long userId = getUserIdIAccessor(headerAccessor);
 
-        gameService.setGame(roomId);
+        gameService.setGame(roomId, userId);
     }
 
-    @MessageMapping("/vote/{roomId}")
-    public void vote(@AuthenticationPrincipal CustomUserDetails userDetails
-            , @DestinationVariable Long roomId
-            , @Payload VoteRequestDTO request) {
-//        long userId = userDetails.getUserId();
-//        long targetId = request.getTargetId();
-
-        long userId = 1L;
-        long targetId = 2L;
-
-        gameService.startVote(roomId, userId, targetId);
-    }
-
-    @MessageMapping("/confirm/{roomId}")
-    public void confirmVote(@AuthenticationPrincipal CustomUserDetails userDetails,
-                            @DestinationVariable Long roomId,
-                            @Payload ConfirmVoteRequestDTO request) {
-//        long userId = Long.parseLong(userDetails.getUsername());
-        long userId = 1L;
-
-        gameService.startConfirm(roomId, userId, request.isConfirm());
-    }
-
-    // 나가는거는 이걸로 처리
-    @MessageMapping("/remove/{roomId}/{targetId}")
-    public void removeUser(@DestinationVariable Long roomId, @DestinationVariable Long targetId) {
-        gameService.removeUser(roomId, targetId);
-    }
 
     @MessageMapping("/kill/{roomId}/{targetId}")
     public void kill(@DestinationVariable Long roomId, @DestinationVariable Long targetId) {
@@ -101,5 +70,42 @@ public class SocketGameController {
     @MessageMapping("/day/{roomId}")
     public void day(@DestinationVariable Long roomId) {
         gameService.day(roomId);
+    }
+
+    @MessageMapping("/vote/{roomId}")
+    public void vote(SimpMessageHeaderAccessor headerAccessor,
+                     @DestinationVariable Long roomId,
+                     @Payload VoteRequestDTO request) {
+        long userId = getUserIdIAccessor(headerAccessor);
+        long targetId = request.getTargetId();
+
+        gameService.startVote(roomId, userId, targetId);
+    }
+
+    @MessageMapping("/confirm/{roomId}")
+    public void confirmVote(SimpMessageHeaderAccessor headerAccessor,
+                            @DestinationVariable Long roomId,
+                            @Payload ConfirmVoteRequestDTO request) {
+        long userId = getUserIdIAccessor(headerAccessor);
+
+        gameService.startConfirm(roomId, userId, request.isConfirm());
+    }
+
+    // 나가는거는 이걸로 처리
+    @MessageMapping("/remove/{roomId}/{targetId}")
+    public void removeUser(@DestinationVariable Long roomId, @DestinationVariable Long targetId) {
+        gameService.removeUser(roomId, targetId);
+    }
+
+    private long getUserIdIAccessor(SimpMessageHeaderAccessor headerAccessor) {
+        CustomUserDetails userDetails = (CustomUserDetails) headerAccessor.getSessionAttributes().get("user");
+        long userId;
+        if (userDetails != null) {
+            log.info("in Accessor userId = {}", userDetails.getUserId());
+            userId = userDetails.getUserId();
+        } else {
+            throw new IllegalStateException("User not authenticated");
+        }
+        return userId;
     }
 }
