@@ -161,20 +161,20 @@ function GamePage() {
     }, [] );
 
 
-    const leaveSession = () => {
+    const leaveSession = async () => {
         const mySession = session;
+        console.log("Attempting to leave session:", mySession);
 
-        // 서버에서 유저 삭제 등 처리를 위해 axios로 API 호출
-        axios.delete(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`)
-             .then(response => console.log('Player left successfully:', response.data))
-             .catch(error => console.error('Error leaving session:', error))
-
-        if (mySession) mySession.disconnect();
+        if (mySession) {
+            await mySession.disconnect();
+            console.log("Session disconnected.");
+        } else {
+            console.log("No session found to disconnect.");
+        }
 
         this.OV = null;
         setSession(undefined);
         setStreamManagers([]);
-        window.location.reload();
     }
 
     // creationTime 순으로 정렬된 streamManagers 배열을 반환
@@ -367,7 +367,7 @@ function GamePage() {
                 <div className="box-content h-32"></div>
                 {/* 게임데이터 있는지 확인 -> 게임데이터에 유저리스트가 있는지 확인 -> 그 유저리스트 array인지 확인  */}
                 {gameData && gameData.userList && Array.isArray(gameData.userList) &&
-                    <GamePageHeader gameData={gameData} id={roomId} />
+                    <GamePageHeader gameData={gameData} id={roomId} leaveSession={leaveSession} />
                 }
                 {gameData && gameData.userList && Array.isArray(gameData.userList) &&
                     <GamePageMain
