@@ -131,7 +131,7 @@ const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
                         <button onClick={openLoginModal} className="navbar-logout-buttons east-sea-dokdo-regular">활동하기</button>
                         <LoginModal isOpen={isLoginModalOpen} openModal={openLoginModal} onLoginSuccess={onLoginSuccess} />
                         <button onClick={openSignUpModal} className="navbar-logout-buttons east-sea-dokdo-regular">독립군 입단</button>
-                        <SignUpModal isOpen={isSignUpModalOpen} openModal={openSignUpModal} />
+                        <SignUpModal isOpen={isSignUpModalOpen} openModal={openSignUpModal} openLoginModal={openLoginModal} />
                     </>
                 )}
                 {/* <div onClick={openSettingsModal} className="links">
