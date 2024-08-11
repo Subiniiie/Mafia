@@ -52,7 +52,7 @@ function GamePage() {
     const [ nowGameState, setNowGameState ] = useState("")
 
     // player 설정
-    const [players, setPlayers] = useState({});
+    const [players, setPlayers] = useState([]);
 
     useEffect( () => {
         const access = localStorage.getItem('access');
@@ -165,6 +165,7 @@ function GamePage() {
                         "Authorization": `Bearer ${access}`,
                     }
                 })
+                console.log(response)
                 setGameData(response.data)
                 console.log('Game Data 출력', gameData);
             } catch (error) {
@@ -172,7 +173,8 @@ function GamePage() {
             }
         }
         gameRoomInfo()
-    }, [])
+    }, [roomId, access])
+
 
     // useEffect( () => {
     //

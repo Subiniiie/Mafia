@@ -5,6 +5,7 @@ import styles from './GameReadyStartBtn.module.css';
 
 function GameReadyStartBtn({ stompClient, nowGameState, gameData, roomId }) {
     const [ clickedBtn, setClickedBtn ] = useState(false)
+    const [ gameReady, setGameReady ] = useState(false)
     const [ showModal, setShowModal ] = useState(false)
 
     const roomManager = gameData.userList.find(user => user.owner === true && user.me === true);

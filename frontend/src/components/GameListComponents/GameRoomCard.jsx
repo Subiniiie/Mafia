@@ -29,7 +29,7 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
     return (
         // <div className="kimjungchul-bold" onClick={getRoomPlayer}>
         <div className="kimjungchul-bold">
-            <Link to={`/game-room/${id}`} state={viduToken} onClick={handleEnterRoom} >
+            {/* <Link to={`/game-room/${id}`} state={viduToken} onClick={handleEnterRoom} > */}
                 {/*<div className={`${isInProgress ? styles.inProgress : styles.notStarted}`} onClick={getGameRoomInfo}*/}
                 <div className={`${isInProgress ? styles.inProgress : styles.notStarted}`}>
                     {/* <Link to={`/game-room/${id}`} className={`${isInProgress ? styles.inProgress : styles.notStarted}`}> */}
@@ -43,7 +43,7 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
                         <p className={styles.progress}>{progress}/8</p>
                     </div>
                 </div>
-            </Link>
+            {/* </Link> */}
         </div>
     );
 };
