@@ -18,7 +18,7 @@ const GLMain = ({ setViduToken }) => {
                     }
                 })
                 setRooms(response.data)
-                
+
             } catch (error) {
                 console.error("Failed to fetch rooms :", error)
             }
@@ -28,7 +28,7 @@ const GLMain = ({ setViduToken }) => {
     }, [])
 
 
-  
+
 
     return (
         <div className={styles.container}>
