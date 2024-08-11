@@ -4,6 +4,10 @@ import { Client } from '@stomp/stompjs';
 import styles from './GameReadyStartBtn.module.css';
 
 function GameReadyStartBtn({ stompClient, nowGameState, gameData }) {
+    const access = localStorage.getItem('access');
+    const header =  {'Authorization': `Bearer ${access}`}
+
+    
     const [ clickedBtn, setClickedBtn ] = useState(false)
     const [ gameReady, setGameReady ] = useState(false)
     const [ showModal, setShowModal ] = useState(false)
@@ -23,8 +27,13 @@ function GameReadyStartBtn({ stompClient, nowGameState, gameData }) {
     const handleReadyBtnClick = () => {
         if (stompClient.current) {
             console.log("일반 플레이어가 준비 버튼을 누른 걸 알려주자")
+            stompClient.current.send(
+                `/pub/ready/${id}`, 
+                header, 
+                {}
+            )
         }
-        stompClient.current.send(`/pub/ready/${id}`, {}, "")
+        // stompClient.current.send(`/pub/ready/${id}`, {}, "")
         setClickedBtn(true)
     }
 

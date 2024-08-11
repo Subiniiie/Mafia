@@ -15,6 +15,8 @@ public interface UserInRoomRepository extends JpaRepository<UserInRoom, UserInRo
 
     void deletePeopleByPk_UserIdAndRoom_RoomId(long roomId, long userId);
 
+    void deleteByPk_UserId(long userId);
+
     Optional<UserInRoom> findByPk_UserId(long userId);
 
     Optional<List<UserInRoom>> findAllByPk_RoomId(long roomId);

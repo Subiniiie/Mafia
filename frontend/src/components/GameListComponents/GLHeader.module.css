@@ -1,28 +1,47 @@
-* {
-    box-sizing: border-box;
-}
-
 .container {
-    display: flex;
-    flex: row;
-    /* flex-wrap: wrap; */
-    /* justify-content: space-between; */
-    justify-content: space-around;
+    position: absolute;
+    top: 100px;
+    width: 100%;
+    height: 100px;
     background-color: #12151D;
-    /* 배경 색상 추가 */
-    /* padding: 10px 60px */
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    z-index: 2000;
+    color: white;
 }
 
 .container>div {
-    width: 33%;
+    width: 30%;
 }
 
-/* .filterBoxContainer {
-    width: 33%;
-    /* display: flex; */
-/* align-items: center; */
-/* justify-content: start; */
-/* flex: 1 1 auto; */
+.filterBoxContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.filterBoxContainerLarge {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex: 2
+}
+
+.filterBoxContainerMini {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex: 1
+}
+
+.filterContainer {
+    display: flex;
+    align-items: center;
+    justify-self: space-around;
+    width: auto;
+}
 
 
 /* .searchBarContainer 
@@ -32,9 +51,9 @@
     justify-content: center;
     flex: 1 1 auto; */
 
-/* .CreateRoomButtonContainer {
-    width: 33%;
+.CreateRoomButtonContainer {
     display: flex;
     align-items: center;
     justify-content: end;
-    /* flex: 1 1 auto; */
+    padding-right: 3%;
+}
