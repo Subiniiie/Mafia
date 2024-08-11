@@ -3,34 +3,37 @@ import axios from "axios";
 import { Client } from '@stomp/stompjs';
 import styles from './GameReadyStartBtn.module.css';
 
-function GameReadyStartBtn({ stompClient, nowGameState, gameData }) {
+function GameReadyStartBtn({ stompClient, nowGameState, gameData, roomId }) {
     const [ clickedBtn, setClickedBtn ] = useState(false)
-    const [ gameReady, setGameReady ] = useState(false)
     const [ showModal, setShowModal ] = useState(false)
 
-    console.log('게임 데이터를 볼거야!', gameData)
-    const roomManagerCheck = gameData.userList.find(user => user.owner === true)
-    console.log('너 방장이야?', roomManagerCheck)
-    const roomManager = roomManagerCheck.owner
-
+    const roomManager = gameData.userList.find(user => user.owner === true && user.me === true);
 
     // 일반 플레이어가 준비 버튼을 누름
     const handleReadyBtnClick = () => {
         if (stompClient.current) {
             console.log("일반 플레이어가 준비 버튼을 누른 걸 알려주자")
+            stompClient.current.send(
+                `/pub/ready/${roomId}`, 
+                header, 
+                {}
+            )
+            setClickedBtn(true)
         }
-        stompClient.current.send(`/pub/ready/${id}`, {}, "")
-        setClickedBtn(true)
     }
 
     // 일반 플레이어가 준비 취소 버튼을 누름
     const handleCancelReadyBtnClick = () => {
         if (stompClient.current) {
             console.log("일반 플레이어가 준비 취소 버튼을 누른 걸 알려주자")
+            stompClient.current.send(
+                `/pub/ready/${roomId}`, 
+                header, 
+                {}
+            )
         }
-        stompClient.current.send(`/pub/ready/cancel/${id}`, {}, "")
-        setClickedBtn(true)
-    } 
+        setClickedBtn(false)
+    }
 
     // 방장 시작 버튼 활성화되고 버튼을 누름
     const handleStartGameBtn = () => {
@@ -41,7 +44,7 @@ function GameReadyStartBtn({ stompClient, nowGameState, gameData }) {
             if (stompClient.current) {
                 console.log("방장이 게임 시작 요청을 보냈다")
             }
-            stompClient.current.send(`/pub/start/${id}`, {}, "")
+            stompClient.current.send(`/pub/start/${roomId}`, {}, "")
         }, 1500)
     }
 
