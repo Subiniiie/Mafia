@@ -9,13 +9,16 @@ import io.openvidu.java.client.OpenViduJavaClientException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.Response;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
@@ -31,7 +34,7 @@ public class RoomController {
         return ResponseEntity.ok(roomService.getRooms(pageable));
     }
 
-    @DeleteMapping("/api/rooms/{roomId}")
+    @DeleteMapping("/rooms/{roomId}")
     public ResponseEntity<CommonResponseDto> deleteRoom(@PathVariable Long roomId){
         return ResponseEntity.ok(roomService.deleteRoom(roomId));
     }
@@ -45,38 +48,42 @@ public class RoomController {
      * 방 생성
      */
     @PostMapping("/rooms")
-    public ResponseEntity<RoomOptionDto> makeRoom(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody RoomRequestDto roomRequestDto) {
+    public ResponseEntity<Map<String,Object>> makeRoom(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody RoomRequestDto roomRequestDto) {
         // 테스트용으로
         long userId = 1L;
         if(!Objects.isNull(customUserDetails)){
             userId = customUserDetails.getUserId();
         }
+
+        Map<String,Object> map = new HashMap<>();
         try{
             // 방이 성공적으로 생성되었을 시, Room Option Dto에 Token 실어서 전송
             RoomOptionDto res = roomService.makeRoom(userId, roomRequestDto);
-            return ResponseEntity.ok(res);
+            map.put("res", "success");
+            map.put("option", res);
+            map.put("detail", roomService.detailRoom(res.getRoomId()));
+            return ResponseEntity.ok(map);
         } catch (OpenViduJavaClientException | OpenViduHttpException e){
             // 방이 생성 실패 되었을 시, 500 error 전송
-            RoomOptionDto res = new RoomOptionDto();
-            return ResponseEntity.internalServerError().body(res);
+            map.put("res", "fail");
+            map.put("error", e.getMessage());
+            return ResponseEntity.internalServerError().body(map);
         }
     }
 
     /**
      * 방 입장
      */
-    // Todo : JWT 처리하는거 추가.
     @PostMapping("/rooms/{roomId}")
     public ResponseEntity<RoomJoinDto> enterRoom(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long roomId) {
-        // 테스트용으로
-        long userId = 1L;
-        if(!Objects.isNull(customUserDetails)){
-            userId = customUserDetails.getUserId();
-        }
+        log.info("enterRoom controller run");
+        long userId = customUserDetails.getUserId();
 
         try{
+            // todo : 메시지 발행하기
             // 참가 성공 시
             RoomJoinDto res = roomService.enterRoom(roomId, userId);
+
             return ResponseEntity.ok(res);
         } catch (OpenViduJavaClientException | OpenViduHttpException e){
             // 참가 실패 시
@@ -108,32 +115,24 @@ public class RoomController {
     /**
      * 방 떠나기
      */
-    @DeleteMapping("/rooms/{roomId}")
+    @DeleteMapping("/rooms/users/{roomId}")
     public ResponseEntity<CommonResponseDto> leaveRoom(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long roomId) {
         // 테스트용으로
         long userId = 1L;
         String nickname = "";
         if(!Objects.isNull(customUserDetails)){
             userId = customUserDetails.getUserId();
-            nickname = customUserDetails.getUsername();
         }
 
         return ResponseEntity.ok(roomService.leaveRoom(roomId, userId));
     }
 
-
-
-    @DeleteMapping("/api/rooms/{roomId}/{userId}")
-    public ResponseEntity<CommonResponseDto> deleteRoom(@PathVariable Long roomId, @PathVariable Long userId){
-        return ResponseEntity.ok(roomService.deleteUser(roomId, userId));
-    }
-
-    @PostMapping("/api/options/rooms/{roomId}")
+    @GetMapping("/rooms/{roomId}/options")
     public ResponseEntity<RoomOptionDto> getOption(@PathVariable Long roomId){
         return ResponseEntity.ok(roomService.getOption(roomId));
     }
 
-    @PatchMapping("/api/options/rooms/{roomId}")
+    @PatchMapping("/rooms/{roomId}/options")
     public ResponseEntity<CommonResponseDto> updateOption(@PathVariable Long roomId, RoomRequestDto roomRequestDto){
         return ResponseEntity.ok(roomService.updateOption(roomId, roomRequestDto));
     }

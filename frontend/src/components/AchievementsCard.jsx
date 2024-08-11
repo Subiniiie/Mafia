@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import styles from "./AchievementsCard.module.css"
 
 function AchievementsCard({achievementName, achievementDate, description, image}) {
-    const formattedDate = achievementDate.toDateString()
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit'}
+    const formattedDate = achievementDate.toLocaleDateString('ko-KR', options)
 
     // 업적을 장착하자
     const getAchievement = function() {

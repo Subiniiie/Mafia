@@ -23,9 +23,9 @@ function Friends({ isOpen, openModal }) {
                     <ModalHeader modalTitle="동지들" openModal={openModal} />
                 </div>
                     <div className={styles.content}>
-                        <button className={styles.btns} onClick={() => handleTabChange("list")}>동지</button>
-                        <button className={styles.btns} onClick={() => handleTabChange("add")}>동지 요청</button>
-                        <button className={styles.btns} onClick={() => handleTabChange("search")}>동지 찾기</button>
+                        <button className={styles.btn} onClick={() => handleTabChange("list")}>동지</button>
+                        <button className={styles.btn} onClick={() => handleTabChange("add")}>동지 요청</button>
+                        <button className={styles.btn} onClick={() => handleTabChange("search")}>동지 찾기</button>
                         <div>
                             {activeTab === "list" && <FriendsListTab />}
                             {activeTab === "add" && <FriendsAddTab />}

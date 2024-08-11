@@ -1,5 +1,6 @@
 package e106.emissary_backend.domain.user.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import e106.emissary_backend.domain.room.dto.RoomDetailDto;
 import e106.emissary_backend.domain.user.entity.User;
 import lombok.AllArgsConstructor;
@@ -16,6 +17,7 @@ public class RoomDetailUserDto {
 
     private String nickname;
 
+    @JsonProperty("owner")
     private boolean isOwner;
 
     public static RoomDetailUserDto of(User user, long ownerId){
