@@ -246,7 +246,8 @@ public class RoomService {
                 .filter(userInRoom -> userInRoom.getUser().getUserId().equals(userId))
                 .findAny()
                 .ifPresent(userInRoom -> {
-                    throw new AlreadyUserInRoomException(CommonErrorCode.ALREADY_USER_IN_ROOM_EXCEPTION);
+                    userInRoomRepository.deleteByPk_UserId(userId);
+//                    throw new AlreadyUserInRoomException(CommonErrorCode.ALREADY_USER_IN_ROOM_EXCEPTION);
                 });
 
         UserInRoom userInRoom = UserInRoom.builder()
@@ -274,17 +275,15 @@ public class RoomService {
         List<RoomDetailUserDto> userList = userInRoomList.stream()
                 .map(UserInRoom::getUser)
                 .map(nowUser -> RoomDetailUserDto.of(nowUser, room.getOwnerId()))
-                .toList();
+                .collect(Collectors.toList());
+
+        RoomDetailUserDto dto = RoomDetailUserDto.of(user, room.getOwnerId());
+        log.info("dto = {}", dto.getUserId());
+        userList.add(dto);
+        log.info("씨빨?");
+
         RoomDetailDto roomDetailDto = RoomDetailDto.toDTO(room, userList);
-//        RoomDetailDto roomDetailDto = RoomDetailDto.builder()
-//                    .roomId(roomId)
-//                    .roomState(RoomState.WAIT)
-//                    .title(room.getTitle())
-//                    .ownerId(room.getOwnerId())
-//                    .maxPlayer(room.getMaxPlayer())
-//                    .haveBetray(room.isHaveBetray())
-//                    .userList(userList)
-//                    .build();
+
         redisPublisher.publish(enterRoomTopic, EnterRoomMessage.builder()
                         .gameState(GameState.ENTER)
                         .roomDetailDto(roomDetailDto)

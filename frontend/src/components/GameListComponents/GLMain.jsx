@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom';
+// import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import GameRoomCard from "./GameRoomCard";
 import styles from "./GLMain.module.css";
 
-const GLMain = ({setViduToken}) => {
+const GLMain = ({ setViduToken }) => {
     const [rooms, setRooms] = useState([])
 
     useEffect(() => {
@@ -17,8 +17,8 @@ const GLMain = ({setViduToken}) => {
                         "Authorization": `Bearer ${access}`,
                     }
                 })
-                console.log(response.data)
                 setRooms(response.data)
+
             } catch (error) {
                 console.error("Failed to fetch rooms :", error)
             }
@@ -28,11 +28,25 @@ const GLMain = ({setViduToken}) => {
     }, [])
 
 
+
+
     return (
         <div className={styles.container}>
+            {/* {rooms.map((room) => (
+                <GameRoomCard
+                    key={room.id}
+                    id={room.roomId}
+                    title={room.title}
+                    leader={room.ownerName}
+                    progress={room.nowPlayer}
+                    inInProgress={room.maxPlayer}
+                    setViduToken={setViduToken}
+                    className={styles.cardWrapper}
+                />
+            ))} */}
             {rooms.map((room) => (
                 // <div className={styles.cardWrapper} key={room.roomId}>
-                <div className={styles.cardWrapper} key={room.id}>
+                <div className={styles.cardWrapper} key={room.roomId}>
                     <GameRoomCard
                         id={room.roomId}
                         title={room.title}
