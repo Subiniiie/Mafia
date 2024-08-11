@@ -55,7 +55,7 @@ public class Room extends BaseTimeEntity {
         title = roomRequestDto.getTitle();
         password = roomRequestDto.getPassword();
         maxPlayer = roomRequestDto.getMaxPlayer();
-        haveBetray = roomRequestDto.isHaveBetrayer();
+        haveBetray = roomRequestDto.isHaveBetray();
         if(Objects.isEmpty(password)) {
             isPrivate = true;
         }

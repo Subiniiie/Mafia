@@ -219,79 +219,85 @@ public class RoomService {
     } // end of getOrCreateSession
 
     // Todo : 분산 트랜잭션 처리 해줘야함.
-    @RedissonLock(value = "#roomId")
-    public RoomJoinDto enterRoom(Long roomId, long userId) throws OpenViduJavaClientException, OpenViduHttpException {
-        List<UserInRoom> userInRoomList = userInRoomRepository.findAllByPk_RoomId(roomId).orElseThrow(
-                () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
+        @RedissonLock(value = "#roomId")
+        public RoomJoinDto enterRoom(Long roomId, long userId) throws OpenViduJavaClientException, OpenViduHttpException {
+            List<UserInRoom> userInRoomList = userInRoomRepository.findAllByPk_RoomId(roomId).orElseThrow(
+                    () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
 
-        Room room = userInRoomList.get(0).getRoom();
+            Room room = userInRoomList.get(0).getRoom();
 
-        if(userInRoomList.size() > room.getMaxPlayer()) {
-            throw new GameFullException(CommonErrorCode.GAME_FULL_EXCEPTION);
-        }
+            if(userInRoomList.size() > room.getMaxPlayer()) {
+                throw new GameFullException(CommonErrorCode.GAME_FULL_EXCEPTION);
+            }
 
-        User user = userRepository.findByUserId(userId).orElseThrow(() -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION));
+            User user = userRepository.findByUserId(userId).orElseThrow(() -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION));
 
-        // Join OpenVidu Session
-        Session session = getOrCreateSession(String.valueOf(roomId));
-        session.fetch();
+            // Join OpenVidu Session
+            Session session = getOrCreateSession(String.valueOf(roomId));
+            log.info("session열었어");
+            session.fetch();
+            log.info("Fetch했어");
 
-        ConnectionProperties connectionProperties = createConnectionProperties(user.getNickname());
+            ConnectionProperties connectionProperties = createConnectionProperties(user.getNickname());
+            log.info("connection어쩌고 저쩌고 성공");
 
-        String token = session.createConnection(connectionProperties).getToken();
-        updateSessionTokens(session.getSessionId(), token, SessionRole.USER);
+            String token = session.createConnection(connectionProperties).getToken();
+            updateSessionTokens(session.getSessionId(), token, SessionRole.USER);
 
-        log.info("user : " + user.getUserId());
-        userInRoomList.stream()
-                .filter(userInRoom -> userInRoom.getUser().getUserId().equals(userId))
-                .findAny()
-                .ifPresent(userInRoom -> {
-                    userInRoomRepository.deleteByPk_UserId(userId);
-//                    throw new AlreadyUserInRoomException(CommonErrorCode.ALREADY_USER_IN_ROOM_EXCEPTION);
-                });
+            log.info("user : " + user.getUserId());
+            userInRoomList.stream()
+                    .filter(userInRoom -> userInRoom.getUser().getUserId().equals(userId))
+                    .findAny()
+                    .ifPresent(userInRoom -> {
+                        log.info("userInRoom에 있다요");
+                        userInRoomRepository.deleteByPk_UserId(userId);
+                        log.info("삭제까지 했따요");
+    //                    throw new AlreadyUserInRoomException(CommonErrorCode.ALREADY_USER_IN_ROOM_EXCEPTION);
+                    });
 
-        UserInRoom userInRoom = UserInRoom.builder()
-                .pk(new UserInRoom.Pk(roomId, userId))
-                .room(room)
-                .user(user)
-                .isBlocked(false)
-                .connectTime(LocalDateTime.now())
-                .build();
+            UserInRoom userInRoom = UserInRoom.builder()
+                    .pk(new UserInRoom.Pk(roomId, userId))
+                    .room(room)
+                    .user(user)
+                    .isBlocked(false)
+                    .connectTime(LocalDateTime.now())
+                    .viduToken(token)
+                    .build();
 
-        userInRoomRepository.save(userInRoom);
+            userInRoomRepository.save(userInRoom);
+            log.info("씨발 save했짢아!!!");
 
-        // Redis 저장 로직
-        Player player = Player.createPlayer(userId, user.getNickname(), userInRoom.getConnectTime());
-        Game game = redisGameRepository.findByGameId(roomId).orElseThrow(
-                () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+            // Redis 저장 로직
+            Player player = Player.createPlayer(userId, user.getNickname(), userInRoom.getConnectTime());
+            Game game = redisGameRepository.findByGameId(roomId).orElseThrow(
+                    () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+            GameDTO gameDTO = GameDTO.toDto(game);
+            gameDTO.addPlayer(player);
+            Game updateGame = gameDTO.toDao();
 
-        GameDTO gameDTO = GameDTO.toDto(game);
-        gameDTO.addPlayer(player);
-        Game updateGame = gameDTO.toDao();
+            redisKeyValueTemplate.update(updateGame);
+            log.info("레디스에 저장했따요 {}", redisGameRepository.findByGameId(game.getGameId()));
 
-        redisKeyValueTemplate.update(updateGame);
+            // Redis 발행 로직
+            List<RoomDetailUserDto> userList = userInRoomList.stream()
+                    .map(UserInRoom::getUser)
+                    .map(nowUser -> RoomDetailUserDto.of(nowUser, room.getOwnerId(), userId))
+                    .collect(Collectors.toList());
+            RoomDetailUserDto dto = RoomDetailUserDto.of(user, room.getOwnerId(), userId);
+            userList.add(dto);
 
-        // Redis 발행 로직
-        List<RoomDetailUserDto> userList = userInRoomList.stream()
-                .map(UserInRoom::getUser)
-                .map(nowUser -> RoomDetailUserDto.of(nowUser, room.getOwnerId()))
-                .collect(Collectors.toList());
+            RoomDetailDto roomDetailDto = RoomDetailDto.toDTO(room, userList);
 
-        RoomDetailUserDto dto = RoomDetailUserDto.of(user, room.getOwnerId());
-        log.info("dto = {}", dto.getUserId());
-        userList.add(dto);
-        log.info("씨빨?");
+            redisPublisher.publish(enterRoomTopic, EnterRoomMessage.builder()
+                            .gameState(GameState.ENTER)
+                            .roomDetailDto(roomDetailDto)
+                            .build());
+            // 다했으면 leave나 kick할시에 발행하는것도 해야해
+            log.info("발행완료");
 
-        RoomDetailDto roomDetailDto = RoomDetailDto.toDTO(room, userList);
-
-        redisPublisher.publish(enterRoomTopic, EnterRoomMessage.builder()
-                        .gameState(GameState.ENTER)
-                        .roomDetailDto(roomDetailDto)
-                        .build());
-        // 다했으면 leave나 kick할시에 발행하는것도 해야해
-
-        return new RoomJoinDto(String.valueOf(room.getRoomId()), token);
-    } // end of EnterRoom
+            RoomJoinDto roomJoinDto = new RoomJoinDto(String.valueOf(room.getRoomId()), token);
+            return roomJoinDto;
+        } // end of EnterRoom
 
     @RedissonLock(value = "#roomId")
     public CommonResponseDto leaveRoom(Long roomId, long userId) {
@@ -335,7 +341,7 @@ public class RoomService {
             roomRepository.deleteById(roomId);
         }else{
             // 발행하기
-            publishRemoveUser(roomId);
+            publishRemoveUser(roomId, userId);
         }
 
         return new CommonResponseDto("ok");
@@ -360,54 +366,68 @@ public class RoomService {
     }
 
     public boolean kickUser(RoomKickDto roomKickDto, long userId) throws OpenViduJavaClientException, OpenViduHttpException {
-            Session session = mapSessions.get(String.valueOf(roomKickDto.getRoomId()));
-            String connectionId = roomKickDto.getConnectionId();
-            session.fetch();
+        log.info("11");
+        Session session = mapSessions.get(String.valueOf(roomKickDto.getRoomId()));
+        log.info("22 ,{}", session);
+        String connectionId = roomKickDto.getConnectionId();
+        log.info("33, {}", connectionId);
 
-            if (session == null){
-                throw new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION);
-            }
+        session.fetch();
+        log.info("Fetch");
 
-            Optional<UserInRoom> userInRoom = userInRoomRepository.findByPk_UserId(userId);
-            String token = "";
-            if (userInRoom.isPresent()){
-                 token = userInRoom.get().getViduToken();
-            } else {
-                throw new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION);
-            }
+        if (session == null){
+            throw new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION);
+        }
+        log.info("눌아님");
+        Optional<UserInRoom> userInRoom = userInRoomRepository.findByPk_UserId(userId);
+        String token = "";
+        if (userInRoom.isPresent()){
+            token = userInRoom.get().getViduToken();
+        } else {
+            throw new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION);
+        }
+        log.info("usr {}", userInRoom.get().getRoom().getRoomId());
+        log.info("token = {}", token);
+        SessionRole role = mapSessionNamesTokens.get(session.getSessionId()).get(token);
 
-            SessionRole role = mapSessionNamesTokens.get(session.getSessionId()).get(token);
+        if (role != SessionRole.HOST){
+            // 권한 부족 exception 전송
+            log.info("권한없어");
+            return false;
+        }
 
-            if (role != SessionRole.HOST){
-                // 권한 부족 exception 전송
-                return false;
-            }
+        String targetToken = session.getConnection(connectionId).getToken();
+        log.info("targetToken = {}", targetToken);
+        User targetUser = userInRoomRepository.findUserByViduToken(targetToken).orElseThrow(
+                () -> new NotFoundUserInRoomException(CommonErrorCode.NOT_FOUND_USER_IN_ROOM_EXCEPTION));
+        long targetId = targetUser.getUserId();
+        log.info("targetId = {}", targetId);
 
-            session.getConnection(connectionId).getToken();
-            // UserInRooM 처리하고
-            String nickname = session.getConnection(connectionId).getClientData();
-            Optional<UserInRoom> kickedUser = userInRoomRepository.findByPk_UserId(userId);
-            String kickedToken = "";
-            if (kickedUser.isPresent()){
-                if (userInRoom.get().getViduToken().equals(kickedUser.get().getViduToken())){
-                    // 호스트가 스스로 강퇴할 때 exception
-                    return false;
-                }
-                kickedToken = kickedUser.get().getViduToken();
-                userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomKickDto.getRoomId(), userId);
-            }
+        log.info("권한대신에 connection으로 token {}", session);
+        // UserInRooM 처리하고
+        String nickname = session.getConnection(connectionId).getClientData();
+        log.info("kickedUser {}", nickname);
+        if (userInRoom.get().getViduToken().equals(targetToken)){
+            // 호스트가 스스로 강퇴할 때 exception
+            log.info("방장이 스스로를 강퇴하면 안돼.");
+            return false;
+        }
+        userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomKickDto.getRoomId(), targetId);
+        log.info("여긴가");
 
-            // 레디스 처리하고
-            deleteUserInRedis(roomKickDto.getRoomId(), userId);
-            publishRemoveUser(roomKickDto.getRoomId());
+        // 레디스 처리하고
+        deleteUserInRedis(roomKickDto.getRoomId(), targetId);
+        publishRemoveUser(roomKickDto.getRoomId(), userId);
+        log.info("레디스 처리 완료");
 
-            // Map 삭제하고
-            Map<String, SessionRole> users = mapSessionNamesTokens.get(session.getSessionId());
-            users.remove(kickedToken);
+        // Map 삭제하고
+        Map<String, SessionRole> users = mapSessionNamesTokens.get(session.getSessionId());
+        users.remove(targetToken);
+        log.info("Map 삭제완료");
 
-            // 강퇴 ㄱ
-            session.forceDisconnect(connectionId);
-            return true;
+        // 강퇴 ㄱ
+        session.forceDisconnect(connectionId);
+        return true;
     }
 
     private Mono<String> sendSignalToSession(String sessionId, String type, String data){
@@ -432,15 +452,22 @@ public class RoomService {
                 .doOnError(error -> System.out.println("Fail to Send Signal: " + error.getMessage()));
     }
 
-    public RoomDetailDto detailRoom (long roomId){
+    @RedissonLock(value = "#roomId")
+    public RoomDetailDto detailRoom (long roomId, long userId){
+        log.info("detail Room run");
         List<UserInRoom> userInRoom = userInRoomRepository.findAllByPk_RoomId(roomId).orElseThrow(
                 () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
+
+        if(Objects.isEmpty(userInRoom)){
+            log.info("userInRoom이 비어있어요");
+            throw new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION);
+        }
 
         Room room = userInRoom.get(0).getRoom();
 
         List<RoomDetailUserDto> roomDetailUserDtoList = userInRoom.stream()
                 .map(UserInRoom::getUser)
-                .map(user -> RoomDetailUserDto.of(user, room.getOwnerId()))
+                .map(user -> RoomDetailUserDto.of(user, room.getOwnerId(), userId))
                 .toList();
 
         return RoomDetailDto.toDTO(room, roomDetailUserDtoList);
@@ -457,13 +484,13 @@ public class RoomService {
         redisKeyValueTemplate.update(updateGame);
     }
 
-    private void publishRemoveUser(Long roomId) {
+    private void publishRemoveUser(Long roomId, long userId) {
         List<UserInRoom> userInRoomList = userInRoomRepository.findAllByPk_RoomId(roomId).orElseThrow(
                 () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
         Room room = userInRoomList.get(0).getRoom();
         List<RoomDetailUserDto> userList = userInRoomList.stream()
                 .map(UserInRoom::getUser)
-                .map(nowUser -> RoomDetailUserDto.of(nowUser, room.getOwnerId()))
+                .map(nowUser -> RoomDetailUserDto.of(nowUser, room.getOwnerId(), userId))
                 .toList();
         RoomDetailDto roomDetailDto = RoomDetailDto.builder()
                 .roomId(roomId)
