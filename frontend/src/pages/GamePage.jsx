@@ -47,21 +47,20 @@ function GamePage() {
 
     // Game
     const [ gameData, setGameData ] = useState({})
-    const [ gameResponse, setGameResponse ] = useState(null)
     const [ nowGameState, setNowGameState ] = useState(null)
 
     // player 설정
-    const [players, setPlayers] = useState([
-        {nickname: 'player1', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-        {nickname: 'player2', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-        {nickname: 'player3', role: 'emissary', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-        {nickname: 'player4', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-        {nickname: 'player5', role: 'police', isRoomManager: true, isMe: false, isAlive: true, hasVoted: false},
-        {nickname: 'player6', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-        {nickname: 'player7', role: 'independenceActivist', isRoomManager: false, isMe: true, isAlive: true, hasVoted: false},
-        {nickname: 'player8', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-    ]);
-
+    // const [players, setPlayers] = useState([
+    //     {nickname: 'player1', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+    //     {nickname: 'player2', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+    //     {nickname: 'player3', role: 'emissary', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+    //     {nickname: 'player4', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+    //     {nickname: 'player5', role: 'police', isRoomManager: true, isMe: false, isAlive: true, hasVoted: false},
+    //     {nickname: 'player6', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+    //     {nickname: 'player7', role: 'independenceActivist', isRoomManager: false, isMe: true, isAlive: true, hasVoted: false},
+    //     {nickname: 'player8', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+    // ]);
+ga
 
     // 방 정보 가져오기
     useEffect(() => {
@@ -335,7 +334,6 @@ function GamePage() {
                 {
                     const messageJson = JSON.parse(message.body)
                     console.log("입장 데이터 확인 : ", messageJson)
-                    setGameResponse(messageJson)
                     setNowGameState('입장 하고 데이터 받는다ㅏㅏ', messageJson.gameState)
                 })
         })
@@ -357,16 +355,19 @@ function GamePage() {
     const gameStart = () => {
         const access = localStorage.getItem('access');
         if (stompClient.current) {
-            stompClient.current.send(`/ws/pub/start/${roomId}`, {
+            stompClient.current.send(
+                `/ws/pub/start/${roomId}`, 
+                {
                 'Authorization': `Bearer ${access}`
-            }, JSON.stringify({ action: 'start' }));
+                }, 
+                {}
+            );
         }
     }
       
     return (
         <>
             <div className={styles.container}>
-                <button onClick={handleButtonClick}>야호</button>
                 {/* 게임데이터 있는지 확인 -> 게임데이터에 유저리스트가 있는지 확인 -> 그 유저리스트 array인지 확인  */}
                 {gameData && gameData.userList && Array.isArray(gameData.userList) &&
                     <GamePageHeader gameData={gameData} id={roomId} />
@@ -382,18 +383,17 @@ function GamePage() {
                         stompClient={stompClient}
                         gameData={gameData}
                         nowGameState={nowGameState}
-                        gameResponse={gameResponse}
                         players={players}
                         setPlayers={setPlayers}
                     />
                 }
                 {gameData && gameData.userList && Array.isArray(gameData.userList) &&
                     <GamePageFooter
+                        roomId={roomId}
                         systemMessage={systemMessage}
                         stompClient={stompClient}
                         gameData={gameData}
                         nowGameState={nowGameState}
-                        gameResponse={gameResponse}
                         session={session}
                         chatHistory={chatHistory}
                         chatMode={chatMode}

@@ -1,26 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { Client } from '@stomp/stompjs';
 import styles from './GameReadyStartBtn.module.css';
 
-function GameReadyStartBtn({ stompClient, nowGameState, gameData }) {
+function GameReadyStartBtn({ roomId, stompClient, nowGameState, gameData }) {
     const access = localStorage.getItem('access');
     const header =  {'Authorization': `Bearer ${access}`}
 
-    
     const [ clickedBtn, setClickedBtn ] = useState(false)
-    const [ gameReady, setGameReady ] = useState(false)
+    // const [ gameReady, setGameReady ] = useState(false)
     const [ showModal, setShowModal ] = useState(false)
 
     console.log('게임 데이터를 볼거야!', gameData)
-    const roomManagerCheck = gameData.userList.find(user => user.owner === true)
-    console.log('장하오', roomManagerCheck)
+    // const roomManagerCheck = gameData.userList.find(user => user.owner === true)
+    // console.log('장하오', roomManagerCheck)
 
-    const roomManager = gameData.userList.find(user => user.userId === roomManagerCheck.userId);
+    const roomManager = gameData.userList.find(user => user.owner === true && user.me === true);
 
 
     // const roomManager = roomManagerCheck.owner.userId
-    console.log('너 방장이야?', roomManagerCheck)
+    // console.log('너 방장이야?', roomManagerCheck)
 
 
     // 일반 플레이어가 준비 버튼을 누름
@@ -28,12 +27,12 @@ function GameReadyStartBtn({ stompClient, nowGameState, gameData }) {
         if (stompClient.current) {
             console.log("일반 플레이어가 준비 버튼을 누른 걸 알려주자")
             stompClient.current.send(
-                `/pub/ready/${id}`, 
+                `/pub/ready/${roomId}`, 
                 header, 
                 {}
             )
         }
-        // stompClient.current.send(`/pub/ready/${id}`, {}, "")
+        // stompClient.current.send(`/pub/ready/${roomId}`, {}, "")
         setClickedBtn(true)
     }
 
@@ -42,8 +41,8 @@ function GameReadyStartBtn({ stompClient, nowGameState, gameData }) {
         if (stompClient.current) {
             console.log("일반 플레이어가 준비 취소 버튼을 누른 걸 알려주자")
         }
-        stompClient.current.send(`/pub/ready/cancel/${id}`, {}, "")
-        setClickedBtn(true)
+        stompClient.current.send(`/pub/ready/cancel/${roomId}`, {}, "")
+        setClickedBtn(false)
     } 
 
     // 방장 시작 버튼 활성화되고 버튼을 누름
@@ -55,7 +54,7 @@ function GameReadyStartBtn({ stompClient, nowGameState, gameData }) {
             if (stompClient.current) {
                 console.log("방장이 게임 시작 요청을 보냈다")
             }
-            stompClient.current.send(`/pub/start/${id}`, {}, "")
+            stompClient.current.send(`/pub/start/${roomId}`, {}, "")
         }, 1500)
     }
 

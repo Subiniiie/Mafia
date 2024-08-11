@@ -46,13 +46,13 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     const header =  {'Authorization': `Bearer ${access}`}
 
     // 게임 시작하기
-    const gameStart = () => {
-        // (주소, {헤더}, 메세지)
-        isStompClient.current.send(
-            `/ws/pub/${roomId}`, 
-            header,
-            {}
-        )
+    // const gameStart = () => {
+    //     // (주소, {헤더}, 메세지)
+    //     isStompClient.current.send(
+    //         `/ws/pub/${roomId}`, 
+    //         header,
+    //         {}
+    //     )
         // const socket = new WebSocket(`/ws/pub/start/${roomId}`)
         // socket.onopen = function(event) {
         //     console.log('웹소켓 연결이 열렸습니다. 게임을 시작합니다')
@@ -124,6 +124,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     }
 
     // 첩보원이 활동한다
+    // isMe 어떻게 오는지 확인하고 코드 바꾸기
     const policeTime = () => {
         const me = gameData.playerMap
           .filter(player => player.isAlive)
@@ -139,7 +140,8 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         isStompClient.current.send(
             `/ws/pub/detect/${roomId}/${targetId}`, 
             header,
-            JSON.stringify({ targetId, targetNickname, targetRole })
+            // JSON.stringify({ targetId, targetNickname, targetRole })
+            {}
         )
         // const socket1 = new WebSocket(`/pub/detect/${roomId}/${targetId}`)
         // socket1.onopen = function(evnet) {
@@ -150,6 +152,10 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         //     console.log('첩보원에게 플레이어 정보를 전송하는 웹소켓 연결이 닫혔습니다.')
         // }
         // 첩보원 화면에만 뜨게 하기
+        // isMe 어떻게 뜨는지 확인22
+        const me = gameData.playerMap
+            .filter(player => player.isAlive)
+            .find(player => player.isMe)
         if (me) {
             setSystemMessage(`${targetNickname}님은 ${targetRole}입니다.`)
         }
@@ -351,7 +357,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // 게임 끝
     const gameEnd = () => {
         stompClient.current.send(
-            `/pub/confirm/${roomId}`, 
+            `/pub/end/${roomId}`, 
             header, 
             {}
         )
@@ -379,43 +385,41 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         // }
     }
 
-    // 이게 뭐지
-    // const handleResult = () => {
-    //     if (stompClient && stompClient.connected) {
-    //         stompClient.send( `/pub/end/${roomId}`, {}, JSON.stringify({ targetId })
-    //     )
-    //         console.log('투표 메시지를 전송했습니다')
-    //     } else {
-    //         console.log('STOMP 클라이언트가 연결되지 않았습니다')
-    //     }
-    // }
+    const access = localStorage.getItem('access')
 
-    // // 게임 결과 반영
-    // const handleResult = async() => {
-    //     await axios.post('https://i11e106.p.ssafy.io/api/results', {
-    //         "데이터 뭐 보냄?"
-    //     })
-    //         .then((response) => {
-    //             console.log(response)
-    //         })
-    //         .catch((error) => {
-    //             console.log(error)
-    //         })
-    //     handleAchievenets()
-    // }
+    // 게임 결과 반영
+    const handleResult = async() => {
+        await axios.post('https://i11e106.p.ssafy.io/api/results', {}, {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${access}`,
+            }, 
+        })
+            .then((response) => {
+                console.log(response)
+                handleAchievenets()
+            })
+            .catch((error) => {
+                console.log(error)
+            })
+        
+    }
 
-    // // 업적 처리
-    // const handleAchievenets = async() => {
-    //     await axios.post('https://i11e106.p.ssafy.io//api/honors', {
-    //         "데이터 뭐 보냄?"
-    //     })
-    //         .then((response) => {
-    //             console.log(response)
-    //         })
-    //         .catch((error) => {
-    //             console.log(error)
-    //         })
-    // }
+    // 업적 처리
+    const handleAchievenets = async() => {
+        await axios.post('https://i11e106.p.ssafy.io//api/honors', {}, {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${access}`,
+            },
+        })
+            .then((response) => {
+                console.log(response)
+            })
+            .catch((error) => {
+                console.log(error)
+            })
+    }
 
 
 
@@ -436,6 +440,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         case 'NIGHT_POLICE' :
             setSystemMessage('밤이 되었습니다. 첩보원이 활동 중입니다.')
             policeTime()
+            break
         case 'VOTE_START' :
             // 낮이 되었을 때, 비디오/오디오 처리
             handleVideoAudioAtDay();
@@ -443,24 +448,31 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
             changeToNormalChatMode();
             setSystemMessage('낮이 되었습니다. 토론을 하며 투표를 진행하세요.')
             voteStart()
+            break
         case 'VOTE_END' :
             setSystemMessage('낮이 되었습니다. 투표가 끝이 났습니다.')
             voteEnd()
+            break
         case 'REVOTE' :
             setSystemMessage('동점자가 나왔습니다. 재투표를 실시합니다.')
             voteAgain()
+            break
         case 'FINISH' :
             setSystemMessage(`투표에 의해 ${playerId}님이 최종 용의자가 되었습니다.`)
             voteFinish()
+            break
         case 'CONFIRM_START' :
             setSystemMessage(`최종 투표를 시작합니다.`)
             confirmStart()
+            break
         case 'CONFIRM_END' :
             setSystemMessage(`최종 투표가 끝이 났습니다`)
             confirmEnd()
+            break
         case 'END' :
             setSystemMessage('게임이 끝이 났습니다.')
             gameEnd()
+            break
     }
 
     return (
@@ -509,6 +521,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         </>
     )
 }
+
 
 
 export default GamePageMain;
