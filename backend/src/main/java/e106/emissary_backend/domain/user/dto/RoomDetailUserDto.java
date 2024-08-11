@@ -36,7 +36,11 @@ public class RoomDetailUserDto {
     }
 
     private void setIsMe(long userId) {
-        this.isMe = (userId == this.userId);
+        if(userId == this.userId) {
+            this.isMe = true;
+        }else{
+            this.isMe = false;
+        }
     }
 
 }

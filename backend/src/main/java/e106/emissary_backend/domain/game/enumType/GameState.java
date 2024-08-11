@@ -2,6 +2,7 @@ package e106.emissary_backend.domain.game.enumType;
 
 public enum GameState {
     ENTER,
+    KICK,
     LEAVE,
     WAIT,
     READY_COMPLETE,
