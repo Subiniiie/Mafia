@@ -8,25 +8,50 @@
     height: 420px;
     border: 1px solid black;
     border-radius: 20px;
-    background: rgba(34, 15, 15, 0.5);
+    /* background: rgba(34, 15, 15, 0.5); */
+    /* background: rgba(0, 0, 0, 0.7); */
+    background: #12151D;
     color: white;
     z-index: 100;
+    /* 추가함 */
+    justify-content: center;
+    align-items: center;
+}
+
+/* 추기힘 */
+.box {
+    background: #12151D;
+    border: 3px solid #1E2940;
+    border-radius: 20px;
+    width: 630px;
+    height:100%;
+    max-width: 100%;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .container {
     display: flex;
     flex-direction: column;
-    width: 100px;
+    /* width: 100px; */
     gap: 20px;
     padding: 20px;
-    display: flex;
     justify-content: center;
     align-items: center;
     position: absolute;
     top: 55%;
     left: 60%;
     transform: translate(-50%, -50%);
+    /* background: #12151D; */
 } 
+
+/* 추가함 */
+.modalTitle {
+    margin-top: 30px;
+    padding-right: 30px;
+}
 
 
 .rowStyle {
@@ -36,11 +61,31 @@
     margin: 10px 0;
 }
 
+.btnBox {
+    position: absolute;
+    align-self: center;
+    justify-content: center;
+}
+
 .btn {
-    color: rgba(255, 255, 255, 0.9);
-    background-color: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(200, 200, 200, 0.2);
-    padding: 5px 10px;
-    border-radius: 10px;
+    display: flex;
+    align-self: center;
+    justify-content: center;
+    background-color: #091a14;
+    border: 1.8px solid #014015;
+    position: relative;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+    /* color: rgba(255, 255, 255, 0.9); */
+    /* background-color: rgba(255, 255, 255, 0.1); */
+    /* border: 2px solid rgba(200, 200, 200, 0.2); */
+    /* padding: 5px 10px; */
+    /* border-radius: 10px; */
     cursor: pointer;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 12px;
+    left: 120%;
+    width: 110px;
 }
