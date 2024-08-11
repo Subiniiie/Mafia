@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios"
 import LoginModal from "../modals/LoginModal";
@@ -15,8 +15,7 @@ import SpeakerOnButton from '../assets/Buttons/SpeakerOnButton.png'
 import SpeakerOffLockedButton from '../assets/Buttons/SpeakerOffLockedButton.png'
 import SpeakerOnLockedButton from '../assets/Buttons/SpeakerOnLockedButton.png'
 
-
-const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
+const Navbar = ({ isLoggedIn, name, onLoginSuccess, isSpeakerOn, toggleSpeaker }) => {
 
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
     const openLoginModal = () => setIsLoginModalOpen(!isLoginModalOpen)
@@ -30,11 +29,42 @@ const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
     // const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
     // const openSettingsModal = () => setIsSettingsModalOpen(!isSettingsModalOpen)
 
-    const [isSpeakerOn, setIsSpeakerOn] = useState(true)
-    const turnSpeakerOn = () => setIsSpeakerOn(!isSpeakerOn)
+    // const [isSpeakerOn, setIsSpeakerOn] = useState(true)
+    // const turnSpeakerOn = () => setIsSpeakerOn(!isSpeakerOn)
 
     const location = useLocation()
     const navigate = useNavigate()
+
+    let audioContext;
+    let gainNode;
+
+    // useRef를 사용하여 AudioContext와 gainNode를 저장
+    const audioContextRef = useRef(null)
+    const gainNodeRef = useRef(null)
+
+    useEffect(() => {
+        // AudioContext와 gainNode 초기화
+        audioContextRef.current = new (window.AudioContext || window.webkitAudioContext())
+        gainNodeRef.current = audioContextRef.current.createGain()
+        gainNodeRef.current.connect(audioContextRef.current.destination)
+
+        // 모든 오디오와 비디오 요소에 대해 gainNode를 연결
+        document.querySelectorAll('audiio', 'video').forEach(mediaElement => {
+            const mediaSource = audioContextRef.current.createMediaElementSource(mediaElement)
+            mediaSource.connenct(gainNodeRef.current)
+        })
+    }, [])
+
+    // const turnSpeakerOn = () => {
+    //     setIsSpeakerOn(prevState => {
+    //         if (prevState) {
+    //             gainNodeRef.current.gain.setValueAtTime(0, audioContextRef.current.currentTime)
+    //         } else {
+    //             gainNodeRef.current.gain.setValueAtTime(1, audioContextRef.current.currentTime)
+    //         }
+    //         return !prevState
+    //     })
+    // }
 
     // URL이 변경되면 모달을 닫음
     useEffect(() => {
@@ -134,20 +164,15 @@ const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
                         <SignUpModal isOpen={isSignUpModalOpen} openModal={openSignUpModal} openLoginModal={openLoginModal} />
                     </>
                 )}
-                {/* <div onClick={openSettingsModal} className="links">
-                    <img src={SettingsButton} alt="SettingsButton" className="navbar-buttons" />
-                    <p>설정</p>
-                </div>
-                <SettingsModal isOpen={isSettingsModalOpen} openModal={openSettingsModal} /> */}
 
                 {isSpeakerOn ? (
                     <div className="Speaker-Box">
                         <img src={SpeakerOnButton} alt="SpeakerOnButton" className="speaker-buttons" />
-                        <img src={SpeakerOffLockedButton} alt="SpeakerOffLockedButton" className="speaker-buttons" onClick={turnSpeakerOn} />
+                        <img src={SpeakerOffLockedButton} alt="SpeakerOffLockedButton" className="speaker-buttons" onClick={toggleSpeaker} />
                     </div>
                 ) : (
                     <div className="Speaker-Box">
-                        <img src={SpeakerOnLockedButton} alt="SpeakerOnLockedButton" className="speaker-buttons" onClick={turnSpeakerOn} />
+                        <img src={SpeakerOnLockedButton} alt="SpeakerOnLockedButton" className="speaker-buttons" onClick={toggleSpeaker} />
                         <img src={SpeakerOffButton} alt="SpeakerOffButton" className="speaker-buttons" />
                     </div>
                 )}
