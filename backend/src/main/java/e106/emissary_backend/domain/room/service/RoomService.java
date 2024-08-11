@@ -21,6 +21,7 @@ import e106.emissary_backend.domain.userInRoom.repository.UserInRoomRepository;
 import e106.emissary_backend.global.common.CommonResponseDto;
 import e106.emissary_backend.global.error.CommonErrorCode;
 import e106.emissary_backend.global.error.exception.*;
+import io.jsonwebtoken.lang.Objects;
 import io.openvidu.java.client.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.criteria.Predicate;
