@@ -8,7 +8,7 @@ import axios from 'axios'
 
 
 
-const SignUpModal = ({ isOpen, openModal }) => {
+const SignUpModal = ({ isOpen, openModal, openLoginModal }) => {
     const modalTitle = '입단하기';
 
     const [email, setEmail] = useState('')
@@ -78,6 +78,7 @@ const SignUpModal = ({ isOpen, openModal }) => {
             })
             console.log('회원가입 성공 :', response.data)
             openModal()
+            openLoginModal()
             // openLoginModal()
             // <LoginModal isOpen={isLoginModalOpen} openModal={openLoginModal} onLoginSuccess={onLoginSuccess} />
             // 추가적인 성공 처리 (예: 모달 닫기, 사용자 알림 등)

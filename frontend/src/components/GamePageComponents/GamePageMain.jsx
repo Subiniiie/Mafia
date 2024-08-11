@@ -9,20 +9,6 @@ import FinalDefensePlayerModal from "../../modals/FinalDefensePlayerModal";
 import styles from "./GamePageMain.module.css"
 
 function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, stompClient, gameData, nowGameState, players, setPlayers }) {
-    // 플레이어들의 초기 상태
-    // const initialPlayers = [
-    //     {nickname: 'player1', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-    //     {nickname: 'player2', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-    //     {nickname: 'player3', role: 'emissary', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-    //     {nickname: 'player4', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-    //     {nickname: 'player5', role: 'police', isRoomManager: true, isMe: false, isAlive: true, hasVoted: false},
-    //     {nickname: 'player6', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-    //     {nickname: 'player7', role: 'independenceActivist', isRoomManager: false, isMe: true, isAlive: true, hasVoted: false},
-    //     {nickname: 'player8', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-    // ]
-
-
-    // setPlayers(initialPlayers)                                                          // Player들의 상태를 관리
     // players 배열을 생성된 시간 순으로 정렬
     // streamManagers와 순서를 맞춰야 하므로 정렬이 필요함
     setPlayers(players => players.sort((a, b) => a.creationTime - b.creationTime));
@@ -41,22 +27,23 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     const [ votes, setVotes ] = useState({});
     const [ suspect, setSuspect ] = useState(null)
 
+    const access = localStorage.getItem('access');
+    const header =  {'Authorization': `Bearer ${access}`}
 
-
-    // 게임 시작하기
-    const gameStart = () => {
-        const socket = new WebSocket(`ws://i11e106.p.ssafy.io/pub/start/${roomId}`)
-        socket.onopen = function(event) {
-            console.log('웹소켓 연결이 열렸습니다. 게임을 시작합니다')
-        }
-        socket.onerror = function(error) {
-            console.error('게임 시작 웹소켓에서 에러가 발생했습니다.:', error);
-        }
-        socket.close()
-        socket.onclose = function(event) {
-            console.log('게임 시작 웹소켓 연결이 닫혔습니다')
-        }
-    }
+    // // 게임 시작하기
+    // const gameStart = () => {
+    //     const socket = new WebSocket(`ws://i11e106.p.ssafy.io/pub/start/${roomId}`)
+    //     socket.onopen = function(event) {
+    //         console.log('웹소켓 연결이 열렸습니다. 게임을 시작합니다')
+    //     }
+    //     socket.onerror = function(error) {
+    //         console.error('게임 시작 웹소켓에서 에러가 발생했습니다.:', error);
+    //     }
+    //     socket.close()
+    //     socket.onclose = function(event) {
+    //         console.log('게임 시작 웹소켓 연결이 닫혔습니다')
+    //     }
+    // }
 
     // 밀정 시간
     const emissaryTime = () => {
@@ -82,28 +69,23 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // 죽일까 변절시킬까
     const handleChoiceDieOrTurncoat = (choiced) => {
         if (choiced === '변절') {
-            const socket = new WebSocket(`ws://i11e106.p.ssafy.io/pub/appease/${roomId}/${emissaryTarget}`)
-            socket.onopen = function(event) {
-                console.log('웹소켓 연결이 열렸습니다. 변절자 정보를 전송합니다')
-            }
-            socket.close()
-            socket.onclose = function(event) {
-                console.log('변절자 정보 전송 웹소켓 연결이 닫혔습니다')
-            }
+            stompClient.current.send(
+                `/ws/pub/appease/${roomId}/${emissaryTarget}`, 
+                header,
+                {}
+            )
         } else if (choiced === '죽임') {
-            const socket = new WebSocket(`ws://i11e106.p.ssafy.io/pub/kill/${roomId}/${emissaryTarget}`)
-            socket.onopen = function(event) {
-                console.log('웹소켓 연결이 열렸습니다. 사망자 정보를 전송합니다')
-            }
-            socket.close()
-            socket.onclose = function(event) {
-                console.log('사망자 정보 전송 웹소켓 연결이 닫혔습니다')
-            }
+            stompClient.current.send(
+                `/ws/pub/kill/${roomId}/${emissaryTarget}`, 
+                header,
+                {}
+            )
         }
         setchoiceDieOrTurncoat(false)
     }
 
     // 첩보원이 활동한다
+    // isMe 어떻게 오는지 확인하고 코드 바꾸기
     const policeTime = () => {
         const me = gameData.playerMap
           .filter(player => player.isAlive)
@@ -116,69 +98,55 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // 첩보원이 선택한 플레이어의 역할을 아는 함수
     const policeChoicedPlayer = function(targetId, targetNickname, targetRole) {
         setShowPoliceModal(false)
-        const socket1 = new WebSocket(`/pub/detect/${roomId}/${targetId}`)
-        socket1.onopen = function(evnet) {
-            console.log('웹소켓 연결이 열렸습니다. 첩보원에게 플레이어 정보를 전송합니다')
-        }
-        socket1.close()
-        socket1.onclose = function(event) {
-            console.log('첩보원에게 플레이어 정보를 전송하는 웹소켓 연결이 닫혔습니다.')
-        }
+        stompClient.current.send(
+            `/ws/pub/detect/${roomId}/${targetId}`, 
+            header,
+            {}
+        )
         // 첩보원 화면에만 뜨게 하기
+        // isMe 어떻게 뜨는지 확인22
+        const me = gameData.playerMap
+            .filter(player => player.isAlive)
+            .find(player => player.isMe)
         if (me) {
             setSystemMessage(`${targetNickname}님은 ${targetRole}입니다.`)
         }
         // 첩보원 활동이 끝났다는 메시지 보내기
-        const socket2 = new WebSocket(`ws://i11e106.p.ssafy.io/day/${roomId}`)
-        socket2.onopen = function(evnet) {
-            console.log('웹소켓 연결이 열렸습니다. 첩보원 활동이 끝났습니다')
-        }
-        socket2.close()
-        socket2.onclose = function(event) {
-            console.log('첩보원 활동이 끝났다는 메시지를 전송했습니다.')
-        }
-
+        stompClient.current.send(
+            `/ws/pub/day/${roomId}`, 
+            header,
+            {}
+        )
     }
 
     // 낮(토론 및 투표 중)
     const voteStart = (targetId) => {
-        const socket = new SockJS(`http://example.com/pub/vote/${roomId}`)
-        const client = new Client({
-            webSocketFactory: () => socket,
-            reconnectDelay: 5000,
-            onConnect: () => {
-                console.log('STOMP 클라이언트가 연결되었습니다')
-                setStompClient(client)
-            },
-            onDisconnect: () => {
-                console.log('STOMP 클라이언트가 연결이 종료되었습니다')
-            },
-            onStompError: (error) => {
-                console.log('STOMP 오류', error)
-            }
-        })
-        client.activate()
+        stompClient.current.send(
+            `/ws/pub//vote/${roomId}`, 
+            header,
+            JSON.stringify({ targetId })
+        )
         handleVote(targetId)
 
         const timer = setTimeOut(() => {
-            if (client) {
-                client.deactivate()
+            if (stompClient.current && stompClient.current.connected) {
                 console.log('낮이 종료되었습니다')
             }
         }, 30000)
 
         return () => {
             clearTimeout(timer)
-            if (client) {
-                client.deactivate()
-            }
         }
     }
 
     // 낮에 투표 전송
     const handleVote = (targetId) => {
         if (stompClient.current && stompClient.connected) {
-            stompClient.current.send( `/pub/vote/${roomId}`, {}, JSON.stringify({ targetId }))
+            stompClient.current.send(
+                 `/pub/vote/${roomId}`, 
+                 header, 
+                 JSON.stringify({ targetId })
+            )
             console.log('투표 메시지를 전송했습니다')
         } else {
             console.log('STOMP 클라이언트가 연결되지 않았습니다')
@@ -284,93 +252,58 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         const targetId = suspect
         // 죽이는 거에 찬성하는지 반대하는지 어떻게 알지?
         if (choiced === '찬성') {
-            const socket = new SockJS(`http://example.com//pub/confirm/${roomId}`)
-            const client = new Client({
-                webSocketFactory: () => socket,
-                reconnectDelay: 5000,
-                onConnect: () => {
-                    console.log('STOMP 클라이언트가 연결되었습니다')
-                    setStompClient(client)
-
-                    client.publish({
-                        destination: `/pub/confirm/${roomId}`,
-                        body: JSON.stringify({ targetId })
-                    })
-                },
-                onDisconnect: () => {
-                    console.log('STOMP 클라이언트가 연결이 종료되었습니다')
-                },
-                onStompError: (error) => {
-                    console.log('STOMP 오류', error)
-                }
-            })
-            client.activate()
+            stompClient.current.send(
+                `/pub/confirm/${roomId}`, 
+                header, 
+                JSON.stringify({targetId})
+            )
         }
     }
 
     // 게임 끝
     const gameEnd = () => {
-        const socket = new SockJS(`http://example.com/pub/end/${roomId}`)
-        const client = new Client({
-            webSocketFactory: () => socket,
-            reconnectDelay: 5000,
-            onConnect: () => {
-                console.log('STOMP 클라이언트가 연결되었습니다')
-            },
-            onDisconnect: () => {
-                console.log('STOMP 클라이언트가 연결이 종료되었습니다')
-            },
-            onStompError: (error) => {
-                console.log('STOMP 오류', error)
-            }
-        })
-        client.activate()
+        stompClient.current.send(
+            `/pub/end/${roomId}`, 
+            header, 
+            {}
+        )
         handleResult()
-
-        return () => {
-            if (client) {
-                client.deactivate()
-            }
-        }
     }
 
-    // 이게 뭐지
-    // const handleResult = () => {
-    //     if (stompClient && stompClient.connected) {
-    //         stompClient.send( `/pub/end/${roomId}`, {}, JSON.stringify({ targetId })
-    //     )
-    //         console.log('투표 메시지를 전송했습니다')
-    //     } else {
-    //         console.log('STOMP 클라이언트가 연결되지 않았습니다')
-    //     }
-    // }
 
-    // // 게임 결과 반영
-    // const handleResult = async() => {
-    //     await axios.post('https://i11e106.p.ssafy.io/api/results', {
-    //         "데이터 뭐 보냄?"
-    //     })
-    //         .then((response) => {
-    //             console.log(response)
-    //         })
-    //         .catch((error) => {
-    //             console.log(error)
-    //         })
-    //     handleAchievenets()
-    // }
+    // 게임 결과 반영
+    const handleResult = async() => {
+        await axios.post('https://i11e106.p.ssafy.io/api/results', {}, {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${access}`,
+            }, 
+        })
+            .then((response) => {
+                console.log(response)
+                handleAchievenets()
+            })
+            .catch((error) => {
+                console.log(error)
+            })
+        
+    }
 
-    // // 업적 처리
-    // const handleAchievenets = async() => {
-    //     await axios.post('https://i11e106.p.ssafy.io//api/honors', {
-    //         "데이터 뭐 보냄?"
-    //     })
-    //         .then((response) => {
-    //             console.log(response)
-    //         })
-    //         .catch((error) => {
-    //             console.log(error)
-    //         })
-    // }
+    // 업적 처리
+    const handleAchievenets = async() => {
+        await axios.post('https://i11e106.p.ssafy.io//api/honors', {}, {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${access}`,
+            },
+        })
+            .then((response) => {
+                console.log(response)
+            })
+            .catch((error) => {
+                console.log(error)
+            })
+    }
 
 
 
@@ -391,6 +324,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         case 'NIGHT_POLICE' :
             setSystemMessage('밤이 되었습니다. 첩보원이 활동 중입니다.')
             policeTime()
+            break
         case 'VOTE_START' :
             // 낮이 되었을 때, 비디오/오디오 처리
             handleVideoAudioAtDay();
@@ -398,41 +332,37 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
             changeToNormalChatMode();
             setSystemMessage('낮이 되었습니다. 토론을 하며 투표를 진행하세요.')
             voteStart()
+            break
         case 'VOTE_END' :
             setSystemMessage('낮이 되었습니다. 투표가 끝이 났습니다.')
             voteEnd()
+            break
         case 'REVOTE' :
             setSystemMessage('동점자가 나왔습니다. 재투표를 실시합니다.')
             voteAgain()
+            break
         case 'FINISH' :
             setSystemMessage(`투표에 의해 ${playerId}님이 최종 용의자가 되었습니다.`)
             voteFinish()
+            break
         case 'CONFIRM_START' :
             setSystemMessage(`최종 투표를 시작합니다.`)
             confirmStart()
+            break
         case 'CONFIRM_END' :
             setSystemMessage(`최종 투표가 끝이 났습니다`)
             confirmEnd()
+            break
         case 'END' :
             setSystemMessage('게임이 끝이 났습니다.')
             gameEnd()
+            break
     }
 
     return (
       <>
           <div className={styles.monitors}>
               <p>MONITOR IN!!</p>
-              {/* {players.map((player, index) => (
-                    <Monitor
-                        key={index}
-                        id={player.id}
-                        isMe={player.isMe}
-                        isAlive={player.isAlive}
-                        roomId={roomId}
-                        //publisher={publisher}
-                        streamManager={streamManager}
-                    />
-                ))} */}
                 {zip(players, streamManagers).map((player, index) => (
                     <Monitor
                         key={index}
@@ -441,7 +371,6 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                         isMe={player[0].isMe}
                         isAlive={player[0].isAlive}
                         roomId={roomId}
-                        //publisher={publisher}
                         streamManager={player[1]}
                         isVote={votes[player.id] || false}
                         onVote={handleVote}
