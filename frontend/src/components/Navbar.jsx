@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios"
 import LoginModal from "../modals/LoginModal";
 import SignUpModal from "../modals/SignUpModal.jsx"
@@ -34,6 +34,7 @@ const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
     const turnSpeakerOn = () => setIsSpeakerOn(!isSpeakerOn)
 
     const location = useLocation()
+    const navigate = useNavigate()
 
     // URL이 변경되면 모달을 닫음
     useEffect(() => {
@@ -55,6 +56,7 @@ const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
     // token undefined 문제 해결하고 나면 할 것
     const handleLogout = async () => {
         console.log("나 로그아웃 버튼 눌렀어")
+
         try {
             console.log("try 들어왔어")
             const access = localStorage.getItem('access')
@@ -65,6 +67,7 @@ const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
                 access: access,
                 refresh: refresh
             }
+
             // 로그아웃 API 요청
             await axios.post('https://i11e106.p.ssafy.io/api/logout', JSON.stringify(body), {
                 headers: {
@@ -75,11 +78,14 @@ const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
                 },
                 withCredentials: true // 필요 시 추가: 이 옵션을 추가하면 쿠키가 포함된 요청을 서버로 보낼 수 있음
             })
+
             // 로그아웃 성공 시 처리 로직
             localStorage.removeItem('access') // 로컬 스토리지에서 토큰 삭제
             localStorage.removeItem('refresh') // 로컬 스토리지에서 토큰 삭제
             console.log('localStorage 에서 access, refresh 삭제했어요')
             onLoginSuccess('') // 상위 컴포넌트에 로그아웃 알림
+
+            navigate('/') // MainPage로 이동
         } catch (error) {
             console.log("catch 들어왔어")
             console.error("Logout failed:", error.response ? error.response.data : error.message)
