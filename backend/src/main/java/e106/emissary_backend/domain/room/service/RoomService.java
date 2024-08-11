@@ -366,54 +366,68 @@ public class RoomService {
     }
 
     public boolean kickUser(RoomKickDto roomKickDto, long userId) throws OpenViduJavaClientException, OpenViduHttpException {
-            Session session = mapSessions.get(String.valueOf(roomKickDto.getRoomId()));
-            String connectionId = roomKickDto.getConnectionId();
-            session.fetch();
+        log.info("11");
+        Session session = mapSessions.get(String.valueOf(roomKickDto.getRoomId()));
+        log.info("22 ,{}", session);
+        String connectionId = roomKickDto.getConnectionId();
+        log.info("33, {}", connectionId);
 
-            if (session == null){
-                throw new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION);
-            }
+        session.fetch();
+        log.info("Fetch");
 
-            Optional<UserInRoom> userInRoom = userInRoomRepository.findByPk_UserId(userId);
-            String token = "";
-            if (userInRoom.isPresent()){
-                 token = userInRoom.get().getViduToken();
-            } else {
-                throw new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION);
-            }
+        if (session == null){
+            throw new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION);
+        }
+        log.info("눌아님");
+        Optional<UserInRoom> userInRoom = userInRoomRepository.findByPk_UserId(userId);
+        String token = "";
+        if (userInRoom.isPresent()){
+            token = userInRoom.get().getViduToken();
+        } else {
+            throw new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION);
+        }
+        log.info("usr {}", userInRoom.get().getRoom().getRoomId());
+        log.info("token = {}", token);
+        SessionRole role = mapSessionNamesTokens.get(session.getSessionId()).get(token);
 
-            SessionRole role = mapSessionNamesTokens.get(session.getSessionId()).get(token);
+        if (role != SessionRole.HOST){
+            // 권한 부족 exception 전송
+            log.info("권한없어");
+            return false;
+        }
 
-            if (role != SessionRole.HOST){
-                // 권한 부족 exception 전송
-                return false;
-            }
+        String targetToken = session.getConnection(connectionId).getToken();
+        log.info("targetToken = {}", targetToken);
+        User targetUser = userInRoomRepository.findUserByViduToken(targetToken).orElseThrow(
+                () -> new NotFoundUserInRoomException(CommonErrorCode.NOT_FOUND_USER_IN_ROOM_EXCEPTION));
+        long targetId = targetUser.getUserId();
+        log.info("targetId = {}", targetId);
 
-            session.getConnection(connectionId).getToken();
-            // UserInRooM 처리하고
-            String nickname = session.getConnection(connectionId).getClientData();
-            Optional<UserInRoom> kickedUser = userInRoomRepository.findByPk_UserId(userId);
-            String kickedToken = "";
-            if (kickedUser.isPresent()){
-                if (userInRoom.get().getViduToken().equals(kickedUser.get().getViduToken())){
-                    // 호스트가 스스로 강퇴할 때 exception
-                    return false;
-                }
-                kickedToken = kickedUser.get().getViduToken();
-                userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomKickDto.getRoomId(), userId);
-            }
+        log.info("권한대신에 connection으로 token {}", session);
+        // UserInRooM 처리하고
+        String nickname = session.getConnection(connectionId).getClientData();
+        log.info("kickedUser {}", nickname);
+        if (userInRoom.get().getViduToken().equals(targetToken)){
+            // 호스트가 스스로 강퇴할 때 exception
+            log.info("방장이 스스로를 강퇴하면 안돼.");
+            return false;
+        }
+        userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomKickDto.getRoomId(), targetId);
+        log.info("여긴가");
 
-            // 레디스 처리하고
-            deleteUserInRedis(roomKickDto.getRoomId(), userId);
-            publishRemoveUser(roomKickDto.getRoomId());
+        // 레디스 처리하고
+        deleteUserInRedis(roomKickDto.getRoomId(), targetId);
+        publishRemoveUser(roomKickDto.getRoomId());
+        log.info("레디스 처리 완료");
 
-            // Map 삭제하고
-            Map<String, SessionRole> users = mapSessionNamesTokens.get(session.getSessionId());
-            users.remove(kickedToken);
+        // Map 삭제하고
+        Map<String, SessionRole> users = mapSessionNamesTokens.get(session.getSessionId());
+        users.remove(targetToken);
+        log.info("Map 삭제완료");
 
-            // 강퇴 ㄱ
-            session.forceDisconnect(connectionId);
-            return true;
+        // 강퇴 ㄱ
+        session.forceDisconnect(connectionId);
+        return true;
     }
 
     private Mono<String> sendSignalToSession(String sessionId, String type, String data){
