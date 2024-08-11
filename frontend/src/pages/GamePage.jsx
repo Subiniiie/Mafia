@@ -62,7 +62,6 @@ function GamePage() {
         {nickname: 'player8', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
     ]);
 
-
     // 방 정보 가져오기
     useEffect(() => {
         const access = localStorage.getItem('access');
@@ -83,8 +82,6 @@ function GamePage() {
 
         gameRoomInfo();
     }, [])
-
-
 
     useEffect( () => {
         const access = localStorage.getItem('access');
@@ -114,8 +111,9 @@ function GamePage() {
             event => deleteStreamManager(event.stream.streamManager);
 
         const handleChatSignal = (event) => {
-            const message = event.data;
-            const nickname = JSON.parse(event.from).nickname;
+            const response = JSON.parse(event.data);
+            const nickname = response.nickname;
+            const message = response.message;
             setChatHistory(prevHistory => [ ...prevHistory, { nickname, message } ]);
         }
 
@@ -366,7 +364,7 @@ function GamePage() {
     return (
         <>
             <div className={styles.container}>
-                <button onClick={handleButtonClick}>야호</button>
+                <div className="box-content h-32"></div>
                 {/* 게임데이터 있는지 확인 -> 게임데이터에 유저리스트가 있는지 확인 -> 그 유저리스트 array인지 확인  */}
                 {gameData && gameData.userList && Array.isArray(gameData.userList) &&
                     <GamePageHeader gameData={gameData} id={roomId} />
