@@ -40,9 +40,10 @@ public class RoomController {
     }
 
     @GetMapping("/rooms/{roomId}")
-    public ResponseEntity<RoomDetailDto> detailRoom(@PathVariable Long roomId){
+    public ResponseEntity<RoomDetailDto> detailRoom(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long roomId){
+        Long userId = customUserDetails.getUserId();
         log.info("detail Room Controller run");
-        return ResponseEntity.ok(roomService.detailRoom(roomId));
+        return ResponseEntity.ok(roomService.detailRoom(roomId, userId));
     }
 
     /**
@@ -62,7 +63,7 @@ public class RoomController {
             RoomOptionDto res = roomService.makeRoom(userId, roomRequestDto);
             map.put("res", "success");
             map.put("option", res);
-            map.put("detail", roomService.detailRoom(res.getRoomId()));
+            map.put("detail", roomService.detailRoom(res.getRoomId(), userId));
             return ResponseEntity.ok(map);
         } catch (OpenViduJavaClientException | OpenViduHttpException e){
             // 방이 생성 실패 되었을 시, 500 error 전송
