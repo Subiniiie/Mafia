@@ -22,22 +22,24 @@ public class RedissonLockAspect {
     private final RedissonClient redissonClient;
     
     @Around("@annotation(e106.emissary_backend.domain.game.aspect.RedissonLock)")
-    public void redissonLock(ProceedingJoinPoint joinPoint) throws Throwable {
+    public Object redissonLock(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
         RedissonLock annotation = method.getAnnotation(RedissonLock.class);
-        String lockKey = method.getName() + CustomSpringParser.getDynamicValue(signature.getParameterNames(), joinPoint.getArgs(), annotation.value());
+//        String lockKey = method.getName() + CustomSpringParser.getDynamicValue(signature.getParameterNames(), joinPoint.getArgs(), annotation.value());
+        // 메서드 + id에서
+        String lockKey = "" + CustomSpringParser.getDynamicValue(signature.getParameterNames(), joinPoint.getArgs(), annotation.value());
 
         RLock lock = redissonClient.getLock(lockKey);
-
+        log.info("lock키는 무엇일까요? = {}", lockKey);
         try{
             boolean lockable = lock.tryLock(annotation.waitTime(), annotation.leaseTime(), TimeUnit.MILLISECONDS);
             if(!lockable){
                 log.info("Lock 획득 실패 = {}", lockKey);
-                return;
+                return null;
             }
             log.info("로직 수행");
-            joinPoint.proceed();
+            return joinPoint.proceed();
         }catch (InterruptedException e){
             log.info("에러 발생");
             throw e;
