@@ -261,6 +261,7 @@ public class RoomService {
                     .user(user)
                     .isBlocked(false)
                     .connectTime(LocalDateTime.now())
+                    .viduToken(token)
                     .build();
 
             userInRoomRepository.save(userInRoom);
