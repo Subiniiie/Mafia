@@ -281,9 +281,9 @@ public class RoomService {
             // Redis 발행 로직
             List<RoomDetailUserDto> userList = userInRoomList.stream()
                     .map(UserInRoom::getUser)
-                    .map(nowUser -> RoomDetailUserDto.of(nowUser, room.getOwnerId()))
+                    .map(nowUser -> RoomDetailUserDto.of(nowUser, room.getOwnerId(), userId))
                     .collect(Collectors.toList());
-            RoomDetailUserDto dto = RoomDetailUserDto.of(user, room.getOwnerId());
+            RoomDetailUserDto dto = RoomDetailUserDto.of(user, room.getOwnerId(), userId);
             userList.add(dto);
 
             RoomDetailDto roomDetailDto = RoomDetailDto.toDTO(room, userList);
@@ -341,7 +341,7 @@ public class RoomService {
             roomRepository.deleteById(roomId);
         }else{
             // 발행하기
-            publishRemoveUser(roomId);
+            publishRemoveUser(roomId, userId);
         }
 
         return new CommonResponseDto("ok");
@@ -417,7 +417,7 @@ public class RoomService {
 
         // 레디스 처리하고
         deleteUserInRedis(roomKickDto.getRoomId(), targetId);
-        publishRemoveUser(roomKickDto.getRoomId());
+        publishRemoveUser(roomKickDto.getRoomId(), userId);
         log.info("레디스 처리 완료");
 
         // Map 삭제하고
@@ -453,7 +453,7 @@ public class RoomService {
     }
 
     @RedissonLock(value = "#roomId")
-    public RoomDetailDto detailRoom (long roomId){
+    public RoomDetailDto detailRoom (long roomId, long userId){
         log.info("detail Room run");
         List<UserInRoom> userInRoom = userInRoomRepository.findAllByPk_RoomId(roomId).orElseThrow(
                 () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
@@ -467,7 +467,7 @@ public class RoomService {
 
         List<RoomDetailUserDto> roomDetailUserDtoList = userInRoom.stream()
                 .map(UserInRoom::getUser)
-                .map(user -> RoomDetailUserDto.of(user, room.getOwnerId()))
+                .map(user -> RoomDetailUserDto.of(user, room.getOwnerId(), userId))
                 .toList();
 
         return RoomDetailDto.toDTO(room, roomDetailUserDtoList);
@@ -484,13 +484,13 @@ public class RoomService {
         redisKeyValueTemplate.update(updateGame);
     }
 
-    private void publishRemoveUser(Long roomId) {
+    private void publishRemoveUser(Long roomId, long userId) {
         List<UserInRoom> userInRoomList = userInRoomRepository.findAllByPk_RoomId(roomId).orElseThrow(
                 () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
         Room room = userInRoomList.get(0).getRoom();
         List<RoomDetailUserDto> userList = userInRoomList.stream()
                 .map(UserInRoom::getUser)
-                .map(nowUser -> RoomDetailUserDto.of(nowUser, room.getOwnerId()))
+                .map(nowUser -> RoomDetailUserDto.of(nowUser, room.getOwnerId(), userId))
                 .toList();
         RoomDetailDto roomDetailDto = RoomDetailDto.builder()
                 .roomId(roomId)
