@@ -10,6 +10,7 @@
     justify-content: space-evenly;
     z-index: 2000;
     color: white;
+    padding: 15px 20px;
 }
 
 .container>div {
@@ -20,20 +21,29 @@
     display: flex;
     align-items: center;
     justify-content: space-around;
+    gap: 15px;
+    color: #F6F3E7;
+    width: 30%;
 }
 
 .filterBoxContainerLarge {
     display: flex;
     align-items: center;
     justify-content: space-around;
-    flex: 2
+    flex: 2;
+    background-color: #292C33;
+    border-radius: 10px;
+    padding: 10px;
 }
 
 .filterBoxContainerMini {
     display: flex;
     align-items: center;
     justify-content: space-around;
-    flex: 1
+    flex: 1;
+    background-color: #292C33;
+    border-radius: 10px;
+    padding: 10px;
 }
 
 .filterContainer {
@@ -41,6 +51,14 @@
     align-items: center;
     justify-self: space-around;
     width: auto;
+    background-color: transparent;
+    font-size: 18px;
+}
+
+.filterButtons {
+    /* width: 25px; */
+    height: 25px;
+    margin-left: 15px;
 }
 
 
@@ -50,10 +68,23 @@
     align-items: center;
     justify-content: center;
     flex: 1 1 auto; */
+/* 
+.searchBarContainer {
+    width: 40%;
+} */
 
 .CreateRoomButtonContainer {
     display: flex;
     align-items: center;
     justify-content: end;
-    padding-right: 3%;
+    /* padding-right: 3%; */
+    /* width: 30% */
+}
+
+.CreateRoomButton {
+    background-color: #5D070A;
+    font-size: 22px;
+    padding: 2px 20px;
+    border: 2.5px #4C0A0E solid;
+    border-radius: 15px;
 }
