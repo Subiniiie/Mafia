@@ -19,23 +19,25 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
             }
         }).then((resp) => {
             console.log(resp);
+            const re = resp
             navigate(`/game-room/${id}`, {state :resp.data.token});
         }).catch((err) => {
             console.error(err);
         })
     }
 
-    useEffect(() => {
-        console.log('안녕 너와?????', gameData)
-    }, [gameData])
+
+    // useEffect(() => {
+    //     console.log('안녕 너와?????', gameData)
+    // }, [gameData])
 
 
 
     return (
         // <div className="kimjungchul-bold" onClick={getRoomPlayer}>
-        <div className="kimjungchul-bold">
-            <Link to={`/game-room/${id}`} state={viduToken} className={`${isInProgress ? styles.inProgress : styles.notStarted}`} onClick={handleEnterRoom} >
-            {/*<div className={`${isInProgress ? styles.inProgress : styles.notStarted}`} onClick={getGameRoomInfo}*/}
+        <div className="kimjungchul-bold" onClick={handleEnterRoom}>
+            {/* <Link to={`/game-room/${id}`} state={viduToken} className={`${isInProgress ? styles.inProgress : styles.notStarted}`} onClick={handleEnterRoom} > */}
+            {/* <div className={`${isInProgress ? styles.inProgress : styles.notStarted}`} onClick={getGameRoomInfo}> */}
             <div className={`${isInProgress ? styles.inProgress : styles.notStarted}`}>
                 {/* <Link to={`/game-room/${id}`} className={`${isInProgress ? styles.inProgress : styles.notStarted}`}> */}
                 <div className={`${styles.cardMain} ${isInProgress ? styles.inProgressMain : styles.notStartedMain}`}>
@@ -48,7 +50,7 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
                     <p className={styles.progress}>{progress}/8</p>
                 </div>
             </div>
-            </Link>
+            {/* </Link> */}
         </div>
     );
 };

@@ -18,7 +18,6 @@ const GLMain = ({ setViduToken }) => {
                     }
                 })
                 setRooms(response.data)
-                
             } catch (error) {
                 console.error("Failed to fetch rooms :", error)
             }

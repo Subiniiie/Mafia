@@ -8,7 +8,7 @@ import ChoiceDieOrTurncoat from "../../modals/ChoiceDieOrTurncoat";
 import FinalDefensePlayerModal from "../../modals/FinalDefensePlayerModal";
 import styles from "./GamePageMain.module.css"
 
-function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, stompClient, gameData, nowGameState, players, setPlayers }) {
+function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, stompClient, gameData, nowGameState, players, setPlayers, isStompClient }) {
     // 플레이어들의 초기 상태
     // const initialPlayers = [
     //     {nickname: 'player1', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
@@ -42,20 +42,28 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     const [ suspect, setSuspect ] = useState(null)
 
 
+    const access = localStorage.getItem('access');
+    const header =  {'Authorization': `Bearer ${access}`}
 
     // 게임 시작하기
     const gameStart = () => {
-        const socket = new WebSocket(`ws://i11e106.p.ssafy.io/pub/start/${roomId}`)
-        socket.onopen = function(event) {
-            console.log('웹소켓 연결이 열렸습니다. 게임을 시작합니다')
-        }
-        socket.onerror = function(error) {
-            console.error('게임 시작 웹소켓에서 에러가 발생했습니다.:', error);
-        }
-        socket.close()
-        socket.onclose = function(event) {
-            console.log('게임 시작 웹소켓 연결이 닫혔습니다')
-        }
+        // (주소, {헤더}, 메세지)
+        isStompClient.current.send(
+            `/ws/pub/${roomId}`, 
+            header,
+            {}
+        )
+        // const socket = new WebSocket(`/ws/pub/start/${roomId}`)
+        // socket.onopen = function(event) {
+        //     console.log('웹소켓 연결이 열렸습니다. 게임을 시작합니다')
+        // }
+        // socket.onerror = function(error) {
+        //     console.error('게임 시작 웹소켓에서 에러가 발생했습니다.:', error);
+        // }
+        // socket.close()
+        // socket.onclose = function(event) {
+        //     console.log('게임 시작 웹소켓 연결이 닫혔습니다')
+        // }
     }
 
     // 밀정 시간
@@ -82,23 +90,35 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // 죽일까 변절시킬까
     const handleChoiceDieOrTurncoat = (choiced) => {
         if (choiced === '변절') {
-            const socket = new WebSocket(`ws://i11e106.p.ssafy.io/pub/appease/${roomId}/${emissaryTarget}`)
-            socket.onopen = function(event) {
-                console.log('웹소켓 연결이 열렸습니다. 변절자 정보를 전송합니다')
-            }
-            socket.close()
-            socket.onclose = function(event) {
-                console.log('변절자 정보 전송 웹소켓 연결이 닫혔습니다')
-            }
+            // const socket = new WebSocket(`ws://i11e106.p.ssafy.io/pub/appease/${roomId}/${emissaryTarget}`)
+            // 내용은 데이터를 줘야할 때 추가해서 주기
+            // gamepage에서 stompClient 내려보내기
+            isStompClient.current.send(
+                `/ws/pub/appease/${roomId}/${emissaryTarget}`, 
+                header,
+                {}
+            )
+            // socket.onopen = function(event) {
+            //     console.log('웹소켓 연결이 열렸습니다. 변절자 정보를 전송합니다')
+            // }
+            // socket.close()
+            // socket.onclose = function(event) {
+            //     console.log('변절자 정보 전송 웹소켓 연결이 닫혔습니다')
+            // }
         } else if (choiced === '죽임') {
-            const socket = new WebSocket(`ws://i11e106.p.ssafy.io/pub/kill/${roomId}/${emissaryTarget}`)
-            socket.onopen = function(event) {
-                console.log('웹소켓 연결이 열렸습니다. 사망자 정보를 전송합니다')
-            }
-            socket.close()
-            socket.onclose = function(event) {
-                console.log('사망자 정보 전송 웹소켓 연결이 닫혔습니다')
-            }
+            isStompClient.current.send(
+                `/ws/pub/kill/${roomId}/${emissaryTarget}`, 
+                header,
+                {}
+            )
+            // const socket = new WebSocket(`ws://i11e106.p.ssafy.io/pub/kill/${roomId}/${emissaryTarget}`)
+            // socket.onopen = function(event) {
+            //     console.log('웹소켓 연결이 열렸습니다. 사망자 정보를 전송합니다')
+            // }
+            // socket.close()
+            // socket.onclose = function(event) {
+            //     console.log('사망자 정보 전송 웹소켓 연결이 닫혔습니다')
+            // }
         }
         setchoiceDieOrTurncoat(false)
     }
@@ -116,69 +136,84 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // 첩보원이 선택한 플레이어의 역할을 아는 함수
     const policeChoicedPlayer = function(targetId, targetNickname, targetRole) {
         setShowPoliceModal(false)
-        const socket1 = new WebSocket(`/pub/detect/${roomId}/${targetId}`)
-        socket1.onopen = function(evnet) {
-            console.log('웹소켓 연결이 열렸습니다. 첩보원에게 플레이어 정보를 전송합니다')
-        }
-        socket1.close()
-        socket1.onclose = function(event) {
-            console.log('첩보원에게 플레이어 정보를 전송하는 웹소켓 연결이 닫혔습니다.')
-        }
+        isStompClient.current.send(
+            `/ws/pub/detect/${roomId}/${targetId}`, 
+            header,
+            JSON.stringify({ targetId, targetNickname, targetRole })
+        )
+        // const socket1 = new WebSocket(`/pub/detect/${roomId}/${targetId}`)
+        // socket1.onopen = function(evnet) {
+        //     console.log('웹소켓 연결이 열렸습니다. 첩보원에게 플레이어 정보를 전송합니다')
+        // }
+        // socket1.close()
+        // socket1.onclose = function(event) {
+        //     console.log('첩보원에게 플레이어 정보를 전송하는 웹소켓 연결이 닫혔습니다.')
+        // }
         // 첩보원 화면에만 뜨게 하기
         if (me) {
             setSystemMessage(`${targetNickname}님은 ${targetRole}입니다.`)
         }
         // 첩보원 활동이 끝났다는 메시지 보내기
-        const socket2 = new WebSocket(`ws://i11e106.p.ssafy.io/day/${roomId}`)
-        socket2.onopen = function(evnet) {
-            console.log('웹소켓 연결이 열렸습니다. 첩보원 활동이 끝났습니다')
-        }
-        socket2.close()
-        socket2.onclose = function(event) {
-            console.log('첩보원 활동이 끝났다는 메시지를 전송했습니다.')
-        }
+        isStompClient.current.send(
+            `/ws/pub/day/${roomId}`, 
+            header,
+            {}
+        )
+        // const socket2 = new WebSocket(`ws://i11e106.p.ssafy.io/day/${roomId}`)
+        // socket2.onopen = function(evnet) {
+        //     console.log('웹소켓 연결이 열렸습니다. 첩보원 활동이 끝났습니다')
+        // }
+        // socket2.close()
+        // socket2.onclose = function(event) {
+        //     console.log('첩보원 활동이 끝났다는 메시지를 전송했습니다.')
+        // }
 
     }
 
     // 낮(토론 및 투표 중)
     const voteStart = (targetId) => {
-        const socket = new SockJS(`http://example.com/pub/vote/${roomId}`)
-        const client = new Client({
-            webSocketFactory: () => socket,
-            reconnectDelay: 5000,
-            onConnect: () => {
-                console.log('STOMP 클라이언트가 연결되었습니다')
-                setStompClient(client)
-            },
-            onDisconnect: () => {
-                console.log('STOMP 클라이언트가 연결이 종료되었습니다')
-            },
-            onStompError: (error) => {
-                console.log('STOMP 오류', error)
-            }
-        })
-        client.activate()
+        isStompClient.current.send(
+            `/ws/pub//vote/${roomId}`, 
+            header,
+            JSON.stringify({ targetId })
+        )
+        // const socket = new SockJS(`http://example.com/pub/vote/${roomId}`)
+        // const client = new Client({
+        //     webSocketFactory: () => socket,
+        //     reconnectDelay: 5000,
+        //     onConnect: () => {
+        //         console.log('STOMP 클라이언트가 연결되었습니다')
+        //         setStompClient(client)
+        //     },
+        //     onDisconnect: () => {
+        //         console.log('STOMP 클라이언트가 연결이 종료되었습니다')
+        //     },
+        //     onStompError: (error) => {
+        //         console.log('STOMP 오류', error)
+        //     }
+        // })
+        // client.activate()
         handleVote(targetId)
 
         const timer = setTimeOut(() => {
-            if (client) {
-                client.deactivate()
+            if (stompClient.current && stompClient.current.connected) {
                 console.log('낮이 종료되었습니다')
             }
         }, 30000)
 
         return () => {
             clearTimeout(timer)
-            if (client) {
-                client.deactivate()
-            }
         }
     }
 
     // 낮에 투표 전송
     const handleVote = (targetId) => {
         if (stompClient.current && stompClient.connected) {
-            stompClient.current.send( `/pub/vote/${roomId}`, {}, JSON.stringify({ targetId }))
+            stompClient.current.send(
+                 `/pub/vote/${roomId}`, 
+                 header, 
+                 JSON.stringify({ targetId })
+            )
             console.log('투표 메시지를 전송했습니다')
         } else {
             console.log('STOMP 클라이언트가 연결되지 않았습니다')
@@ -284,54 +319,64 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         const targetId = suspect
         // 죽이는 거에 찬성하는지 반대하는지 어떻게 알지?
         if (choiced === '찬성') {
-            const socket = new SockJS(`http://example.com//pub/confirm/${roomId}`)
-            const client = new Client({
-                webSocketFactory: () => socket,
-                reconnectDelay: 5000,
-                onConnect: () => {
-                    console.log('STOMP 클라이언트가 연결되었습니다')
-                    setStompClient(client)
+            stompClient.current.send(
+                `/pub/confirm/${roomId}`, 
+                header, 
+                JSON.stringify({targetId})
+           )
+        //     const socket = new SockJS(`http://example.com//pub/confirm/${roomId}`)
+        //     const client = new Client({
+        //         webSocketFactory: () => socket,
+        //         reconnectDelay: 5000,
+        //         onConnect: () => {
+        //             console.log('STOMP 클라이언트가 연결되었습니다')
+        //             setStompClient(client)
 
-                    client.publish({
-                        destination: `/pub/confirm/${roomId}`,
-                        body: JSON.stringify({ targetId })
-                    })
-                },
-                onDisconnect: () => {
-                    console.log('STOMP 클라이언트가 연결이 종료되었습니다')
-                },
-                onStompError: (error) => {
-                    console.log('STOMP 오류', error)
-                }
-            })
-            client.activate()
-        }
+        //             client.publish({
+        //                 destination: `/pub/confirm/${roomId}`,
+        //                 body: JSON.stringify({ targetId })
+        //             })
+        //         },
+        //         onDisconnect: () => {
+        //             console.log('STOMP 클라이언트가 연결이 종료되었습니다')
+        //         },
+        //         onStompError: (error) => {
+        //             console.log('STOMP 오류', error)
+        //         }
+        //     })
+        //     client.activate()
+        // }
     }
 
     // 게임 끝
     const gameEnd = () => {
-        const socket = new SockJS(`http://example.com/pub/end/${roomId}`)
-        const client = new Client({
-            webSocketFactory: () => socket,
-            reconnectDelay: 5000,
-            onConnect: () => {
-                console.log('STOMP 클라이언트가 연결되었습니다')
-            },
-            onDisconnect: () => {
-                console.log('STOMP 클라이언트가 연결이 종료되었습니다')
-            },
-            onStompError: (error) => {
-                console.log('STOMP 오류', error)
-            }
-        })
-        client.activate()
+        stompClient.current.send(
+            `/pub/confirm/${roomId}`, 
+            header, 
+            {}
+        )
+        // const socket = new SockJS(`http://example.com/pub/end/${roomId}`)
+        // const client = new Client({
+        //     webSocketFactory: () => socket,
+        //     reconnectDelay: 5000,
+        //     onConnect: () => {
+        //         console.log('STOMP 클라이언트가 연결되었습니다')
+        //     },
+        //     onDisconnect: () => {
+        //         console.log('STOMP 클라이언트가 연결이 종료되었습니다')
+        //     },
+        //     onStompError: (error) => {
+        //         console.log('STOMP 오류', error)
+        //     }
+        // })
+        // client.activate()
         handleResult()
 
-        return () => {
-            if (client) {
-                client.deactivate()
-            }
-        }
+        // return () => {
+        //     if (client) {
+        //         client.deactivate()
+        //     }
+        // }
     }
 
     // 이게 뭐지

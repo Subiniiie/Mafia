@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, forwardRef } from "react";
 import {useLocation, useParams} from "react-router-dom";
 import axios from "axios";
 import { Client, Stomp } from "@stomp/stompjs";
@@ -378,6 +378,7 @@ function GamePage() {
                         streamManagers={getSortedStreamManagers(streamManagers)}
                         setChatHistory={setChatHistory}
                         setChatMode={setChatMode}
+                        // 바로 보내도 되나?
                         stompClient={stompClient}
                         gameData={gameData}
                         nowGameState={nowGameState}

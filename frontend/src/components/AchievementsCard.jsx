@@ -16,14 +16,14 @@ function AchievementsCard({achievementName, achievementDate, description, image}
             <div className={styles.card}>
                 <div className={styles.inner}>
                     <div className={styles.front}>
-                        <img src={image} alt={achievementName}></img>
+                        <img src={image} alt="image"></img>
                          <div className={styles.content}>
                             <div>{achievementName}</div>
                             <div>{formattedDate}</div>
-                    <div className={styles.back}>
-                        {description}
-                    </div>
                             <button onClick={getAchievement}>장착</button>
+                            <div className={styles.back}>
+                                {description}
+                            </div>
                         </div>
                     </div>
                 </div>

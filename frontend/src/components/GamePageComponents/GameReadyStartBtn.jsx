@@ -10,8 +10,13 @@ function GameReadyStartBtn({ stompClient, nowGameState, gameData }) {
 
     console.log('게임 데이터를 볼거야!', gameData)
     const roomManagerCheck = gameData.userList.find(user => user.owner === true)
+    console.log('장하오', roomManagerCheck)
+
+    const roomManager = gameData.userList.find(user => user.userId === roomManagerCheck.userId);
+
+
+    // const roomManager = roomManagerCheck.owner.userId
     console.log('너 방장이야?', roomManagerCheck)
-    const roomManager = roomManagerCheck.owner
 
 
     // 일반 플레이어가 준비 버튼을 누름
