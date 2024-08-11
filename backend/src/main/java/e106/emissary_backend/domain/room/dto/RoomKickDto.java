@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class RoomKickDto {
     private Long roomId;
-    private String ConnectionId;
+    private String connectionId;
 }
