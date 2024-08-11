@@ -9,15 +9,13 @@ function MainPage({ isLoggedIn }) {
         alert('로그인을 해주세요.')
     }
 
-    const MainPageClass = classNames('east-sea-dokdo-regular', styles.content)
+    const MainPageClass = classNames('east-sea-dokdo-regular', styles.button)
 
     return (
-        <div className={styles.container}>
-            <div className={styles.videoContainer}>
-                <video autoPlay loop muted className={styles.backgroundVideo}>
-                    <source src={bgVideo} type="video/mp4" />
-                </video>
-            </div>
+        <>
+            <video autoPlay loop muted className={styles.video}>
+                <source src={bgVideo} type="video/mp4" />
+            </video>
             <div className={MainPageClass}>
                 {isLoggedIn ? (
                     <Link to="/game-list" className={styles.workingButton}>여정 떠나기</Link>
@@ -27,7 +25,7 @@ function MainPage({ isLoggedIn }) {
                     </div>
                 )}
             </div>
-        </div>
+        </>
     )
 }
 

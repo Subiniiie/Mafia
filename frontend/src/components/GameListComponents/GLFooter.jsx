@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import anime from 'animejs';
 import styles from './GLFooter.module.css';
+import classNames from 'classnames';
 
 const quotes = [
     { text: "우리는 결코 일본에 종속되지 않을 것이다.", author: "김구" },
@@ -79,13 +80,13 @@ const GLFooter = () => {
         return () => clearTimeout(timer);
     }, [currentQuoteIndex]);
 
+    const GLFooterClass = classNames('east-sea-dokdo-regular', styles.footer)
+
     return (
 
-        <footer className="east-sea-dokdo-regular">
-            <div className={styles.footer}>
-                <p className={styles.quote} ref={textRef}></p>
-                <p className={styles.author} ref={authorRef}></p>
-            </div>
+        <footer className={GLFooterClass}>
+            <p className={styles.quote} ref={textRef}></p>
+            <p className={styles.author} ref={authorRef}></p>
         </footer>
     );
 };
