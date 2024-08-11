@@ -24,13 +24,16 @@ import e106.emissary_backend.global.error.exception.*;
 import io.jsonwebtoken.lang.Objects;
 import io.openvidu.java.client.*;
 import jakarta.annotation.PostConstruct;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisKeyValueTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
@@ -94,6 +97,44 @@ public class RoomService {
 
     public List<RoomListDto> getRooms(Pageable pageable) {
         Slice<Room> roomList = roomRepository.findAllBy(pageable).orElseThrow(()-> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
+        return roomList.stream().map(room -> RoomListDto.builder()
+                        .title(room.getTitle())
+                        .roomId(room.getRoomId())
+                        .ownerName(userRepository.findNicknameByUserId(room.getOwnerId()).orElseThrow(
+                                () -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION)))
+                        .maxPlayer(room.getMaxPlayer())
+                        .nowPlayer(userInRoomRepository.countPeopleByRoom_RoomId(room.getRoomId()))
+                        .password(room.getPassword())
+                        .isPrivate(room.isPrivate())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    public List<RoomListDto> getFilteredRooms(Pageable pageable, Boolean isPublic, Boolean isPrivate, Boolean isWaiting, String search) {
+        Specification<Room> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (isPublic != null && isPublic) {
+                predicates.add(criteriaBuilder.isFalse(root.get("isPrivate")));
+            }
+
+            if (isPrivate != null && isPrivate) {
+                predicates.add(criteriaBuilder.isTrue(root.get("isPrivate")));
+            }
+
+            if (isWaiting != null && isWaiting) {
+                predicates.add(criteriaBuilder.equal(root.get("roomState"), RoomState.WAIT));
+            }
+
+            if (search != null && !search.isEmpty()) {
+                predicates.add(criteriaBuilder.like(root.get("title"), "%" + search + "%"));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Page<Room> roomList = roomRepository.findAll(spec, pageable);
+
         return roomList.stream().map(room -> RoomListDto.builder()
                         .title(room.getTitle())
                         .roomId(room.getRoomId())
