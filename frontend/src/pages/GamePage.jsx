@@ -22,6 +22,7 @@ function GamePage() {
 
     // 게임방 주소에 roomId 추가해서 리스트에서 들어가는 게임방마다 다른 경로로 가게 하기
     const { roomId } = useParams();
+    
 
     // OpenVidu Session Variables
     const OV = new OpenVidu();
@@ -47,44 +48,11 @@ function GamePage() {
 
     // Game
     const [ gameData, setGameData ] = useState({})
-    const [ gameResponse, setGameResponse ] = useState(null)
-    const [ nowGameState, setNowGameState ] = useState(null)
+    const [ gameResponse, setGameResponse ] = useState("")
+    const [ nowGameState, setNowGameState ] = useState("")
 
     // player 설정
-    const [players, setPlayers] = useState([
-        {nickname: 'player1', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-        {nickname: 'player2', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-        {nickname: 'player3', role: 'emissary', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-        {nickname: 'player4', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-        {nickname: 'player5', role: 'police', isRoomManager: true, isMe: false, isAlive: true, hasVoted: false},
-        {nickname: 'player6', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-        {nickname: 'player7', role: 'independenceActivist', isRoomManager: false, isMe: true, isAlive: true, hasVoted: false},
-        {nickname: 'player8', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-    ]);
-
-
-    // 방 정보 가져오기
-    useEffect(() => {
-        const access = localStorage.getItem('access');
-
-        async function gameRoomInfo() {
-            await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`, {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${access}`,
-                }
-            }).then((res) => {
-                setGameData(res.data);
-                console.log("RES",res.data);
-            }).catch ((err) => {
-                console.log("게임방 API를 불러오지 못했습니다", err);
-            })
-        }
-
-        gameRoomInfo();
-    }, [])
-
-
+    const [players, setPlayers] = useState({});
 
     useEffect( () => {
         const access = localStorage.getItem('access');
@@ -185,12 +153,11 @@ function GamePage() {
 
 
     const stompClient = useRef(null)
-    // const { roomid }  = useParams()
+    const access = localStorage.getItem('access');
 
     // 방 정보 가져오기
     useEffect(() => {
         const gameRoomInfo = async() => {
-            console.log('장하오')
             try {
                 const response = await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`, {
                     headers: {
@@ -198,22 +165,14 @@ function GamePage() {
                         "Authorization": `Bearer ${access}`,
                     }
                 })
-                console.log("resp", response.data)
                 setGameData(response.data)
-                console.log('제발 나와라!!!11', gameData);
-                console.log('너 나와!!!!!', gameData.title)
-                console.log('너도 나와!!!!!!', gameData.title)
+                console.log('Game Data 출력', gameData);
             } catch (error) {
                 console.log("게임방 API를 불러오지 못했습니다", error)
             }
         }
         gameRoomInfo()
     }, [])
-
-    useEffect(() => {
-        console.log('나 들어감??', gameData)
-        console.log('나 갔따', gameData.title)
-    }, [gameData, gameData.title])
 
     // useEffect( () => {
     //
@@ -366,7 +325,6 @@ function GamePage() {
     return (
         <>
             <div className={styles.container}>
-                <button onClick={handleButtonClick}>야호</button>
                 {/* 게임데이터 있는지 확인 -> 게임데이터에 유저리스트가 있는지 확인 -> 그 유저리스트 array인지 확인  */}
                 {gameData && gameData.userList && Array.isArray(gameData.userList) &&
                     <GamePageHeader gameData={gameData} id={roomId} />
@@ -389,6 +347,7 @@ function GamePage() {
                 {gameData && gameData.userList && Array.isArray(gameData.userList) &&
                     <GamePageFooter
                         systemMessage={systemMessage}
+                        roomId={roomId}
                         stompClient={stompClient}
                         gameData={gameData}
                         nowGameState={nowGameState}
@@ -400,30 +359,6 @@ function GamePage() {
                     />
                 }
             </div>
-            {/* <div>
-                <GamePageHeader />
-                <GamePageMain   setSystemMessage={setSystemMessage}
-                                roomId={roomId}
-                                streamManagers={getSortedStreamManagers(streamManagers)}
-                                setChatMode={setChatMode}
-                                stompClient={stompClient}
-                                gameData={gameData}
-                                nowGameState={nowGameState}
-                                gameResponse={gameResponse}
-                                players={players}
-                                setPlayers={setPlayers}
-                                />
-                <GamePageFooter systemMessage={systemMessage}
-                                stompClient={stompClient}
-                                gameData={gameData}
-                                nowGameState={nowGameState}
-                                gameResponse={gameResponse}
-                                session={session}
-                                chatHistory={chatHistory}
-                                chatMode={chatMode}
-                                players={players}
-                                />
-            </div> */}
         </>
     )
 }

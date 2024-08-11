@@ -25,11 +25,6 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
         })
     }
 
-    useEffect(() => {
-        console.log('안녕 너와?????', gameData)
-    }, [gameData])
-
-
 
     return (
         // <div className="kimjungchul-bold" onClick={getRoomPlayer}>
