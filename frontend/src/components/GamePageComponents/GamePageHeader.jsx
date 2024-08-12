@@ -4,7 +4,7 @@ import axios from "axios";
 import styles from "./GamePageHeader.module.css"
 import GameSettingsModal from "../../modals/GameSettingsModal";
 
-function GamePageHeader({ gameData, id }) {
+function GamePageHeader({ gameData, roomId }) {
     const roomTitle = gameData.title
 
     const roomManager = gameData.userList.find(user => user.owner === true && user.me === true);
@@ -42,7 +42,7 @@ function GamePageHeader({ gameData, id }) {
 
     const GoBackGameList = async function() {
         try {
-            console.log('나 나갈 아이디', id);
+            console.log('나 나갈 아이디', roomId);
             let access = localStorage.getItem('access');
     
             if (!access) {
@@ -52,7 +52,7 @@ function GamePageHeader({ gameData, id }) {
     
             try {
                 const response = await axios.delete(
-                    `https://i11e106.p.ssafy.io/api/rooms/users/${id}`, 
+                    `https://i11e106.p.ssafy.io/api/rooms/users/${roomId}`, 
                     {
                         headers: {
                             "Content-Type": "application/json",
@@ -67,7 +67,7 @@ function GamePageHeader({ gameData, id }) {
                     access = await refreshToken();
                     if (access) {
                         const response = await axios.delete(
-                            `https://i11e106.p.ssafy.io/api/rooms/users/${id}`, 
+                            `https://i11e106.p.ssafy.io/api/rooms/users/${roomId}`, 
                             {
                                 headers: {
                                     "Content-Type": "application/json",

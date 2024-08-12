@@ -8,10 +8,10 @@ import ChoiceDieOrTurncoat from "../../modals/ChoiceDieOrTurncoat";
 import FinalDefensePlayerModal from "../../modals/FinalDefensePlayerModal";
 import styles from "./GamePageMain.module.css"
 
-function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, stompClient, gameData, nowGameState, players, setPlayers }) {
+function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, stompClient, gameData, nowGameState, gameResponse, players, setPlayers }) {
     // players 배열을 생성된 시간 순으로 정렬
     // streamManagers와 순서를 맞춰야 하므로 정렬이 필요함
-    setPlayers(players => players.sort((a, b) => a.creationTime - b.creationTime));
+    // setPlayers(playes => players.sort((a, b) => a.creationTime - b.creationTime));
 
     // const [ currentPhase, setCurrentPhase ] = useState('night')                         // 게임 단계(night, police, discussion, finalDefense)
     const [ nightTimer, setNightTimer ] = useState(30)                                  // 밤 타이머   
@@ -26,6 +26,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     const [ showPoliceModal, setShowPoliceModal ] = useState(false)                         // 첩보원 모달 표시 여부
     const [ votes, setVotes ] = useState({});
     const [ suspect, setSuspect ] = useState(null)
+    const [ winnerModal, setWinnerModal ] = useState(false)                                // 우승자 표시
 
     const access = localStorage.getItem('access');
     const header =  {'Authorization': `Bearer ${access}`}
@@ -219,9 +220,23 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
     // players 배열을 생성된 시간 순으로 정렬
     // streamManager와 순서를 맞춰야 하므로 정렬이 필요함
-    useEffect(()=>{
-        setPlayers(players => players.sort((a, b) => a.creationTime - b.creationTime));
-    })
+    // useEffect(()=>{
+    //     setPlayers(players => players.sort((a, b) => a.creationTime - b.creationTime));
+    // })
+    // useEffect(() => {
+    //     setPlayers(players => [...players].sort((a, b) => a.creationTime - b.creationTime));
+    // }, [players, setPlayers]);
+    useEffect(() => {
+        // 기존 players와 비교하여 변경된 경우에만 업데이트
+        setPlayers(prevPlayers => {
+            const newSortedPlayers = [...players].sort((a, b) => a.creationTime - b.creationTime);
+            // 상태가 변경된 경우에만 업데이트
+            if (JSON.stringify(prevPlayers) !== JSON.stringify(newSortedPlayers)) {
+                return newSortedPlayers;
+            }
+            return prevPlayers;
+        });
+    }, [players]);
 
 
     // 재투표를 해야할 때
@@ -299,13 +314,23 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         })
             .then((response) => {
                 console.log(response)
+                showResult()
             })
             .catch((error) => {
                 console.log(error)
             })
     }
 
+    // 결과 어케 받??
+    // 직업으로 주지 않을까?
+    const showResult = async() => {
+        const winnerJob = gameResponse.어쩌궞쩌구
+        setWinnerModal(true)
 
+        setTimeout(() => {
+            setWinnerModal(false)
+        }, 3000)
+    }
 
 
     switch (nowGameState)
@@ -342,7 +367,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
             voteAgain()
             break
         case 'FINISH' :
-            setSystemMessage(`투표에 의해 ${playerId}님이 최종 용의자가 되었습니다.`)
+            setSystemMessage(`투표에 의해 ${suspect}님이 최종 용의자가 되었습니다.`)
             voteFinish()
             break
         case 'CONFIRM_START' :
@@ -390,6 +415,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                 {showPoliceModal ? <PoliceModal gameData={gameData} onChioce={policeChoicedPlayer}/>: null}
                 {finalDefensePlayer ? <FinalDefensePlayerModal suspect={suspect} onMessage={handleFinalDefenseResult}/> : null }
             </div>
+            { winnerModal ? <div className={styles.winner}><span style={{ color: 'red', fontWeight: 'bold' }}>{winnerJob}</span>의 승리입니다.</div> : null}
         </>
     )
 }
