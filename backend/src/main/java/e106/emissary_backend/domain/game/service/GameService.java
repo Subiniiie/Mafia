@@ -133,10 +133,13 @@ public class GameService {
 
         // 역할부여
         Map<GameRole, Integer> roles = RoleUtils.getRole(gameDTO);
+        log.info("getRole");
         RoleUtils.grantRole(roles, gameDTO);
+        log.info("finish grantRole , gameDTO : {}", gameDTO);
 
         // 레디스에 저장하기
         update(gameDTO);
+        log.info("update redis");
 
         // 타이머 - 토론시간임.
         nightEmissaryTask.setGameId(roomId);
