@@ -162,7 +162,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     const handleVote = (targetId) => {
         if (stompClient.current && stompClient.connected) {
             stompClient.current.send(
-                 `/pub/vote/${roomId}`, 
+                 `/ws/pub/vote/${roomId}`,
                  header, 
                  JSON.stringify({ targetId })
             )
@@ -286,7 +286,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         // 죽이는 거에 찬성하는지 반대하는지 어떻게 알지?
         if (choiced === '찬성') {
             stompClient.current.send(
-                `/WS/pub/confirm/${roomId}`, 
+                `/ws/pub/confirm/${roomId}`,
                 header, 
                 JSON.stringify({targetId})
             )
@@ -296,7 +296,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // 게임 끝
     const gameEnd = () => {
         stompClient.current.send(
-            `/WS/pub/end/${roomId}`, 
+            `/ws/pub/end/${roomId}`,
             header, 
             {}
         )

@@ -73,8 +73,7 @@ function GamePage() {
     useEffect(() => {
         const access = localStorage.getItem('access');
 
-        // async function gameRoomInfo() {
-        const gameRoomInfo = async function() {
+        const gameRoomInfo = async () => {
             await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`, {
                 headers: {
                     "Content-Type": "application/json",
