@@ -8,6 +8,8 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
     const [viduToken, setViduToken] = useState("");
     const navigate = useNavigate();
 
+
+
     // 입장 시 로직 변경
     const handleEnterRoom = async (e) => {
         e.preventDefault();
@@ -28,7 +30,7 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
 
     return (
         // <div className="kimjungchul-bold" onClick={getRoomPlayer}>
-        <div className="kimjungchul-bold">
+        // <div className="kimjungchul-bold" onClick={handleEnterRoom}>
             <Link to={`/game-room/${id}`} state={viduToken} onClick={handleEnterRoom} >
                 {/*<div className={`${isInProgress ? styles.inProgress : styles.notStarted}`} onClick={getGameRoomInfo}*/}
                 <div className={`${isInProgress ? styles.inProgress : styles.notStarted}`}>
@@ -44,7 +46,7 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
                     </div>
                 </div>
             </Link>
-        </div>
+//         </div>
     );
 };
 

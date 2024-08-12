@@ -1,5 +1,8 @@
 .container {
+    position: fixed;
+    top: 100px;
     height: 8vh;
+    width: 100%;
 }
 
 .header {
