@@ -18,7 +18,7 @@ function GameReadyStartBtn({ stompClient, nowGameState, gameData, gameResponse, 
         if (stompClient.current && stompClient.current.connected) {
             console.log("일반 플레이어가 준비 버튼을 누른 걸 알려주자")
             stompClient.current.send(
-                `/pub/ready/${roomId}`, 
+                `/ws/pub/ready/${roomId}`,
                 header, 
                 {}
             )

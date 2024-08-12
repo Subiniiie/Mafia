@@ -323,13 +323,23 @@ function GamePage() {
         stompClient.current.connect({
             'Authorization': `Bearer ${access}`
         }, () => {
-            stompClient.current.subscribe(`/ws/sub/${roomId}`, (message) =>
+            stompClient.current.subscribe(`/sub/${roomId}`, (message) =>
                 {
-                    const messageJson = JSON.parse(message.body)
-                    console.log("입장 데이터 확인 : ", messageJson)
-                    setGameResponse(messageJson)
-                    setNowGameState('입장 하고 데이터 받는다ㅏㅏ', messageJson.gameState)
-                })
+                    if(message.body){
+                        console.log("IN! WS");
+                        console.log(message.body);
+                        const messageJson = JSON.parse(message.body);
+                        setGameResponse(messageJson);
+                        setNowGameState("입장하고데이터 받는다", messageJson.gameState)
+                        console.log(messageJson);
+                    } else {
+                       console.log("OUT! WS");
+                    }
+                    // const messageJson = JSON.parse(message.body)
+                    // console.log("입장 데이터 확인 : ", messageJson)
+                    // setGameResponse(messageJson)
+                    // setNowGameState('입장 하고 데이터 받는다ㅏㅏ', messageJson.gameState)
+            })
         })
 
         return () => {

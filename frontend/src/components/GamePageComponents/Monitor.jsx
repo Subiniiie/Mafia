@@ -14,6 +14,7 @@ const Monitor = function({ nickname, isRoomManager, isMe, isAlive, onVote, isVot
     // const [ isVote, setIsVote ] = useState(false)
     // 투표한 플레이어의 닉네임을 저장하는 변수
     const [ votedPlayer, setVotedPlayer ] = useState(null)
+    const access = localStorage.getItem("access");
 
     // 비디오가 실제로 추가될 부분
     const videoRef = useRef();
@@ -56,7 +57,16 @@ const Monitor = function({ nickname, isRoomManager, isMe, isAlive, onVote, isVot
 
         // 백엔드 서버에 강퇴 요청 => 해당 streamManager에 대해 SessionDisconnected Event 발생
         // event.reason === 'forceDisconnectByServer' 인지 확인 후 조건 분기하여 처리
-        axios.delete('https://i11e106.p.ssafy.io/api/rooms/kick', { data: { roomId, connectionId: streamManager.stream.connection.connectionId } })
+        axios.delete('https://i11e106.p.ssafy.io/api/rooms/kick', {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${access}`,
+            },
+            data: {
+                roomId,
+                connectionId: streamManager.stream.connection.connectionId
+            }
+        })
              .then(response => console.log('Player kicked successfully:', response.data))
              .catch(error => console.error('Error kicking player:', error))
     }
