@@ -412,20 +412,6 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
     return (
         <>
-            {/* 간이 모양만 테스트 */}
-            {/* <div className={styles.fakeHeaderContainer} />
-            <div className={styles.playerContainer}>
-                <div className={styles.playerCell}></div>
-                <div className={styles.playerCell}></div>
-                <div className={styles.playerCell}></div>
-                <div className={styles.playerCell}></div>
-                <div className={styles.playerCell}></div>
-                <div className={styles.playerCell}></div>
-                <div className={styles.playerCell}></div>
-                <div className={styles.playerCell}></div>
-            </div> */}
-
-
             <div className={styles.fakeHeaderContainer} />
             <div className={styles.playerContainer}>
                 {/* OpenVidu 화면을 채우기 위해 div를 렌더링 */}
@@ -436,23 +422,6 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                 ))}
             </div>
 
-
-
-            {/* <div className={styles.monitors}>
-                {zip(players, streamManagers).map((player, index) => (
-                    <Monitor
-                        key={index}
-                        nickname={player[0].nickname}
-                        isRoomManager={player[0].isRoomManager}
-                        isMe={player[0].isMe}
-                        isAlive={player[0].isAlive}
-                        roomId={roomId}
-                        streamManager={player[1]}
-                        isVote={votes[player.id] || false}
-                        onVote={handleVote}
-                    />
-                ))}
-            </div> */}
             <div className={styles.timer}>
                 {/* {currentPhase === 'night' && <p>밤 시간: {nightTimer}초</p>}
                 {currentPhase === 'police' && <p>첩보원 시간: {policeTimer}초</p>}

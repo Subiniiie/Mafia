@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import classNames from "classnames";
 import ModalHeader from "../components/ModalHeader"
 import RoomName from "../components/GamePageComponents/RoomName";
 import SecretMode from "../components/GamePageComponents/SecretMode";
@@ -8,18 +9,18 @@ import Turncoat from "../components/GamePageComponents/Turncoat";
 import styles from "./GameSettingsModal.module.css";
 import { decode } from "jwt-js-decode";
 
-function GameSettingsModal({ openModal, roomId }) {
+function GameSettingsModal({ isOpen, openModal, roomId }) {
 
     const [roomName, setRoomName] = useState('')
     const [isSecret, setIsSecret] = useState(false)
     const [password, setPassword] = useState('')
     const [isTurncoat, setIsTurncoat] = useState(false)
 
-    const [ gameSettings, setGameSettings ] = useState({})
+    const [gameSettings, setGameSettings] = useState({})
 
     // 게임방 정보를 가지고 오자
     useEffect(() => {
-        const openGameSettingModal = async() => {
+        const openGameSettingModal = async () => {
             console.log(roomId)
             try {
                 const access = localStorage.getItem('access')
@@ -47,7 +48,7 @@ function GameSettingsModal({ openModal, roomId }) {
     }, [gameSettings])
 
     // 변경 버튼을 누르면 바뀐 내용이 새롭게 저장됨
-    const handleSave = async function(roomId, roomName, isSecret, password, isTurncoat) {
+    const handleSave = async function (roomId, roomName, isSecret, password, isTurncoat) {
         console.log('나 왔다!', roomId, roomName, isSecret, password, isTurncoat)
         // setGameSettings({...gameSettings, title:roomName, password: password, haveBetrayer: isTurncoat})
         try {
@@ -63,14 +64,14 @@ function GameSettingsModal({ openModal, roomId }) {
 
             const response = await axios.patch(`https://i11e106.p.ssafy.io/api/options/rooms/${roomId}`,
                 JSON.stringify(body), {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${access}`,
-                    }
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${access}`,
                 }
+            }
             )
             console.log('방 정보 바꿨다', response.data)
-        }  catch (error) {
+        } catch (error) {
             console.log('방 못 바꿈', error)
         }
         // await axios.patch(`https://i11e106.p.ssafy.io/api/options/rooms/${roomId}`, {
@@ -99,7 +100,7 @@ function GameSettingsModal({ openModal, roomId }) {
         //     console.log(error)
         // }
 
-    
+
     }
 
     useEffect(() => {
@@ -108,32 +109,30 @@ function GameSettingsModal({ openModal, roomId }) {
         console.log(password)
     }, [roomName, isSecret, password])
 
+    const GSModalClass = classNames('kimjungchul-gothic-regular', styles.modalContent)
+
     return (
         <>
-            {/* 각 컴포넌트들이랑 값을 주고 받아서 바뀌는 걸 알아야 함 */}
-            <div className={styles.modal}>
-                <div className={styles.box}>
-                    <div className={styles.modalTitle}>
-                        <ModalHeader modalTitle="게임 설정" openModal={openModal} />
-                    </div>
-                    <div className={styles.container}>
-                        <div className={styles.content}>
-                            <RoomName value={roomName} onChange={setRoomName} />
-                            <div className={styles.rowStyle}>
-                                <SecretMode checked={isSecret} onChange={setIsSecret} />
-                                <Password 
-                                    value={password} 
-                                    onChange={setPassword} 
-                                    required={isSecret}  //비공개일 때 필수임
-                                />
-                            </div>
-                            <div>
-                                <Turncoat checked={isTurncoat} onChange={setIsTurncoat}/>
-                            </div>
-                                {/* 변경 버튼을 누르면 변경된 내용이 서버에 적용되고 모달 닫힘 */}
-                            <div className={styles.btnBox}>
-                                <button className={styles.btn} onClick={() => handleSave(roomId, roomName, isSecret, password, isTurncoat)}>변경</button>
-                            </div>
+            <div className={styles.modalOverlay} onClick={openModal}>
+                <div className={GSModalClass} onClick={(e) => e.stopPropagation()}>
+                    {/* 각 컴포넌트들이랑 값을 주고 받아서 바뀌는 걸 알아야 함 */}
+                    <ModalHeader modalTitle="게임 설정" openModal={openModal} />
+                    <div className={styles.formContainer}>
+                        <RoomName value={roomName} onChange={setRoomName} />
+                        <div className={styles.rowStyle}>
+                            <SecretMode checked={isSecret} onChange={setIsSecret} />
+                            <Password
+                                value={password}
+                                onChange={setPassword}
+                                required={isSecret}  //비공개일 때 필수임
+                            />
+                        </div>
+                        <div>
+                            <Turncoat checked={isTurncoat} onChange={setIsTurncoat} />
+                        </div>
+                        {/* 변경 버튼을 누르면 변경된 내용이 서버에 적용되고 모달 닫힘 */}
+                        <div className={styles.btnBox}>
+                            <button className={styles.btn} onClick={() => handleSave(roomId, roomName, isSecret, password, isTurncoat)}>변경</button>
                         </div>
                     </div>
                 </div>
