@@ -52,7 +52,37 @@ function GamePage() {
     const [ nowGameState, setNowGameState ] = useState("")
 
     // player 설정
-    const [players, setPlayers] = useState([]);
+    const [players, setPlayers] = useState([
+        {nickname: 'player1', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+        {nickname: 'player2', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+        {nickname: 'player3', role: 'emissary', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+        {nickname: 'player4', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+        {nickname: 'player5', role: 'police', isRoomManager: true, isMe: false, isAlive: true, hasVoted: false},
+        {nickname: 'player6', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+        {nickname: 'player7', role: 'independenceActivist', isRoomManager: false, isMe: true, isAlive: true, hasVoted: false},
+        {nickname: 'player8', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+    ]);
+
+    // 방 정보 가져오기
+    useEffect(() => {
+        const access = localStorage.getItem('access');
+
+        async function gameRoomInfo() {
+            await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${access}`,
+                }
+            }).then((res) => {
+                setGameData(res.data);
+                console.log("RES",res.data);
+            }).catch ((err) => {
+                console.log("게임방 API를 불러오지 못했습니다", err);
+            })
+        }
+
+        gameRoomInfo();
+    }, [])
 
     useEffect( () => {
         const access = localStorage.getItem('access');
@@ -82,8 +112,9 @@ function GamePage() {
             event => deleteStreamManager(event.stream.streamManager);
 
         const handleChatSignal = (event) => {
-            const message = event.data;
-            const nickname = JSON.parse(event.from).nickname;
+            const response = JSON.parse(event.data);
+            const nickname = response.nickname;
+            const message = response.message;
             setChatHistory(prevHistory => [ ...prevHistory, { nickname, message } ]);
         }
 
@@ -131,20 +162,20 @@ function GamePage() {
     }, [] );
 
 
-    const leaveSession = () => {
+    const leaveSession = async () => {
         const mySession = session;
+        console.log("Attempting to leave session:", mySession);
 
-        // 서버에서 유저 삭제 등 처리를 위해 axios로 API 호출
-        axios.delete(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`)
-             .then(response => console.log('Player left successfully:', response.data))
-             .catch(error => console.error('Error leaving session:', error))
-
-        if (mySession) mySession.disconnect();
+        if (mySession) {
+            await mySession.disconnect();
+            console.log("Session disconnected.");
+        } else {
+            console.log("No session found to disconnect.");
+        }
 
         this.OV = null;
         setSession(undefined);
         setStreamManagers([]);
-        window.location.reload();
     }
 
     // creationTime 순으로 정렬된 streamManagers 배열을 반환
@@ -313,9 +344,10 @@ function GamePage() {
     return (
         <>
             <div className={styles.container}>
+                <button onClick={handleButtonClick}>야호</button>
                 {/* 게임데이터 있는지 확인 -> 게임데이터에 유저리스트가 있는지 확인 -> 그 유저리스트 array인지 확인  */}
                 {gameData && gameData.userList && Array.isArray(gameData.userList) &&
-                    <GamePageHeader gameData={gameData} roomId={roomId} />
+                    <GamePageHeader gameData={gameData} id={roomId} leaveSession={leaveSession} />
                 }
                 {gameData && gameData.userList && Array.isArray(gameData.userList) &&
                     <GamePageMain
