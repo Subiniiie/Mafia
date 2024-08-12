@@ -99,7 +99,8 @@ public class RedisConfig {
                                                                        MessageListenerAdapter nightEmissaryAdapter, ChannelTopic nightEmissaryTopic,
                                                                        MessageListenerAdapter nightPoliceAdapter, ChannelTopic nightPoliceTopic,
                                                                        MessageListenerAdapter enterRoomAdapter, ChannelTopic enterRoomTopic,
-                                                                       MessageListenerAdapter kickUserAdapter, ChannelTopic kickUserTopic) {
+                                                                       MessageListenerAdapter kickUserAdapter, ChannelTopic kickUserTopic,
+                                                                       MessageListenerAdapter endAdapter, ChannelTopic endTopic) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         // subscriber, topic
@@ -114,6 +115,7 @@ public class RedisConfig {
         container.addMessageListener(nightPoliceAdapter, nightPoliceTopic);
         container.addMessageListener(enterRoomAdapter, enterRoomTopic);
         container.addMessageListener(kickUserAdapter, kickUserTopic);
+        container.addMessageListener(endAdapter, endTopic);
 
         return container;
     }
@@ -227,6 +229,16 @@ public class RedisConfig {
     @Bean
     public ChannelTopic kickUserTopic() {
         return new ChannelTopic("KICK_USER");
+    }
+
+    @Bean
+    public MessageListenerAdapter endAdapter(EndSubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "sendMessage");
+    }
+
+    @Bean
+    public ChannelTopic endTopic() {
+        return new ChannelTopic("END");
     }
 
 }
