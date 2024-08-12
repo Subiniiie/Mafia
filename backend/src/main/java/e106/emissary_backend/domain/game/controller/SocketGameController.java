@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -28,6 +29,12 @@ public class SocketGameController {
 //    private final SimpMessagingTemplate messagingTemplate;
 
     private final GameService gameService;
+
+    @MessageMapping("/connect/{roomId}")
+    @SendTo("/sub/{roomId}")
+    public String connect(@DestinationVariable long roomId){
+        return "연결이 유지되고 있습니다";
+    }
 
     @MessageMapping("/ready/{roomId}")
     public void ready(@DestinationVariable Long roomId, SimpMessageHeaderAccessor headerAccessor) {

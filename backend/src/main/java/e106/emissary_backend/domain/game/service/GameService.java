@@ -106,7 +106,7 @@ public class GameService {
 
         player.setReady(false);
 
-        commonPublish(gameId, GameState.WAIT, CommonResult.SUCCESS);
+        commonPublish(gameId, GameState.WAIT, CommonResult.FAILED);
 
         update(gameDTO);
     } // end of readyCancel

@@ -58,4 +58,8 @@ public class RedisPublisher {
     public void publish(ChannelTopic topic, KickUserMessage message) {
         redisTemplate.convertAndSend(topic.getTopic(), message);
     }
+
+    public void publish(ChannelTopic topic, EndMessage message) {
+        redisTemplate.convertAndSend(topic.getTopic(), message);
+    }
 }
