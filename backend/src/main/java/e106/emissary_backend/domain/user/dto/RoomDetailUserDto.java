@@ -1,7 +1,6 @@
 package e106.emissary_backend.domain.user.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import e106.emissary_backend.domain.room.dto.RoomDetailDto;
 import e106.emissary_backend.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,12 +29,12 @@ public class RoomDetailUserDto {
                 .isOwner(user.getUserId() == ownerId)
                 .build();
 
-        roomDetailUserDto.setIsMe(userId);
+        roomDetailUserDto.changeProperty(userId);
 
         return roomDetailUserDto;
     }
 
-    private void setIsMe(long userId) {
+    private void changeProperty(long userId) {
         if(userId == this.userId) {
             this.isMe = true;
         }else{
