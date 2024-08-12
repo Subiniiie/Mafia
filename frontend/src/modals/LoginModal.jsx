@@ -19,6 +19,8 @@ const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
     const passwordRef = useRef()
     const loginButtonRef = useRef()
 
+    const [loginFailed, setLoginFailed] = useState(false)
+
     const handleEmailKeyDown = (e) => {
         if (e.key === 'Enter') {
             console.log('Enter를 눌렀네!')
@@ -63,10 +65,13 @@ const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
             // console.log('난 디코딩 된 refreshToken :', decodedRefresh)
             localStorage.setItem('access', access) // 로컬 스토리지에 토큰 저장
             localStorage.setItem('refresh', refresh)
+            setLoginFailed(false)
             onLoginSuccess(username) // 상위 컴포넌트에 로그인 성공 알림
             openModal()
         } catch (error) {
             console.error("Login failed:", error.response ? error.response.data : error.message);
+            setLoginFailed(true)
+            // alert('이메일 또는 비밀번호가 잘못 되었습니다. 아이디와 비밀번호를 정확히 입력해 주세요.')
             // 로그인 실패 시 처리 로직
         }
     };
@@ -111,6 +116,7 @@ const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
                     <button className={styles.submitButton} onClick={handleLogin} ref={loginButtonRef}>
                         활동하기
                     </button>
+                    {loginFailed && <p className={styles.loginFailed}>{`이메일 또는 비밀번호가 잘못 되었습니다.\n아이디와 비밀번호를 정확히 입력해 주세요.`}</p>}
 
                     <p onClick={openFindPwModal} className={styles.findPw}>비밀번호 찾기</p>
                     <FindPwModal isOpen={isFindPwModalOpen} openModal={openFindPwModal} />
