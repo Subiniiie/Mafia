@@ -7,6 +7,8 @@ import PoliceModal from "../../modals/PoliceModal";
 import ChoiceDieOrTurncoat from "../../modals/ChoiceDieOrTurncoat";
 import FinalDefensePlayerModal from "../../modals/FinalDefensePlayerModal";
 import styles from "./GamePageMain.module.css"
+import { useNavigate } from "react-router-dom";
+import { decode } from "jwt-js-decode";
 
 function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, stompClient, gameData, nowGameState, gameResponse, players, setPlayers }) {
     // players 배열을 생성된 시간 순으로 정렬
@@ -26,25 +28,31 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     const [ showPoliceModal, setShowPoliceModal ] = useState(false)                         // 첩보원 모달 표시 여부
     const [ votes, setVotes ] = useState({});
     const [ suspect, setSuspect ] = useState(null)
+    const [ showModal, setShowModal] = useState(false);
     const [ winnerModal, setWinnerModal ] = useState(false)                                // 우승자 표시
 
     const access = localStorage.getItem('access');
     const header =  {'Authorization': `Bearer ${access}`}
+    const navigate = useNavigate();
+    const decodedAccess = decode(access);
+    const myId = decodedAccess.payload.userId;
 
-    // // 게임 시작하기
-    // const gameStart = () => {
-    //     const socket = new WebSocket(`ws://i11e106.p.ssafy.io/pub/start/${roomId}`)
-    //     socket.onopen = function(event) {
-    //         console.log('웹소켓 연결이 열렸습니다. 게임을 시작합니다')
-    //     }
-    //     socket.onerror = function(error) {
-    //         console.error('게임 시작 웹소켓에서 에러가 발생했습니다.:', error);
-    //     }
-    //     socket.close()
-    //     socket.onclose = function(event) {
-    //         console.log('게임 시작 웹소켓 연결이 닫혔습니다')
-    //     }
-    // }
+    // 강퇴 처리
+    const kick = () => {
+        console.log("제아이디는 이것입니다 : ", myId);
+        console.log("넌 강퇴야! : ", gameResponse.targetId);
+        if(gameResponse.targetId == myId){
+            navigate('/game-list');
+        }
+    }
+
+    //게임 시작
+    const gameStart = () => {
+        setShowModal(true);
+        setTimeout(() => {
+            setShowModal(false)
+        }, 15000)
+    }
 
     // 밀정 시간
     const emissaryTime = () => {
@@ -144,7 +152,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     const handleVote = (targetId) => {
         if (stompClient.current && stompClient.connected) {
             stompClient.current.send(
-                 `/pub/vote/${roomId}`, 
+                 `/ws/pub/vote/${roomId}`,
                  header, 
                  JSON.stringify({ targetId })
             )
@@ -268,7 +276,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         // 죽이는 거에 찬성하는지 반대하는지 어떻게 알지?
         if (choiced === '찬성') {
             stompClient.current.send(
-                `/pub/confirm/${roomId}`, 
+                `/ws/pub/confirm/${roomId}`,
                 header, 
                 JSON.stringify({targetId})
             )
@@ -278,7 +286,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // 게임 끝
     const gameEnd = () => {
         stompClient.current.send(
-            `/pub/end/${roomId}`, 
+            `/ws/pub/end/${roomId}`,
             header, 
             {}
         )
@@ -333,56 +341,62 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     }
 
 
-    switch (nowGameState)
-    {
-        case 'STARTED' :
-            gameStart()
-            break
-        case 'NIGHT_EMISSARY' :
-            // 밤이 되었을 때, 비디오/오디오 처리
-            handleVideoAudioAtNight();
-            // 밤이 되었을 때, 채팅 처리
-            changeToSecretChatMode();
-            setSystemMessage('밤이 시작되었습니다. 밀정이 활동 중입니다.')
-            emissaryTime()
-            break
-        case 'NIGHT_POLICE' :
-            setSystemMessage('밤이 되었습니다. 첩보원이 활동 중입니다.')
-            policeTime()
-            break
-        case 'VOTE_START' :
-            // 낮이 되었을 때, 비디오/오디오 처리
-            handleVideoAudioAtDay();
-            // 낮이 되었을 때, 채팅 처리
-            changeToNormalChatMode();
-            setSystemMessage('낮이 되었습니다. 토론을 하며 투표를 진행하세요.')
-            voteStart()
-            break
-        case 'VOTE_END' :
-            setSystemMessage('낮이 되었습니다. 투표가 끝이 났습니다.')
-            voteEnd()
-            break
-        case 'REVOTE' :
-            setSystemMessage('동점자가 나왔습니다. 재투표를 실시합니다.')
-            voteAgain()
-            break
-        case 'FINISH' :
-            setSystemMessage(`투표에 의해 ${suspect}님이 최종 용의자가 되었습니다.`)
-            voteFinish()
-            break
-        case 'CONFIRM_START' :
-            setSystemMessage(`최종 투표를 시작합니다.`)
-            confirmStart()
-            break
-        case 'CONFIRM_END' :
-            setSystemMessage(`최종 투표가 끝이 났습니다`)
-            confirmEnd()
-            break
-        case 'END' :
-            setSystemMessage('게임이 끝이 났습니다.')
-            gameEnd()
-            break
-    }
+    useEffect(() => {
+        switch (nowGameState) {
+            case 'KICK':
+                kick()
+                break
+            case 'STARTED' :
+                gameStart()
+                break
+            case 'NIGHT_EMISSARY' :
+                // 밤이 되었을 때, 비디오/오디오 처리
+                handleVideoAudioAtNight();
+                // 밤이 되었을 때, 채팅 처리
+                changeToSecretChatMode();
+                setSystemMessage('밤이 시작되었습니다. 밀정이 활동 중입니다.')
+                emissaryTime()
+                break
+            case 'NIGHT_POLICE' :
+                setSystemMessage('밤이 되었습니다. 첩보원이 활동 중입니다.')
+                policeTime()
+                break
+            case 'VOTE_START' :
+                // 낮이 되었을 때, 비디오/오디오 처리
+                handleVideoAudioAtDay();
+                // 낮이 되었을 때, 채팅 처리
+                changeToNormalChatMode();
+                setSystemMessage('낮이 되었습니다. 토론을 하며 투표를 진행하세요.')
+                voteStart()
+                break
+            case 'VOTE_END' :
+                setSystemMessage('낮이 되었습니다. 투표가 끝이 났습니다.')
+                voteEnd()
+                break
+            case 'REVOTE' :
+                setSystemMessage('동점자가 나왔습니다. 재투표를 실시합니다.')
+                voteAgain()
+                break
+            case 'FINISH' :
+                setSystemMessage(`투표에 의해 ${suspect}님이 최종 용의자가 되었습니다.`)
+                voteFinish()
+                break
+            case 'CONFIRM_START' :
+                setSystemMessage(`최종 투표를 시작합니다.`)
+                confirmStart()
+                break
+            case 'CONFIRM_END' :
+                setSystemMessage(`최종 투표가 끝이 났습니다`)
+                confirmEnd()
+                break
+            case 'END' :
+                setSystemMessage('게임이 끝이 났습니다.')
+                gameEnd()
+                break
+            default :
+                break
+        }
+    }, [nowGameState])
 
     return (
       <>
@@ -414,6 +428,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                 {showPoliceModal ? <PoliceModal gameData={gameData} onChioce={policeChoicedPlayer}/>: null}
                 {finalDefensePlayer ? <FinalDefensePlayerModal suspect={suspect} onMessage={handleFinalDefenseResult}/> : null }
             </div>
+            {showModal && <div className={styles.alarm}>지금부터 밀정1931을 시작합니다.</div>}
             { winnerModal ? <div className={styles.winner}><span style={{ color: 'red', fontWeight: 'bold' }}>{winnerJob}</span>의 승리입니다.</div> : null}
         </>
     )

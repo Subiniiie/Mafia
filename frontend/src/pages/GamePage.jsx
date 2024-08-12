@@ -67,7 +67,7 @@ function GamePage() {
     useEffect(() => {
         const access = localStorage.getItem('access');
 
-        async function gameRoomInfo() {
+        const gameRoomInfo = async () => {
             await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`, {
                 headers: {
                     "Content-Type": "application/json",
@@ -208,7 +208,7 @@ function GamePage() {
                         console.log(message.body);
                         const messageJson = JSON.parse(message.body);
                         setGameResponse(messageJson);
-                        setNowGameState("입장하고데이터 받는다", messageJson.gameState)
+                        setNowGameState(messageJson.gameState)
                         console.log(messageJson);
                     } else {
                        console.log("OUT! WS");
