@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import e106.emissary_backend.domain.game.entity.Game;
 import e106.emissary_backend.domain.game.service.subscriber.*;
 import e106.emissary_backend.domain.room.service.subscriber.EnterRoomSubscriber;
+import e106.emissary_backend.domain.room.service.subscriber.KickUserSubscriber;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -97,7 +98,9 @@ public class RedisConfig {
                                                                        MessageListenerAdapter endConfirmAdapter, ChannelTopic endConfirmTopic,
                                                                        MessageListenerAdapter nightEmissaryAdapter, ChannelTopic nightEmissaryTopic,
                                                                        MessageListenerAdapter nightPoliceAdapter, ChannelTopic nightPoliceTopic,
-                                                                       MessageListenerAdapter enterRoomAdapter, ChannelTopic enterRoomTopic) {
+                                                                       MessageListenerAdapter enterRoomAdapter, ChannelTopic enterRoomTopic,
+                                                                       MessageListenerAdapter kickUserAdapter, ChannelTopic kickUserTopic,
+                                                                       MessageListenerAdapter endAdapter, ChannelTopic endTopic) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         // subscriber, topic
@@ -111,6 +114,8 @@ public class RedisConfig {
         container.addMessageListener(nightEmissaryAdapter, nightEmissaryTopic);
         container.addMessageListener(nightPoliceAdapter, nightPoliceTopic);
         container.addMessageListener(enterRoomAdapter, enterRoomTopic);
+        container.addMessageListener(kickUserAdapter, kickUserTopic);
+        container.addMessageListener(endAdapter, endTopic);
 
         return container;
     }
@@ -214,6 +219,26 @@ public class RedisConfig {
     @Bean
     public ChannelTopic enterRoomTopic() {
         return new ChannelTopic("ENTER_ROOM");
+    }
+
+    @Bean
+    public MessageListenerAdapter kickUserAdapter(KickUserSubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "sendMessage");
+    }
+
+    @Bean
+    public ChannelTopic kickUserTopic() {
+        return new ChannelTopic("KICK_USER");
+    }
+
+    @Bean
+    public MessageListenerAdapter endAdapter(EndSubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "sendMessage");
+    }
+
+    @Bean
+    public ChannelTopic endTopic() {
+        return new ChannelTopic("END");
     }
 
 }
