@@ -25,13 +25,16 @@ import e106.emissary_backend.global.error.exception.*;
 import io.jsonwebtoken.lang.Objects;
 import io.openvidu.java.client.*;
 import jakarta.annotation.PostConstruct;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisKeyValueTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
@@ -96,6 +99,44 @@ public class RoomService {
 
     public List<RoomListDto> getRooms(Pageable pageable) {
         Slice<Room> roomList = roomRepository.findAllBy(pageable).orElseThrow(()-> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
+        return roomList.stream().map(room -> RoomListDto.builder()
+                        .title(room.getTitle())
+                        .roomId(room.getRoomId())
+                        .ownerName(userRepository.findNicknameByUserId(room.getOwnerId()).orElseThrow(
+                                () -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION)))
+                        .maxPlayer(room.getMaxPlayer())
+                        .nowPlayer(userInRoomRepository.countPeopleByRoom_RoomId(room.getRoomId()))
+                        .password(room.getPassword())
+                        .isPrivate(room.isPrivate())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    public List<RoomListDto> getFilteredRooms(Pageable pageable, Boolean isPublic, Boolean isPrivate, Boolean isWaiting, String search) {
+        Specification<Room> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (isPublic != null && isPublic) {
+                predicates.add(criteriaBuilder.isFalse(root.get("isPrivate")));
+            }
+
+            if (isPrivate != null && isPrivate) {
+                predicates.add(criteriaBuilder.isTrue(root.get("isPrivate")));
+            }
+
+            if (isWaiting != null && isWaiting) {
+                predicates.add(criteriaBuilder.equal(root.get("roomState"), RoomState.WAIT));
+            }
+
+            if (search != null && !search.isEmpty()) {
+                predicates.add(criteriaBuilder.like(root.get("title"), "%" + search + "%"));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Page<Room> roomList = roomRepository.findAll(spec, pageable);
+
         return roomList.stream().map(room -> RoomListDto.builder()
                         .title(room.getTitle())
                         .roomId(room.getRoomId())
@@ -308,42 +349,55 @@ public class RoomService {
         if (session == null){
             throw new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION);
         }
+        System.out.println("check get session");
+        System.out.println(session.toString());
+        System.out.println(String.valueOf(roomId));
 
         // 레디스에서 삭제
         deleteUserInRedis(roomId, userId);
+        System.out.println("redis delete complete");
         
         // Vidu와 DB에서 삭제
         Map<String, SessionRole> users = mapSessionNamesTokens.get(session.getSessionId());
         UserInRoom userInRoom = userInRoomRepository.findByPk_UserId(userId).orElseThrow(
                 () -> new NotFoundUserInRoomException(CommonErrorCode.NOT_FOUND_USER_IN_ROOM_EXCEPTION));
+        System.out.println("get User In Room Complete");
 
         String token = userInRoom.getViduToken();
         if (users.get(token) == SessionRole.USER){
+            System.out.println("He is user");
             // 유저일 경우 나가기 처리
             users.remove(token);
+            System.out.println("remove session @vidu complete");
             userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
+            System.out.println("remove session @mysql complete");
+            //remove user @redis
+            publishRemoveUser(roomId, userId);
         } else if (users.get(token) == SessionRole.HOST){
             // 방장 위임
             users.remove(token);
-            String nextOwnerToken = changeSessionOwner(session);
+            System.out.println("remove current user complete");
+            // 여기서 방 삭제 할지 찾는게 맞지 않나..?
+            if(users.isEmpty()){
+                mapSessions.remove(session.getSessionId());
+                mapSessionNamesTokens.remove(session.getSessionId());
+                roomRepository.deleteById(roomId);
+            } else {
+                System.out.println("next owner founded");
+                String nextOwnerToken = changeSessionOwner(session);
+                System.out.println("He is user");
 
-            User owner = userInRoomRepository.findUserByViduToken(nextOwnerToken).orElseThrow(
-                    () -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION));
-            Long ownerId = owner.getUserId();
-            Room room = userInRoom.getRoom();
-            room.changeOwner(ownerId);
+                User owner = userInRoomRepository.findUserByViduToken(nextOwnerToken).orElseThrow(
+                        () -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION));
+                Long ownerId = owner.getUserId();
+                Room room = userInRoom.getRoom();
+                room.changeOwner(ownerId);
 
-            userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
-        }
-
-        // users empty 되면 방 삭제
-        if(users.isEmpty()){
-            mapSessions.remove(session.getSessionId());
-            mapSessionNamesTokens.remove(session.getSessionId());
-            roomRepository.deleteById(roomId);
-        }else{
-            // 발행하기
-            publishRemoveUser(roomId, userId);
+                userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
+                System.out.println("remove session @mysql complete");
+                //remove user @redis
+                publishRemoveUser(roomId, userId);
+            }
         }
 
         return new CommonResponseDto("ok");

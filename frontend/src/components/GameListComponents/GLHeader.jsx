@@ -1,29 +1,71 @@
 import { useState } from "react"
+import classNames from "classnames"
 import FilterBox from "./FilterBox"
 import SearchBar from "../../components/SearchBar"
 import CreateRoomModal from "../../modals/CreateRoomModal"
+import styles from "./GLHeader.module.css";
+import FilterChecked from "../../assets/Buttons/FilterChecked.png"
+import FilterUnchecked from "../../assets/Buttons/FilterUnchecked.png"
 
-const GLHeader = () => {
+
+const GLHeader = ({ setViduToken }) => {
 
     const [isModalOpen, setIsModalOpen] = useState(false)
-
     const openModal = () => setIsModalOpen(!isModalOpen)
 
+    const [isCheckedPublic, setIsCheckedPublic] = useState(false)
+    const checkFilterPublic = () => setIsCheckedPublic(!isCheckedPublic)
+
+    const [isCheckedPrivate, setIsCheckedPrivate] = useState(false)
+    const checkFilterPrivate = () => setIsCheckedPrivate(!isCheckedPrivate)
+
+    const [isCheckedPlaying, setIsCheckedPlaying] = useState(false)
+    const checkFilterPlaying = () => setIsCheckedPlaying(!isCheckedPlaying)
+
+    const GLHeaderClass = classNames('east-sea-dokdo-regular', styles.container)
+
     return (
-        <div className="east-sea-dokdo-regular">
-            <div>
-                <div>
-                    <FilterBox />
+        <header className={GLHeaderClass}>
+            <div className={styles.filterBoxContainer}>
+                {/* <FilterBox /> */}
+                <div className={styles.filterBoxContainerLarge}>
+                    <div className={styles.filterContainer}>
+                        공개 임무
+                        {isCheckedPublic ? (
+                            <img src={FilterChecked} alt="FilterChecked" className={styles.filterButtons} onClick={checkFilterPublic} />
+                        ) : (
+                            <img src={FilterUnchecked} alt="FilterUnchecked" className={styles.filterButtons} onClick={checkFilterPublic} />
+                        )}
+                    </div>
+
+                    <div className={styles.filterContainer}>
+                        극비 임무
+                        {isCheckedPrivate ? (
+                            <img src={FilterChecked} alt="FilterChecked" className={styles.filterButtons} onClick={checkFilterPrivate} />
+                        ) : (
+                            <img src={FilterUnchecked} alt="FilterUnchecked" className={styles.filterButtons} onClick={checkFilterPrivate} />
+                        )}
+                    </div>
                 </div>
-                <div>
-                    <SearchBar placeholder="터전을 찾아보세요." />
-                </div>
-                <div>
-                    <button onClick={openModal}>새로운 도전</button>
-                    <CreateRoomModal isOpen={isModalOpen} openModal={openModal} />
+                <div className={styles.filterBoxContainerMini}>
+                    <div className={styles.filterContainer}>
+                        임무 시작 전
+                        {isCheckedPlaying ? (
+                            <img src={FilterChecked} alt="FilterChecked" className={styles.filterButtons} onClick={checkFilterPlaying} />
+                        ) : (
+                            <img src={FilterUnchecked} alt="FilterUnchecked" className={styles.filterButtons} onClick={checkFilterPlaying} />
+                        )}
+                    </div>
                 </div>
             </div>
-        </div >
+            <div className={styles.searchBarContainer}>
+                <SearchBar placeholder="터전을 찾아보세요." />
+            </div>
+            <div className={styles.CreateRoomButtonContainer}>
+                <button onClick={openModal} className={styles.CreateRoomButton}>새로운 도전 +</button>
+                <CreateRoomModal isOpen={isModalOpen} openModal={openModal} setViduToken={setViduToken} />
+            </div>
+        </header >
     )
 }
 

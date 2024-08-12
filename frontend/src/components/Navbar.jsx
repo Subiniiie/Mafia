@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react"
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { useState, useEffect, useRef } from "react"
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios"
 import LoginModal from "../modals/LoginModal";
 import SignUpModal from "../modals/SignUpModal.jsx"
@@ -15,8 +15,7 @@ import SpeakerOnButton from '../assets/Buttons/SpeakerOnButton.png'
 import SpeakerOffLockedButton from '../assets/Buttons/SpeakerOffLockedButton.png'
 import SpeakerOnLockedButton from '../assets/Buttons/SpeakerOnLockedButton.png'
 
-
-const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
+const Navbar = ({ isLoggedIn, name, onLoginSuccess, isSpeakerOn, toggleSpeaker }) => {
 
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
     const openLoginModal = () => setIsLoginModalOpen(!isLoginModalOpen)
@@ -30,10 +29,42 @@ const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
     // const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
     // const openSettingsModal = () => setIsSettingsModalOpen(!isSettingsModalOpen)
 
-    const [isSpeakerOn, setIsSpeakerOn] = useState(true)
-    const turnSpeakerOn = () => setIsSpeakerOn(!isSpeakerOn)
+    // const [isSpeakerOn, setIsSpeakerOn] = useState(true)
+    // const turnSpeakerOn = () => setIsSpeakerOn(!isSpeakerOn)
 
     const location = useLocation()
+    const navigate = useNavigate()
+
+    let audioContext;
+    let gainNode;
+
+    // useRef를 사용하여 AudioContext와 gainNode를 저장
+    const audioContextRef = useRef(null)
+    const gainNodeRef = useRef(null)
+
+    useEffect(() => {
+        // AudioContext와 gainNode 초기화
+        audioContextRef.current = new (window.AudioContext || window.webkitAudioContext())
+        gainNodeRef.current = audioContextRef.current.createGain()
+        gainNodeRef.current.connect(audioContextRef.current.destination)
+
+        // 모든 오디오와 비디오 요소에 대해 gainNode를 연결
+        document.querySelectorAll('audiio', 'video').forEach(mediaElement => {
+            const mediaSource = audioContextRef.current.createMediaElementSource(mediaElement)
+            mediaSource.connenct(gainNodeRef.current)
+        })
+    }, [])
+
+    // const turnSpeakerOn = () => {
+    //     setIsSpeakerOn(prevState => {
+    //         if (prevState) {
+    //             gainNodeRef.current.gain.setValueAtTime(0, audioContextRef.current.currentTime)
+    //         } else {
+    //             gainNodeRef.current.gain.setValueAtTime(1, audioContextRef.current.currentTime)
+    //         }
+    //         return !prevState
+    //     })
+    // }
 
     // URL이 변경되면 모달을 닫음
     useEffect(() => {
@@ -55,6 +86,7 @@ const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
     // token undefined 문제 해결하고 나면 할 것
     const handleLogout = async () => {
         console.log("나 로그아웃 버튼 눌렀어")
+
         try {
             console.log("try 들어왔어")
             const access = localStorage.getItem('access')
@@ -65,6 +97,7 @@ const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
                 access: access,
                 refresh: refresh
             }
+
             // 로그아웃 API 요청
             await axios.post('https://i11e106.p.ssafy.io/api/logout', JSON.stringify(body), {
                 headers: {
@@ -75,11 +108,14 @@ const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
                 },
                 withCredentials: true // 필요 시 추가: 이 옵션을 추가하면 쿠키가 포함된 요청을 서버로 보낼 수 있음
             })
+
             // 로그아웃 성공 시 처리 로직
             localStorage.removeItem('access') // 로컬 스토리지에서 토큰 삭제
             localStorage.removeItem('refresh') // 로컬 스토리지에서 토큰 삭제
             console.log('localStorage 에서 access, refresh 삭제했어요')
             onLoginSuccess('') // 상위 컴포넌트에 로그아웃 알림
+
+            navigate('/') // MainPage로 이동
         } catch (error) {
             console.log("catch 들어왔어")
             console.error("Logout failed:", error.response ? error.response.data : error.message)
@@ -125,23 +161,18 @@ const Navbar = ({ isLoggedIn, name, onLoginSuccess }) => {
                         <button onClick={openLoginModal} className="navbar-logout-buttons east-sea-dokdo-regular">활동하기</button>
                         <LoginModal isOpen={isLoginModalOpen} openModal={openLoginModal} onLoginSuccess={onLoginSuccess} />
                         <button onClick={openSignUpModal} className="navbar-logout-buttons east-sea-dokdo-regular">독립군 입단</button>
-                        <SignUpModal isOpen={isSignUpModalOpen} openModal={openSignUpModal} />
+                        <SignUpModal isOpen={isSignUpModalOpen} openModal={openSignUpModal} openLoginModal={openLoginModal} />
                     </>
                 )}
-                {/* <div onClick={openSettingsModal} className="links">
-                    <img src={SettingsButton} alt="SettingsButton" className="navbar-buttons" />
-                    <p>설정</p>
-                </div>
-                <SettingsModal isOpen={isSettingsModalOpen} openModal={openSettingsModal} /> */}
 
                 {isSpeakerOn ? (
                     <div className="Speaker-Box">
                         <img src={SpeakerOnButton} alt="SpeakerOnButton" className="speaker-buttons" />
-                        <img src={SpeakerOffLockedButton} alt="SpeakerOffLockedButton" className="speaker-buttons" onClick={turnSpeakerOn} />
+                        <img src={SpeakerOffLockedButton} alt="SpeakerOffLockedButton" className="speaker-buttons" onClick={toggleSpeaker} />
                     </div>
                 ) : (
                     <div className="Speaker-Box">
-                        <img src={SpeakerOnLockedButton} alt="SpeakerOnLockedButton" className="speaker-buttons" onClick={turnSpeakerOn} />
+                        <img src={SpeakerOnLockedButton} alt="SpeakerOnLockedButton" className="speaker-buttons" onClick={toggleSpeaker} />
                         <img src={SpeakerOffButton} alt="SpeakerOffButton" className="speaker-buttons" />
                     </div>
                 )}

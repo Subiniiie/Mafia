@@ -16,17 +16,24 @@ function Friends({ isOpen, openModal }) {
         setActivetab(tab)
     }
 
-    const friends = <div className={styles.container}>
-        <ModalHeader modalTitle="동지들" openModal={openModal} />
-        <button onClick={() => handleTabChange("list")}>동지</button>
-        <button onClick={() => handleTabChange("add")}>동지 요청</button>
-        <button onClick={() => handleTabChange("search")}>동지 찾기</button>
-        <div>
-            {activeTab === "list" && <FriendsListTab />}
-            {activeTab === "add" && <FriendsAddTab />}
-            {activeTab === "search" && <FriendsSearchTab />}
+    const friends = 
+        <div className={styles.modal}>
+            <div className={styles.container}>
+                <div className={styles.modalTitle}>
+                    <ModalHeader modalTitle="동지들" openModal={openModal} />
+                </div>
+                    <div className={styles.content}>
+                        <button className={styles.btn} onClick={() => handleTabChange("list")}>동지</button>
+                        <button className={styles.btn} onClick={() => handleTabChange("add")}>동지 요청</button>
+                        <button className={styles.btn} onClick={() => handleTabChange("search")}>동지 찾기</button>
+                        <div>
+                            {activeTab === "list" && <FriendsListTab />}
+                            {activeTab === "add" && <FriendsAddTab />}
+                            {activeTab === "search" && <FriendsSearchTab />}
+                        </div>
+                    </div>
+            </div>
         </div>
-    </div>
 
     return (
         <>
