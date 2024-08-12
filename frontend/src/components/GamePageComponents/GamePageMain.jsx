@@ -11,7 +11,7 @@ import styles from "./GamePageMain.module.css"
 function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, stompClient, gameData, nowGameState, gameResponse, players, setPlayers }) {
     // players 배열을 생성된 시간 순으로 정렬
     // streamManagers와 순서를 맞춰야 하므로 정렬이 필요함
-    setPlayers(playes => players.sort((a, b) => a.creationTime - b.creationTime));
+    // setPlayers(playes => players.sort((a, b) => a.creationTime - b.creationTime));
 
     // const [ currentPhase, setCurrentPhase ] = useState('night')                         // 게임 단계(night, police, discussion, finalDefense)
     const [ nightTimer, setNightTimer ] = useState(30)                                  // 밤 타이머   
@@ -223,9 +223,20 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // useEffect(()=>{
     //     setPlayers(players => players.sort((a, b) => a.creationTime - b.creationTime));
     // })
+    // useEffect(() => {
+    //     setPlayers(players => [...players].sort((a, b) => a.creationTime - b.creationTime));
+    // }, [players, setPlayers]);
     useEffect(() => {
-        setPlayers(players => [...players].sort((a, b) => a.creationTime - b.creationTime));
-    }, [players, setPlayers]);
+        // 기존 players와 비교하여 변경된 경우에만 업데이트
+        setPlayers(prevPlayers => {
+            const newSortedPlayers = [...players].sort((a, b) => a.creationTime - b.creationTime);
+            // 상태가 변경된 경우에만 업데이트
+            if (JSON.stringify(prevPlayers) !== JSON.stringify(newSortedPlayers)) {
+                return newSortedPlayers;
+            }
+            return prevPlayers;
+        });
+    }, [players]);
 
 
     // 재투표를 해야할 때

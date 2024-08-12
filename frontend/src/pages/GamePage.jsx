@@ -309,27 +309,13 @@ function GamePage() {
 
     }, [])
 
-    const handleButtonClick = () => {
-        // 버튼 클릭 시 실행할 로직을 여기에 작성합니다.
-        console.log('버튼이 클릭되었습니다.');
-        gameStart();
-      };
-
-    const gameStart = () => {
-        const access = localStorage.getItem('access');
-        if (stompClient.current) {
-            stompClient.current.send(`/ws/pub/start/${roomId}`, {
-                'Authorization': `Bearer ${access}`
-            }, JSON.stringify({ action: 'start' }));
-        }
-    }
       
     return (
         <>
             <div className={styles.container}>
                 {/* 게임데이터 있는지 확인 -> 게임데이터에 유저리스트가 있는지 확인 -> 그 유저리스트 array인지 확인  */}
                 {gameData && gameData.userList && Array.isArray(gameData.userList) &&
-                    <GamePageHeader gameData={gameData} id={roomId} />
+                    <GamePageHeader gameData={gameData} roomId={roomId} />
                 }
                 {gameData && gameData.userList && Array.isArray(gameData.userList) &&
                     <GamePageMain
