@@ -23,7 +23,6 @@ function GameReadyStartBtn({ stompClient, nowGameState, gameData, gameResponse, 
                 {}
             )
             setClickedBtn(true)
-            console.log('장하오', gameResponse)
             // gameResponse에서 어떻게 응답해주냐에 따라 
             // handleStartGameBtn 활성화되게 하기
         } else {

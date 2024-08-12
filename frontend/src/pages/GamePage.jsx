@@ -22,7 +22,7 @@ function GamePage() {
 
     // 게임방 주소에 roomId 추가해서 리스트에서 들어가는 게임방마다 다른 경로로 가게 하기
     const { roomId } = useParams();
-    
+
 
     // OpenVidu Session Variables
     const OV = new OpenVidu();
@@ -48,7 +48,7 @@ function GamePage() {
 
     // Game
     const [ gameData, setGameData ] = useState({})
-    const [ gameResponse, setGameResponse ] = useState("")
+    const [ gameResponse, setGameResponse ] = useState({})
     const [ nowGameState, setNowGameState ] = useState("")
 
     // player 설정
@@ -319,18 +319,26 @@ function GamePage() {
         const socket = new WebSocket("wss://i11e106.p.ssafy.io/ws")
         const access = localStorage.getItem('access');
 
+        console.log("여까진옴");
         stompClient.current = Stomp.over(socket)
+        console.log("client",stompClient.current);
         stompClient.current.connect({
             'Authorization': `Bearer ${access}`
         }, () => {
-            stompClient.current.subscribe(`/ws/sub/${roomId}`, (message) =>
+            console.log("하이")
+            stompClient.current.subscribe(`/sub/${roomId}`, (message) =>
+                
                 {
+                    console.log("연결성공")
                     const messageJson = JSON.parse(message.body)
                     console.log("입장 데이터 확인 : ", messageJson)
                     setGameResponse(messageJson)
-                    setNowGameState('입장 하고 데이터 받는다ㅏㅏ', messageJson.gameState)
+                    setNowGameState(messageJson.gameState)
+                    console.log(gameResponse)
+                    console.log(nowGameState)
                 })
         })
+
 
         return () => {
             if (stompClient.current) {
