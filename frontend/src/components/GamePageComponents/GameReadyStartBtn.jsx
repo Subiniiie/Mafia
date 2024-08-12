@@ -6,7 +6,6 @@ import styles from './GameReadyStartBtn.module.css';
 function GameReadyStartBtn({ stompClient, nowGameState, gameData, gameResponse, roomId }) {
     const [ clickedBtn, setClickedBtn ] = useState(false)
     const [ gameReady, setGameReady ] = useState(false)
-    const [ showModal, setShowModal ] = useState(false)
 
     const roomManager = gameData.userList.find(user => user.owner === true && user.me === true);
 
@@ -91,7 +90,6 @@ function GameReadyStartBtn({ stompClient, nowGameState, gameData, gameResponse, 
                 </button>
             )
             }
-            {showModal && <div className={styles.alarm}>지금부터 밀정1931을 시작합니다.</div>}
         </>
     )
 

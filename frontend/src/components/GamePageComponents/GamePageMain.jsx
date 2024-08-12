@@ -26,25 +26,20 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     const [ showPoliceModal, setShowPoliceModal ] = useState(false)                         // 첩보원 모달 표시 여부
     const [ votes, setVotes ] = useState({});
     const [ suspect, setSuspect ] = useState(null)
+    const [ showModal, setShowModal ] = useState(false)
     const [ winnerModal, setWinnerModal ] = useState(false)                                // 우승자 표시
 
     const access = localStorage.getItem('access');
     const header =  {'Authorization': `Bearer ${access}`}
 
-    // // 게임 시작하기
-    // const gameStart = () => {
-    //     const socket = new WebSocket(`ws://i11e106.p.ssafy.io/pub/start/${roomId}`)
-    //     socket.onopen = function(event) {
-    //         console.log('웹소켓 연결이 열렸습니다. 게임을 시작합니다')
-    //     }
-    //     socket.onerror = function(error) {
-    //         console.error('게임 시작 웹소켓에서 에러가 발생했습니다.:', error);
-    //     }
-    //     socket.close()
-    //     socket.onclose = function(event) {
-    //         console.log('게임 시작 웹소켓 연결이 닫혔습니다')
-    //     }
-    // }
+    // 게임 시작하기
+    const gameStart = () => {
+        // 게임시작 알람 모달
+        setShowModal(true)
+        setTimeout(() => {
+            setShowModal(false)
+        }, 15000)
+    }
 
     // 밀정 시간
     const emissaryTime = () => {
@@ -123,7 +118,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // 낮(토론 및 투표 중)
     const voteStart = (targetId) => {
         stompClient.current.send(
-            `/ws/pub//vote/${roomId}`, 
+            `/ws/pub/vote/${roomId}`, 
             header,
             JSON.stringify({ targetId })
         )
@@ -268,7 +263,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         // 죽이는 거에 찬성하는지 반대하는지 어떻게 알지?
         if (choiced === '찬성') {
             stompClient.current.send(
-                `/pub/confirm/${roomId}`, 
+                `/WS/pub/confirm/${roomId}`, 
                 header, 
                 JSON.stringify({targetId})
             )
@@ -278,7 +273,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // 게임 끝
     const gameEnd = () => {
         stompClient.current.send(
-            `/pub/end/${roomId}`, 
+            `/WS/pub/end/${roomId}`, 
             header, 
             {}
         )
@@ -414,6 +409,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                 {showPoliceModal ? <PoliceModal gameData={gameData} onChioce={policeChoicedPlayer}/>: null}
                 {finalDefensePlayer ? <FinalDefensePlayerModal suspect={suspect} onMessage={handleFinalDefenseResult}/> : null }
             </div>
+            {showModal && <div className={styles.alarm}>지금부터 밀정1931을 시작합니다.</div>}
             { winnerModal ? <div className={styles.winner}><span style={{ color: 'red', fontWeight: 'bold' }}>{winnerJob}</span>의 승리입니다.</div> : null}
         </>
     )
