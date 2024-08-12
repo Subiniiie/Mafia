@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import GLHeader from "../components/GameListComponents/GLHeader";
 import GLMain from "../components/GameListComponents/GLMain";
 import GLFooter from "../components/GameListComponents/GLFooter";
+import React from "react";
 import BGM from "../assets/BGM/LobbyBGM.mp3"
 
 
@@ -20,6 +21,14 @@ function GameListPage({ setViduToken, isSpeakerOn }) {
     }, [isSpeakerOn])
 
     return (
+      <div>
+        <div className="box-content h-48"></div>
+        <GLHeader setViduToken={setViduToken}/>
+        <main>
+          <GLMain setViduToken={setViduToken}/>
+        </main>
+        <GLFooter/>
+      </div>
         <div>
             <audio ref={audioRef} autoPlay loop >
                 <source src={BGM} type="audio/mp3" />
