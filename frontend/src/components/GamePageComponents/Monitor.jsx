@@ -43,6 +43,7 @@ const Monitor = function ({ nickname, isRoomManager, isMe, isAlive, onVote, isVo
     const [isMuteVoice, setIsMuteVoice] = useState(false)
 
     const handleVoice = function () {
+        console.log('으악 투표 받았다')
         if (!isMuteVoice) streamManager.subscribeToAudio(false);
         else streamManager.subscribeToAudio(true);
 
@@ -63,27 +64,27 @@ const Monitor = function ({ nickname, isRoomManager, isMe, isAlive, onVote, isVo
 
     return (
         <>
-            <div className={styles.monitor}></div>
-            <video autoPlay={true} ref={videoRef} className={styles.monitor} />
-
             <div className={styles.monitor}>
                 <video autoPlay={true} ref={videoRef} className={styles.videoBox} />
+
                 <div className={styles.monitorHeader}>
-                    <div>
-                        {/* 닉네임 출력하기
-                        {nickname} */}
+                    <div className={styles.nickname}>
+                        {/* 닉네임 출력하기 */}
                         {isMe ? 'me' : nickname}
                     </div>
-                    {/* 죽으면 어쩔겨 
-                    투표창은 회색으로 하고 인덱스는 그대로 유지
-                    */}
-                    <button
+
+
+                    {/* 투표창 | 죽으면 회색으로 하고 인덱스는 그대로 유지 */}
+                    <div
                         className={isAlive ? isVote ? styles.voteBtnRed : styles.voteBtnGreen : styles.deadBtn}
                         disabled={!isAlive}
                         // 투표 당한 플레이어의 닉네임 전송
                         onClick={handleVote}>
-                    </button>
+                    </div>
                 </div>
+
+
+
                 <div className={styles.monitorFooter}>
                     {/* 클릭해서 음소거 가능 */}
                     <img className={styles.voiceBtn} onClick={handleVoice} src={isMuteVoice ? "/volume_mute.png" : "/volume.png"} alt="volume"></img>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useParams } from "react";
-import {Link, useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import styles from "./GamePageHeader.module.css"
 import GameSettingsModal from "../../modals/GameSettingsModal";
@@ -14,13 +14,13 @@ function GamePageHeader({ gameData, id, leaveSession }) {
     const roomId = gameData.roomId
 
     const access = localStorage.getItem("access");
-    
-    
+
+
     // 방장만 게임 설정 바꿀 수 있게
     // 버튼을 클릭하면 게임 설정 모달이 열림
-    const [ isModalOpen, setIsModalOpen ] = useState(false)
-    const [ blackBackground, setBlackBackground ] = useState(false)
-    
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [blackBackground, setBlackBackground] = useState(false)
+
     function openModal() {
         setIsModalOpen(!isModalOpen)
         setBlackBackground((preState) => !preState)
@@ -31,10 +31,10 @@ function GamePageHeader({ gameData, id, leaveSession }) {
         try {
             const refreshToken = localStorage.getItem('refresh_token');
             if (!refreshToken) throw new Error('Refresh token is missing.');
-    
+
             const response = await axios.post('https://i11e106.p.ssafy.io/api/auth/refresh', { token: refreshToken });
             const newAccessToken = response.data.accessToken;
-    
+
             localStorage.setItem('access', newAccessToken);
             return newAccessToken;
         } catch (error) {
@@ -46,13 +46,13 @@ function GamePageHeader({ gameData, id, leaveSession }) {
     const exitHandler = async (e) => {
         e.preventDefault();
         await axios.delete(
-          `https://i11e106.p.ssafy.io/api/rooms/users/${id}`,
-          {
-              headers: {
-                  "Content-Type": "application/json",
-                  "Authorization": `Bearer ${access}`,
-              }
-          }
+            `https://i11e106.p.ssafy.io/api/rooms/users/${id}`,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${access}`,
+                }
+            }
         ).then((resp) => {
             console.log(" 나 나가요.", resp);
             return leaveSession();
@@ -71,19 +71,19 @@ function GamePageHeader({ gameData, id, leaveSession }) {
                     <div className={styles.roomTitle}>
                         {roomTitle}
                     </div>
-                    <div className={styles.right}>
+                    <div className={styles.contentBox}>
                         {roomManager ? roomManagerSettings : null}
-                            <Link to="/game-list" className={styles.exit} onClick={exitHandler}>
-                                <img src="/exit.png" alt="exit.png" className={styles.exitImage} />
-                                나가기
-                            </Link>
+                        <Link to="/game-list" className={styles.exit} onClick={exitHandler}>
+                            <img src="/exit.png" alt="exit.png" className={styles.exitImage} />
+                            나가기
+                        </Link>
                     </div>
                 </div>
                 <div>
                     {isModalOpen ? <GameSettingsModal isOpen={isModalOpen} openModal={openModal} roomId={roomId} /> : null}
                 </div>
             </div>
-            { blackBackground ? <div className={styles.black} onClick={openModal}></div> : null}
+            {blackBackground ? <div className={styles.black} onClick={openModal}></div> : null}
         </>
     )
 }

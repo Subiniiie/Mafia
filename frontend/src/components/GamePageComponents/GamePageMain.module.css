@@ -1,5 +1,6 @@
 .fakeHeaderContainer {
-    height: 170px;
+    /* 방제목, 나가기 버튼 등에 가리지 않기 위한 빈 공간 div */
+    height: 150px;
 }
 
 .playerContainer {
@@ -7,17 +8,17 @@
     place-items: center;
     grid-template-rows: repeat(2, 1fr);
     grid-template-columns: repeat(4, 1fr);
-    gap: 40px 10px;
-    margin: 30px 40px;
+    gap: 40px 5px;
+    margin: 30px 45px 30px 45px;
 }
 
 .playerCell {
-    background-color: white;
-    width: 85%;
+    background-color: #2D2F3F;
+    width: 263px;
+    /* width: 80%; */
     height: 190px;
     border-radius: 10px;
 }
-
 
 
 .monitors {

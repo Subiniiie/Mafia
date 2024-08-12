@@ -226,17 +226,18 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // useEffect(() => {
     //     setPlayers(players => [...players].sort((a, b) => a.creationTime - b.creationTime));
     // }, [players, setPlayers]);
-    useEffect(() => {
-        // 기존 players와 비교하여 변경된 경우에만 업데이트
-        setPlayers(prevPlayers => {
-            const newSortedPlayers = [...players].sort((a, b) => a.creationTime - b.creationTime);
-            // 상태가 변경된 경우에만 업데이트
-            if (JSON.stringify(prevPlayers) !== JSON.stringify(newSortedPlayers)) {
-                return newSortedPlayers;
-            }
-            return prevPlayers;
-        });
-    }, [players]);
+
+    // useEffect(() => {
+    //     // 기존 players와 비교하여 변경된 경우에만 업데이트
+    //     setPlayers(prevPlayers => {
+    //         const newSortedPlayers = [...players].sort((a, b) => a.creationTime - b.creationTime);
+    //         // 상태가 변경된 경우에만 업데이트
+    //         if (JSON.stringify(prevPlayers) !== JSON.stringify(newSortedPlayers)) {
+    //             return newSortedPlayers;
+    //         }
+    //         return prevPlayers;
+    //     });
+    // }, [players]);
 
 
     // 재투표를 해야할 때
@@ -383,9 +384,36 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
             break
     }
 
+    // 화면 8개 고정 배열
+
+    const [renderedStreams, setRenderedStreams] = useState([])
+
+    useEffect(() => {
+        // players 배열이 변경될 때마다 OpenVidu 화면을 재렌더링
+        const updatedRenderedStreams = streamManagers.map((streamManager, index) => (
+            <div key={index} id={`video-container-${index}`} className={styles.videoContainer}>
+                {streamManager && (
+                    <Monitor
+                        nickname={players[index]?.nickname}
+                        isRoomManager={players[index]?.isRoomManager}
+                        isMe={players[index]?.isMe}
+                        isAlive={players[index].isAlive}
+                        roomId={roomId}
+                        streamManager={streamManager}
+                        isVote={votes[players[index]?.id] || false}
+                        onVote={handleVote}
+                    />
+                )}
+            </div>
+        ))
+
+        setRenderedStreams(updatedRenderedStreams)
+    }, [players, streamManagers])
+
     return (
         <>
-            <div className={styles.fakeHeaderContainer} />
+            {/* 간이 모양만 테스트 */}
+            {/* <div className={styles.fakeHeaderContainer} />
             <div className={styles.playerContainer}>
                 <div className={styles.playerCell}></div>
                 <div className={styles.playerCell}></div>
@@ -395,12 +423,22 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                 <div className={styles.playerCell}></div>
                 <div className={styles.playerCell}></div>
                 <div className={styles.playerCell}></div>
+            </div> */}
+
+
+            <div className={styles.fakeHeaderContainer} />
+            <div className={styles.playerContainer}>
+                {/* OpenVidu 화면을 채우기 위해 div를 렌더링 */}
+                {renderedStreams}
+                {/* 나머지 div 태그 그대로 놔두기 */}
+                {Array.from({ length: 8 - streamManagers.length }, (_, index) => (
+                    <div key={`empty-${index}`} className={styles.playerCell}></div>
+                ))}
             </div>
 
 
 
-            <div className={styles.monitors}>
-                {/* <p>MONITOR IN!!</p> */}
+            {/* <div className={styles.monitors}>
                 {zip(players, streamManagers).map((player, index) => (
                     <Monitor
                         key={index}
@@ -414,7 +452,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                         onVote={handleVote}
                     />
                 ))}
-            </div>
+            </div> */}
             <div className={styles.timer}>
                 {/* {currentPhase === 'night' && <p>밤 시간: {nightTimer}초</p>}
                 {currentPhase === 'police' && <p>첩보원 시간: {policeTimer}초</p>}
