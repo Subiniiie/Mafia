@@ -6,7 +6,6 @@ import styles from './GameReadyStartBtn.module.css';
 function GameReadyStartBtn({ stompClient, nowGameState, gameData, gameResponse, roomId }) {
     const [ clickedBtn, setClickedBtn ] = useState(false)
     const [ gameReady, setGameReady ] = useState(false)
-    // const [ showModal, setShowModal ] = useState(false)
 
     const roomManager = gameData.userList.find(user => user.owner === true && user.me === true);
 
@@ -35,7 +34,7 @@ function GameReadyStartBtn({ stompClient, nowGameState, gameData, gameResponse, 
         if (stompClient.current && stompClient.current.connected) {
             console.log("일반 플레이어가 준비 취소 버튼을 누른 걸 알려주자")
             stompClient.current.send(
-                `/ws/pub/ready/${roomId}`,
+                `/ws/pub/ready/${roomId}`, 
                 header, 
                 {}
             )
@@ -49,11 +48,11 @@ function GameReadyStartBtn({ stompClient, nowGameState, gameData, gameResponse, 
     const handleStartGameBtn = () => {
         if (stompClient.current && stompClient.current.connected) {
             console.log("방장이 게임 시작 요청을 보냈다")
-            stompClient.current.send(`/ws/pub/start/${roomId}`, {}, "")
+            stompClient.current.send(`/ws/pub/start/${roomId}`, header, {})
             console.log('나옴', nowGameState)
             console.log('나감', gameResponse)
         } else {
-            console.error("STOMP 클라이언트가 연결되지 않았습니다.");
+            console.error("STOMP 클라이언트가 연결되지 않았습니다.")
         }
     }
 
@@ -62,21 +61,21 @@ function GameReadyStartBtn({ stompClient, nowGameState, gameData, gameResponse, 
             { roomManager ? (
                 // 방장일 때
                 <>
-                    {/*{gameReady ? (*/}
+                    {/* {gameReady ? ( */}
                         <button
                             className={styles.btnClass}
                             onClick={handleStartGameBtn}
                         >
                             게임 시작
                         </button>
-                    {/*) : (*/}
-                    {/*    <button*/}
-                    {/*        className={styles.btnDisabled}*/}
-                    {/*    >*/}
-                    {/*        게임 시작*/}
-                    {/*    </button>*/}
-                    {/*)}*/}
-                </>
+                        {/* ) : ( */}
+                        {/* <button
+                            className={styles.btnDisabled}
+                        > 
+                            게임 시작
+                        {</button>
+                    )} */}
+                </> 
             ) :(
                 // 방장이 아닐 때
                 <button
