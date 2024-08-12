@@ -20,12 +20,27 @@ public class RoomDetailUserDto {
     @JsonProperty("owner")
     private boolean isOwner;
 
-    public static RoomDetailUserDto of(User user, long ownerId){
-        return RoomDetailUserDto.builder()
+    @JsonProperty("me")
+    private boolean isMe;
+
+    public static RoomDetailUserDto of(User user, long ownerId, long userId){
+        RoomDetailUserDto roomDetailUserDto = RoomDetailUserDto.builder()
                 .userId(user.getUserId())
                 .nickname(user.getNickname())
                 .isOwner(user.getUserId() == ownerId)
                 .build();
+
+        roomDetailUserDto.setIsMe(userId);
+
+        return roomDetailUserDto;
+    }
+
+    private void setIsMe(long userId) {
+        if(userId == this.userId) {
+            this.isMe = true;
+        }else{
+            this.isMe = false;
+        }
     }
 
 }

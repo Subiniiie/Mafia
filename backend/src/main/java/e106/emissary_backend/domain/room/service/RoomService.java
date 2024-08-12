@@ -13,6 +13,7 @@ import e106.emissary_backend.domain.room.enumType.RoomState;
 import e106.emissary_backend.domain.room.enumType.SessionRole;
 import e106.emissary_backend.domain.room.repository.RoomRepository;
 import e106.emissary_backend.domain.room.service.subscriber.message.EnterRoomMessage;
+import e106.emissary_backend.domain.room.service.subscriber.message.KickUserMessage;
 import e106.emissary_backend.domain.user.dto.RoomDetailUserDto;
 import e106.emissary_backend.domain.user.entity.User;
 import e106.emissary_backend.domain.user.repository.UserRepository;
@@ -58,6 +59,7 @@ public class RoomService {
 
     private final RedisPublisher redisPublisher;
     private final ChannelTopic enterRoomTopic;
+    private final ChannelTopic kickUserTopic;
 
     @Value("${OPENVIDU_URL}")
     private String openviduUrl;
@@ -281,9 +283,9 @@ public class RoomService {
             // Redis 발행 로직
             List<RoomDetailUserDto> userList = userInRoomList.stream()
                     .map(UserInRoom::getUser)
-                    .map(nowUser -> RoomDetailUserDto.of(nowUser, room.getOwnerId()))
+                    .map(nowUser -> RoomDetailUserDto.of(nowUser, room.getOwnerId(), userId))
                     .collect(Collectors.toList());
-            RoomDetailUserDto dto = RoomDetailUserDto.of(user, room.getOwnerId());
+            RoomDetailUserDto dto = RoomDetailUserDto.of(user, room.getOwnerId(), userId);
             userList.add(dto);
 
             RoomDetailDto roomDetailDto = RoomDetailDto.toDTO(room, userList);
@@ -341,7 +343,7 @@ public class RoomService {
             roomRepository.deleteById(roomId);
         }else{
             // 발행하기
-            publishRemoveUser(roomId);
+            publishRemoveUser(roomId, userId);
         }
 
         return new CommonResponseDto("ok");
@@ -417,7 +419,7 @@ public class RoomService {
 
         // 레디스 처리하고
         deleteUserInRedis(roomKickDto.getRoomId(), targetId);
-        publishRemoveUser(roomKickDto.getRoomId());
+        publishRemoveUser(roomKickDto.getRoomId(), userId);
         log.info("레디스 처리 완료");
 
         // Map 삭제하고
@@ -427,6 +429,10 @@ public class RoomService {
 
         // 강퇴 ㄱ
         session.forceDisconnect(connectionId);
+
+        // 강퇴당한 유저 알리기
+        KickUserMessage kickUserMessage = KickUserMessage.builder().targetId(targetId).roomId(roomKickDto.getRoomId()).gameState(GameState.KICK).build();
+        redisPublisher.publish(kickUserTopic, kickUserMessage);
         return true;
     }
 
@@ -453,10 +459,11 @@ public class RoomService {
     }
 
     @RedissonLock(value = "#roomId")
-    public RoomDetailDto detailRoom (long roomId){
+    public RoomDetailDto detailRoom (long roomId, long userId){
         log.info("detail Room run");
         List<UserInRoom> userInRoom = userInRoomRepository.findAllByPk_RoomId(roomId).orElseThrow(
                 () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
+
 
         if(Objects.isEmpty(userInRoom)){
             log.info("userInRoom이 비어있어요");
@@ -467,7 +474,7 @@ public class RoomService {
 
         List<RoomDetailUserDto> roomDetailUserDtoList = userInRoom.stream()
                 .map(UserInRoom::getUser)
-                .map(user -> RoomDetailUserDto.of(user, room.getOwnerId()))
+                .map(user -> RoomDetailUserDto.of(user, room.getOwnerId(), userId))
                 .toList();
 
         return RoomDetailDto.toDTO(room, roomDetailUserDtoList);
@@ -484,14 +491,19 @@ public class RoomService {
         redisKeyValueTemplate.update(updateGame);
     }
 
-    private void publishRemoveUser(Long roomId) {
+    private void publishRemoveUser(Long roomId, long userId) {
         List<UserInRoom> userInRoomList = userInRoomRepository.findAllByPk_RoomId(roomId).orElseThrow(
                 () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
         Room room = userInRoomList.get(0).getRoom();
         List<RoomDetailUserDto> userList = userInRoomList.stream()
                 .map(UserInRoom::getUser)
-                .map(nowUser -> RoomDetailUserDto.of(nowUser, room.getOwnerId()))
+                .map(nowUser -> RoomDetailUserDto.of(nowUser, room.getOwnerId(), userId))
                 .toList();
+
+        for (RoomDetailUserDto roomDetailUserDto : userList) {
+            log.info(roomDetailUserDto.toString());
+        }
+
         RoomDetailDto roomDetailDto = RoomDetailDto.builder()
                 .roomId(roomId)
                 .roomState(RoomState.WAIT)
@@ -501,6 +513,7 @@ public class RoomService {
                 .haveBetray(room.isHaveBetray())
                 .userList(userList)
                 .build();
+
         redisPublisher.publish(enterRoomTopic, EnterRoomMessage.builder()
                         .gameState(GameState.ENTER)
                         .roomDetailDto(roomDetailDto)

@@ -20,7 +20,7 @@ public class RoomRequestDto {
 
     public Room toEntity(long userId){
         boolean isPrivate = false;
-        if(Objects.isEmpty(getPassword())){
+        if(!Objects.isEmpty(getPassword())){
             isPrivate = true;
         }
 
