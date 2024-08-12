@@ -22,7 +22,6 @@ function GameReadyStartBtn({ stompClient, nowGameState, gameData, gameResponse, 
                 {}
             )
             setClickedBtn(true)
-            console.log('장하오', gameResponse)
             // gameResponse에서 어떻게 응답해주냐에 따라 
             // handleStartGameBtn 활성화되게 하기
         } else {
@@ -35,7 +34,7 @@ function GameReadyStartBtn({ stompClient, nowGameState, gameData, gameResponse, 
         if (stompClient.current && stompClient.current.connected) {
             console.log("일반 플레이어가 준비 취소 버튼을 누른 걸 알려주자")
             stompClient.current.send(
-                `/pub/ready/${roomId}`, 
+                `/ws/pub/ready/${roomId}`, 
                 header, 
                 {}
             )
@@ -47,17 +46,14 @@ function GameReadyStartBtn({ stompClient, nowGameState, gameData, gameResponse, 
 
     // 방장 시작 버튼 활성화되고 버튼을 누름
     const handleStartGameBtn = () => {
-        // 게임시작 알람 모달
-        setShowModal(true)
-        // 모달이 닫힌 후에 게임 시작 요청을 보냄 
-        setTimeout(() => {
-            if (stompClient.current && stompClient.current.connected) {
-                console.log("방장이 게임 시작 요청을 보냈다")
-            stompClient.current.send(`/pub/start/${roomId}`, {}, "")
+        if (stompClient.current && stompClient.current.connected) {
+            console.log("방장이 게임 시작 요청을 보냈다")
+            stompClient.current.send(`/ws/pub/start/${roomId}`, header, {})
+            console.log('나옴', nowGameState)
+            console.log('나감', gameResponse)
         } else {
-            console.error("STOMP 클라이언트가 연결되지 않았습니다.");
+            console.error("STOMP 클라이언트가 연결되지 않았습니다.")
         }
-        }, 1500)
     }
 
     return (
@@ -65,21 +61,21 @@ function GameReadyStartBtn({ stompClient, nowGameState, gameData, gameResponse, 
             { roomManager ? (
                 // 방장일 때
                 <>
-                    {gameReady ? (
+                    {/* {gameReady ? ( */}
                         <button
                             className={styles.btnClass}
                             onClick={handleStartGameBtn}
                         >
                             게임 시작
                         </button>
-                    ) : (
-                        <button
+                        {/* ) : ( */}
+                        {/* <button
                             className={styles.btnDisabled}
-                        >
+                        > 
                             게임 시작
-                        </button>
-                    )}
-                </>
+                        {</button>
+                    )} */}
+                </> 
             ) :(
                 // 방장이 아닐 때
                 <button

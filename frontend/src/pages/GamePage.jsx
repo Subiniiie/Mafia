@@ -12,6 +12,12 @@ function GamePage() {
     const {state} = useLocation();
     console.log(state);
 
+    // 직업 카드에 보여지는 직업 정의
+    const [ myJob, setMyJob ] = useState("")
+    const getMyJob = (job) => {
+        setMyJob(job)
+    }
+
     // 화면 이동 시 LeaveSession
     // useEffect(()=>{
     //     // window.onbeforeunload = () => leaveSession();
@@ -67,7 +73,8 @@ function GamePage() {
     useEffect(() => {
         const access = localStorage.getItem('access');
 
-        async function gameRoomInfo() {
+        // async function gameRoomInfo() {
+        const gameRoomInfo = async function() {
             await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`, {
                 headers: {
                     "Content-Type": "application/json",
@@ -208,8 +215,8 @@ function GamePage() {
                         console.log(message.body);
                         const messageJson = JSON.parse(message.body);
                         setGameResponse(messageJson);
-                        setNowGameState("입장하고데이터 받는다", messageJson.gameState)
-                        console.log(messageJson);
+                        setNowGameState(messageJson.gameState)
+                        console.log('웹소켓을 구독하고 받은 message, gameResponse', messageJson);
                     } else {
                        console.log("OUT! WS");
                     }
@@ -249,6 +256,7 @@ function GamePage() {
                         gameResponse={gameResponse}
                         players={players}
                         setPlayers={setPlayers}
+                        getMyJob={getMyJob}
                     />
                 }
                 {gameData && gameData.userList && Array.isArray(gameData.userList) &&
@@ -263,6 +271,7 @@ function GamePage() {
                         chatHistory={chatHistory}
                         chatMode={chatMode}
                         players={players}
+                        myJob={myJob}
                     />
                 }
             </div>
