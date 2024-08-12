@@ -53,6 +53,7 @@ public class SocketGameController {
 
     @MessageMapping("/start/{roomId}")
     public void start( @DestinationVariable Long roomId, SimpMessageHeaderAccessor headerAccessor) {
+        log.info("game Started");
         long userId = getUserIdIAccessor(headerAccessor);
 
         gameService.setGame(roomId, userId);
