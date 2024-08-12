@@ -1,16 +1,46 @@
-/* GLMain.module.css */
-
-.container {
+/* .container {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
-    background-color: #12151D;
-    /* 배경 색상 추가 */
-    padding: 10px 60px
+    justify-content: space-evenly;
+    padding: 20px;
+    gap: 20px;
+} */
+
+/* .container::after {
+    content: '';
+    flex: 1 1 calc(33.333% - 20px);
+    max-width: calc(33.333% - 20px);
+} */
+
+/* .cardWrapper {
+    flex: 1 1 calc(33.333% - 20px);
+    box-sizing: border-box;
+    max-width: calc(33.333% - 20px);
+    min-width: 250px;
+    padding: 20px;
+    border-radius: 8px;
+    color: white;
+    text-align: center;
+} */
+
+.container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 0 20px;
+    margin-top: 100px;
 }
 
 .cardWrapper {
-    flex: 1 1 calc(33.333% - 10px);
+    border-radius: 8px;
+    padding: 0 20px;
+    text-align: center;
+    color: white;
     box-sizing: border-box;
-    margin: 5px;
+}
+
+.container::after {
+    content: '';
+    visibility: hidden;
+    grid-column: span 3;
 }

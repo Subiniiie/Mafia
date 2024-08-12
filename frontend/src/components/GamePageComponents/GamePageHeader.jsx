@@ -1,44 +1,68 @@
 import React, { useState, useEffect, useParams } from "react";
-import { Link } from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import axios from "axios";
 import styles from "./GamePageHeader.module.css"
 import GameSettingsModal from "../../modals/GameSettingsModal";
 
-function GamePageHeader() {
-    const { gameData, setGameData } = useState(null)
-    
+function GamePageHeader({ gameData, id, leaveSession }) {
+    const navigate = useNavigate();
+
     const roomTitle = gameData.title
-    const roomManager = gameData.userList.find(user => user.isOwner === true)
+
+    const roomManager = gameData.userList.find(user => user.owner === true && user.me === true);
     const roomManagerSettings = <button className={styles.settings} onClick={openModal}>게임설정</button>
+    const roomId = gameData.roomId
 
-
+    const access = localStorage.getItem("access");
+    
+    
     // 방장만 게임 설정 바꿀 수 있게
     // 버튼을 클릭하면 게임 설정 모달이 열림
     const [ isModalOpen, setIsModalOpen ] = useState(false)
     const [ blackBackground, setBlackBackground ] = useState(false)
-
+    
     function openModal() {
         setIsModalOpen(!isModalOpen)
         setBlackBackground((preState) => !preState)
     }
 
-    // 방 정보를 가져올거임
-    useEffect(() => {
-        // 주소에서 roomId를 가져옴
-        // 방 클릭할 때 주소 전송하는 걸 누가 해야하지?
-        // 주소에서  roomId인지 id인지 보기
-        const { roomId } = useParams()
-        const gameRoomInfo = async () => {
-            try {
-                // 게임방 API 호출
-                const response = await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`)
-                setGameData(response.data)
-            } catch (error) {
-                console.log("게임방 API를 불러오지 못했습니다", error)
-            }
+    // 토큰 갱신
+    const refreshToken = async () => {
+        try {
+            const refreshToken = localStorage.getItem('refresh_token');
+            if (!refreshToken) throw new Error('Refresh token is missing.');
+    
+            const response = await axios.post('https://i11e106.p.ssafy.io/api/auth/refresh', { token: refreshToken });
+            const newAccessToken = response.data.accessToken;
+    
+            localStorage.setItem('access', newAccessToken);
+            return newAccessToken;
+        } catch (error) {
+            console.error('토큰 갱신 실패:', error);
+            // 로그인 페이지로 리디렉션 등 추가 처리 필요
         }
-        gameRoomInfo()
-    } , [])
+    }
+
+    const exitHandler = async (e) => {
+        e.preventDefault();
+        await axios.delete(
+          `https://i11e106.p.ssafy.io/api/rooms/users/${id}`,
+          {
+              headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${access}`,
+              }
+          }
+        ).then((resp) => {
+            console.log(" 나 나가요.", resp);
+            return leaveSession();
+        }).then((response) => {
+            console.log("IN!");
+            navigate('/game-list');
+        }).catch((e) => {
+            console.error("탈출실패!");
+        })
+    }
 
     return (
         <>
@@ -49,14 +73,14 @@ function GamePageHeader() {
                     </div>
                     <div className={styles.right}>
                         {roomManager ? roomManagerSettings : null}
-                            <Link to="/game-list" className={styles.exit}>
-                                <img src="/exit.png" alt="exit.png" className={styles.exitImage}/>
+                            <Link to="/game-list" className={styles.exit} onClick={exitHandler}>
+                                <img src="/exit.png" alt="exit.png" className={styles.exitImage} />
                                 나가기
                             </Link>
                     </div>
                 </div>
                 <div>
-                    {isModalOpen ? <GameSettingsModal isOpen={isModalOpen} openModal={openModal}/> : null}
+                    {isModalOpen ? <GameSettingsModal isOpen={isModalOpen} openModal={openModal} roomId={roomId} /> : null}
                 </div>
             </div>
             { blackBackground ? <div className={styles.black} onClick={openModal}></div> : null}

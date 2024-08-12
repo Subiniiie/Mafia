@@ -1,4 +1,28 @@
 .card {
+    font-family: 'KimjungchulMyungjo-Bold';
+    position: relative;
+    width: 280px;
+    height: 400px;
+    margin: 10px;
+    perspective: 1000px;
+}
+
+.inner {
+    position: relative;
+    width: 280px;
+    height: 100%;
+    border: 1px solid black;
+    border-radius: 20px;
+    transition: transform 5s;
+    transform-style: preserve-3d;
+    background-color: #fff;
+    box-shadow: 0 4px 15px rgba(128, 128, 128);
+    overflow: hidden;
+}
+
+
+/* .card {
+    font-family: 'KimjungchulMyungjo-Bold';
     position: relative;
     width: 230px;
     height: 350px;
@@ -88,4 +112,4 @@
 
 .back {
     transform: rotateY(180deg);
-}
+}  */

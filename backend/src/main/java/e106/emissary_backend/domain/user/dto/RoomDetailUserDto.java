@@ -30,6 +30,7 @@ public class RoomDetailUserDto {
                 .build();
 
         roomDetailUserDto.changeProperty(userId);
+        roomDetailUserDto.changeProperty(userId);
 
         return roomDetailUserDto;
     }

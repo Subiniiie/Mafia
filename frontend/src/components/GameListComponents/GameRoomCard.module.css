@@ -3,7 +3,6 @@
 .notStarted {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     border-radius: 22px;
     margin: 10px;
     color: #F6F3E7;
@@ -15,8 +14,7 @@
 .inProgress {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    border-radius: 25px;
+    border-radius: 22px;
     margin: 10px;
     color: #F6F3E7;
     /* border: 1px solid transparent; */
@@ -38,32 +36,43 @@
 .notStartedMain {
     background-color: #102A21;
     padding: 8px;
-    border-radius: 25px 25px 0 0;
+    border-radius: 22px 22px 0 0;
 }
 
 .inProgressMain {
     background-color: #35373D;
     padding: 8px;
-    border-radius: 25px 25px 0 0;
+    border-radius: 22px 22px 0 0;
 
 }
 
 .notStartedContent {
     background-color: #11201F;
     padding: 8px;
-    border-radius: 0 0 25px 25px;
+    border-radius: 0 0 22px 22px;
 
 }
 
 .inProgressContent {
     background-color: #2A2C34;
     padding: 8px;
-    border-radius: 0 0 25px 25px;
+    border-radius: 0 0 22px 22px;
 
 }
 
 .card:hover {
     border-color: white;
+}
+
+.notStartedTitle,
+.inProgressTitle,
+.leader,
+.progress {
+    background-color: transparent;
+    /* 배경색을 투명하게 설정 */
+    padding: 0;
+    /* 패딩도 제거하여 상자 형태가 나오지 않도록 함 */
+    margin: 0;
 }
 
 .notStartedTitle {
