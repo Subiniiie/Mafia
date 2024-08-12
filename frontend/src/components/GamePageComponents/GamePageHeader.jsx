@@ -8,11 +8,8 @@ function GamePageHeader({ gameData, id, leaveSession }) {
     const navigate = useNavigate();
 
     const roomTitle = gameData.title
-    console.log('유저 목록이야', gameData.userList)
-    const roomManagerCheck = gameData.userList.find(user => user.owner === true)
-    const roomManager = roomManagerCheck.userId
-    console.log('너 방장이야?', roomManagerCheck)
-    console.log('너가 방장이구나', roomManager)
+
+    const roomManager = gameData.userList.find(user => user.owner === true && user.me === true);
     const roomManagerSettings = <button className={styles.settings} onClick={openModal}>게임설정</button>
     const roomId = gameData.roomId
 

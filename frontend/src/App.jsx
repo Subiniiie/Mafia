@@ -14,8 +14,8 @@ import './App.css'
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태
-  // const [isLoggedIn, setIsLoggedIn] = useState(true); // 로그인 상태
   const [name, setName] = useState('') // 로그인된 사용자의 이름
+  const [isSpeakerOn, setIsSpeakerOn] = useState(true)
   const [viduToken, setViduToken] = useState("");
 
   useEffect(() => {
@@ -83,17 +83,27 @@ function App() {
     setName(username)
   }
 
+  const toggleSpeaker = () => {
+    setIsSpeakerOn(prev => !prev)
+  }
+
   return (
     // <BrowserRouter>
     <>
-      <Navbar isLoggedIn={isLoggedIn} name={name} onLoginSuccess={handleLoginSuccess} />
+      <Navbar
+        isLoggedIn={isLoggedIn}
+        name={name}
+        onLoginSuccess={handleLoginSuccess}
+        isSpeakerOn={isSpeakerOn}
+        toggleSpeaker={toggleSpeaker}
+      />
 
       <Routes>
-        <Route path='/' element={<MainPage isLoggedIn={isLoggedIn} />}></Route>
-        <Route path='/game-list' element={<GameListPage />}></Route>
-        <Route path={'/game-room/:roomId'} element={<GamePage />}></Route>
-        <Route path='/achievements' element={<AchievementsPage />}></Route>
-        <Route path='/profile' element={<ProfilePage />}></Route>
+        <Route path='/' element={<MainPage isLoggedIn={isLoggedIn} isSpeakerOn={isSpeakerOn} />}></Route>
+        <Route path='/game-list' element={<GameListPage isSpeakerOn={isSpeakerOn} />}></Route>
+        <Route path={'/game-room/:roomId'} element={<GamePage isSpeakerOn={isSpeakerOn} />}></Route>
+        <Route path='/achievements' element={<AchievementsPage isSpeakerOn={isSpeakerOn} />}></Route>
+        <Route path='/profile' element={<ProfilePage isSpeakerOn={isSpeakerOn} />}></Route>
       </Routes>
       {/* </BrowserRouter> */}
     </>

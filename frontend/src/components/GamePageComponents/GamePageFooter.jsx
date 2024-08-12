@@ -4,7 +4,7 @@ import GameChat from "./GameChat";
 import GameReadyStartBtn from "./GameReadyStartBtn";
 import styles from "./GamePageFooter.module.css"
 
-function GamePageFooter({ systemMessage, stompClient, gameData, nowGameState, gameResponse, session, chatHistory, chatMode, players }) {
+function GamePageFooter({ systemMessage, stompClient, gameData, nowGameState, gameResponse, session, chatHistory, chatMode, players, roomId }) {
     // 모달을 열고 닫을 변수
     const [ isModalOpen, setIsModalOpen ] = useState(false)
     const [ blackBackground, setBlackBackground ] = useState(false)
@@ -26,7 +26,7 @@ function GamePageFooter({ systemMessage, stompClient, gameData, nowGameState, ga
                                 chatHistory={chatHistory}
                                 players={players}
                                 />
-                    <GameReadyStartBtn stompClient={stompClient} nowGameState={nowGameState} gameData={gameData}/>
+                    <GameReadyStartBtn stompClient={stompClient} nowGameState={nowGameState} gameData={gameData} gameResponse={gameResponse} roomId={roomId}/>
                 </div>
                 <div className="job-modals">
                     { isModalOpen ? jobModalOpen : null}

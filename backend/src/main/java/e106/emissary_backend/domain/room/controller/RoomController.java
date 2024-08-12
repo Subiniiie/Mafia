@@ -34,6 +34,17 @@ public class RoomController {
         return ResponseEntity.ok(roomService.getRooms(pageable));
     }
 
+    @GetMapping("/rooms/filter")
+    public ResponseEntity<List<RoomListDto>> getFilteredRooms(
+            @PageableDefault Pageable pageable,
+            @RequestParam(required = false) Boolean filter1,
+            @RequestParam(required = false) Boolean filter2,
+            @RequestParam(required = false) Boolean filter3,
+            @RequestParam(required = false) String search
+    ) {
+        return ResponseEntity.ok(roomService.getFilteredRooms(pageable, filter1, filter2, filter3, search));
+    }
+
     @DeleteMapping("/rooms/{roomId}")
     public ResponseEntity<CommonResponseDto> deleteRoom(@PathVariable Long roomId){
         return ResponseEntity.ok(roomService.deleteRoom(roomId));

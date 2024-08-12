@@ -22,6 +22,7 @@ function GamePage() {
 
     // 게임방 주소에 roomId 추가해서 리스트에서 들어가는 게임방마다 다른 경로로 가게 하기
     const { roomId } = useParams();
+    
 
     // OpenVidu Session Variables
     const OV = new OpenVidu();
@@ -47,8 +48,8 @@ function GamePage() {
 
     // Game
     const [ gameData, setGameData ] = useState({})
-    const [ gameResponse, setGameResponse ] = useState(null)
-    const [ nowGameState, setNowGameState ] = useState(null)
+    const [ gameResponse, setGameResponse ] = useState("")
+    const [ nowGameState, setNowGameState ] = useState("")
 
     // player 설정
     const [players, setPlayers] = useState([
@@ -183,12 +184,11 @@ function GamePage() {
 
 
     const stompClient = useRef(null)
-    // const { roomid }  = useParams()
+    const access = localStorage.getItem('access');
 
     // 방 정보 가져오기
     useEffect(() => {
         const gameRoomInfo = async() => {
-            console.log('장하오')
             try {
                 const response = await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`, {
                     headers: {
@@ -196,22 +196,16 @@ function GamePage() {
                         "Authorization": `Bearer ${access}`,
                     }
                 })
-                console.log("resp", response.data)
+                console.log(response)
                 setGameData(response.data)
-                console.log('제발 나와라!!!11', gameData);
-                console.log('너 나와!!!!!', gameData.title)
-                console.log('너도 나와!!!!!!', gameData.title)
+                console.log('Game Data 출력', gameData);
             } catch (error) {
                 console.log("게임방 API를 불러오지 못했습니다", error)
             }
         }
         gameRoomInfo()
-    }, [])
+    }, [roomId, access])
 
-    useEffect(() => {
-        console.log('나 들어감??', gameData)
-        console.log('나 갔따', gameData.title)
-    }, [gameData, gameData.title])
 
     // useEffect( () => {
     //
@@ -346,25 +340,11 @@ function GamePage() {
 
     }, [])
 
-    const handleButtonClick = () => {
-        // 버튼 클릭 시 실행할 로직을 여기에 작성합니다.
-        console.log('버튼이 클릭되었습니다.');
-        gameStart();
-      };
-
-    const gameStart = () => {
-        const access = localStorage.getItem('access');
-        if (stompClient.current) {
-            stompClient.current.send(`/ws/pub/start/${roomId}`, {
-                'Authorization': `Bearer ${access}`
-            }, JSON.stringify({ action: 'start' }));
-        }
-    }
       
     return (
         <>
             <div className={styles.container}>
-                <div className="box-content h-32"></div>
+                <button onClick={handleButtonClick}>야호</button>
                 {/* 게임데이터 있는지 확인 -> 게임데이터에 유저리스트가 있는지 확인 -> 그 유저리스트 array인지 확인  */}
                 {gameData && gameData.userList && Array.isArray(gameData.userList) &&
                     <GamePageHeader gameData={gameData} id={roomId} leaveSession={leaveSession} />
@@ -387,6 +367,7 @@ function GamePage() {
                 {gameData && gameData.userList && Array.isArray(gameData.userList) &&
                     <GamePageFooter
                         systemMessage={systemMessage}
+                        roomId={roomId}
                         stompClient={stompClient}
                         gameData={gameData}
                         nowGameState={nowGameState}
@@ -398,30 +379,6 @@ function GamePage() {
                     />
                 }
             </div>
-            {/* <div>
-                <GamePageHeader />
-                <GamePageMain   setSystemMessage={setSystemMessage}
-                                roomId={roomId}
-                                streamManagers={getSortedStreamManagers(streamManagers)}
-                                setChatMode={setChatMode}
-                                stompClient={stompClient}
-                                gameData={gameData}
-                                nowGameState={nowGameState}
-                                gameResponse={gameResponse}
-                                players={players}
-                                setPlayers={setPlayers}
-                                />
-                <GamePageFooter systemMessage={systemMessage}
-                                stompClient={stompClient}
-                                gameData={gameData}
-                                nowGameState={nowGameState}
-                                gameResponse={gameResponse}
-                                session={session}
-                                chatHistory={chatHistory}
-                                chatMode={chatMode}
-                                players={players}
-                                />
-            </div> */}
         </>
     )
 }

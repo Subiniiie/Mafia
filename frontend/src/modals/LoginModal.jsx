@@ -2,7 +2,7 @@ import classNames from "classnames";
 import ModalHeader from "../components/ModalHeader"
 import FindPwModal from "./FindPwModal";
 import styles from "./LoginModal.module.css"
-import { useState } from "react";
+import { useState, useRef } from "react";
 import axios from "axios";
 import { decode } from "jwt-js-decode";
 
@@ -14,6 +14,28 @@ const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+
+    const emailRef = useRef()
+    const passwordRef = useRef()
+    const loginButtonRef = useRef()
+
+    const [loginFailed, setLoginFailed] = useState(false)
+
+    const handleEmailKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            console.log('Enter를 눌렀네!')
+            passwordRef.current.focus()
+        }
+    }
+
+    const handlePasswordKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            console.log('Enter를 눌렀네!')
+            loginButtonRef.current.focus()
+            // handleLogin()
+        }
+    }
+
 
     const handleLogin = async () => {
         try {
@@ -32,23 +54,24 @@ const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
                 ,
                 // { withCredentials: true }
             );
-            console.log(response.data);
+
             // 로그인 성공 시 처리 로직
             const { access, refresh } = response.data
-            console.log('accessToken :', access)
-            console.log('refreshToken :', refresh)
             const decodedAccess = decode(access)
-            console.log('난 디코딩 된 accessToken :', decodedAccess)
+            // console.log('난 디코딩 된 accessToken :', decodedAccess)
             const { username } = decodedAccess.payload // 디코딩된 토큰에서 이름 추출
             console.log('username :', username)
-            const decodedRefresh = decode(refresh)
-            console.log('난 디코딩 된 refreshToken :', decodedRefresh)
+            // const decodedRefresh = decode(refresh)
+            // console.log('난 디코딩 된 refreshToken :', decodedRefresh)
             localStorage.setItem('access', access) // 로컬 스토리지에 토큰 저장
             localStorage.setItem('refresh', refresh)
+            setLoginFailed(false)
             onLoginSuccess(username) // 상위 컴포넌트에 로그인 성공 알림
             openModal()
         } catch (error) {
             console.error("Login failed:", error.response ? error.response.data : error.message);
+            setLoginFailed(true)
+            // alert('이메일 또는 비밀번호가 잘못 되었습니다. 아이디와 비밀번호를 정확히 입력해 주세요.')
             // 로그인 실패 시 처리 로직
         }
     };
@@ -71,6 +94,8 @@ const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
                             className={styles.inputField}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            onKeyDown={handleEmailKeyDown}
+                            ref={emailRef}
                         />
                     </div>
 
@@ -83,12 +108,15 @@ const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
                             className={styles.inputField}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            onKeyDown={handlePasswordKeyDown}
+                            ref={passwordRef}
                         />
                     </div>
 
-                    <button className={styles.submitButton} onClick={handleLogin}>
+                    <button className={styles.submitButton} onClick={handleLogin} ref={loginButtonRef}>
                         활동하기
                     </button>
+                    {loginFailed && <p className={styles.loginFailed}>{`이메일 또는 비밀번호가 잘못 되었습니다.\n아이디와 비밀번호를 정확히 입력해 주세요.`}</p>}
 
                     <p onClick={openFindPwModal} className={styles.findPw}>비밀번호 찾기</p>
                     <FindPwModal isOpen={isFindPwModalOpen} openModal={openFindPwModal} />

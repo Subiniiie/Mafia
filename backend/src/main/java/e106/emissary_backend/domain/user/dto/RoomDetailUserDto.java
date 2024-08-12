@@ -30,12 +30,12 @@ public class RoomDetailUserDto {
                 .isOwner(user.getUserId() == ownerId)
                 .build();
 
-        roomDetailUserDto.setIsMe(userId);
+        roomDetailUserDto.changeProperty(userId);
 
         return roomDetailUserDto;
     }
 
-    private void setIsMe(long userId) {
+    private void changeProperty(long userId) {
         this.isMe = (userId == this.userId);
     }
 
