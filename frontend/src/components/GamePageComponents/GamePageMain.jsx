@@ -387,7 +387,6 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     return (
       <>
           <div className={styles.monitors}>
-              <p>MONITOR IN!!</p>
                 {zip(players, streamManagers).map((player, index) => (
                     <Monitor
                         key={index}
