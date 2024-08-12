@@ -344,7 +344,6 @@ function GamePage() {
     return (
         <>
             <div className={styles.container}>
-                <button onClick={handleButtonClick}>야호</button>
                 {/* 게임데이터 있는지 확인 -> 게임데이터에 유저리스트가 있는지 확인 -> 그 유저리스트 array인지 확인  */}
                 {gameData && gameData.userList && Array.isArray(gameData.userList) &&
                     <GamePageHeader gameData={gameData} id={roomId} leaveSession={leaveSession} />
