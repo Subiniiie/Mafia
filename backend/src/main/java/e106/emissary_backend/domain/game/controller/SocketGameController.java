@@ -33,7 +33,8 @@ public class SocketGameController {
     @MessageMapping("/connect/{roomId}")
     @SendTo("/sub/{roomId}")
     public String connect(@DestinationVariable long roomId){
-        return "연결이 유지되고 있습니다";
+        String result = "연결이 유지되고 있습니다";
+        return result;
     }
 
     @MessageMapping("/ready/{roomId}")
