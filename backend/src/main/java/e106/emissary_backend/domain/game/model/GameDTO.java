@@ -64,6 +64,7 @@ public class GameDTO {
                         .nickname(player.getNickname())
                         .isAlive(false)
                         .isLeft(false)
+                        .isReady(player.isReady())
                         .role(GameRole.PERSON)
                         .build());
     }

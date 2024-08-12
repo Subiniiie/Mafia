@@ -112,7 +112,7 @@ public class SocketGameController {
             log.info("in Accessor userId = {}", userDetails.getUserId());
             userId = userDetails.getUserId();
         } else {
-            throw new IllegalStateException("User not authenticated");
+            throw new IllegalStateException("우리 모두 header에 토큰을 추가했는지 확인해요!!");
         }
         return userId;
     }
