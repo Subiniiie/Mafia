@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import classNames from "classnames"
 import axios from "axios";
 import styles from "./GameRoomCard.module.css";
 
@@ -27,26 +28,27 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
         })
     }
 
+    const GameRoomCardClass = classNames('kimjungchul-bold', styles.container)
 
     return (
         // <div className="kimjungchul-bold" onClick={getRoomPlayer}>
         // <div className="kimjungchul-bold" onClick={handleEnterRoom}>
-            <Link to={`/game-room/${id}`} state={viduToken} onClick={handleEnterRoom} >
-                {/*<div className={`${isInProgress ? styles.inProgress : styles.notStarted}`} onClick={getGameRoomInfo}*/}
-                <div className={`${isInProgress ? styles.inProgress : styles.notStarted}`}>
-                    {/* <Link to={`/game-room/${id}`} className={`${isInProgress ? styles.inProgress : styles.notStarted}`}> */}
-                    <div className={`${styles.cardMain} ${isInProgress ? styles.inProgressMain : styles.notStartedMain}`}>
-                        {/* <p className={styles.title}>{title}</p> */}
-                        <p className={`${isInProgress ? styles.inProgressTitle : styles.notStartedTitle}`}>{title}</p>
-                        <p className={styles.leader}>대장 동지 : {leader}</p>
-                    </div>
-                    {/* <div className={styles.cardContent}> */}
-                    <div className={`${styles.cardMain} ${isInProgress ? styles.inProgressContent : styles.notStartedContent}`}>
-                        <p className={styles.progress}>{progress}/8</p>
-                    </div>
+        <Link to={`/game-room/${id}`} state={viduToken} onClick={handleEnterRoom} className={GameRoomCardClass}>
+            {/*<div className={`${isInProgress ? styles.inProgress : styles.notStarted}`} onClick={getGameRoomInfo}*/}
+            <div className={`${isInProgress ? styles.inProgress : styles.notStarted}`}>
+                {/* <Link to={`/game-room/${id}`} className={`${isInProgress ? styles.inProgress : styles.notStarted}`}> */}
+                <div className={`${styles.cardMain} ${isInProgress ? styles.inProgressMain : styles.notStartedMain}`}>
+                    {/* <p className={styles.title}>{title}</p> */}
+                    <p className={`${isInProgress ? styles.inProgressTitle : styles.notStartedTitle}`}>{title}</p>
+                    <p className={styles.leader}>대장 동지 : {leader}</p>
                 </div>
-            </Link>
-//         </div>
+                {/* <div className={styles.cardContent}> */}
+                <div className={`${styles.cardMain} ${isInProgress ? styles.inProgressContent : styles.notStartedContent}`}>
+                    <p className={styles.progress}>{progress}/8</p>
+                </div>
+            </div>
+        </Link>
+        //         </div>
     );
 };
 
