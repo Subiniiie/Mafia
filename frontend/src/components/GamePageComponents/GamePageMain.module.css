@@ -1,3 +1,25 @@
+.fakeHeaderContainer {
+    height: 170px;
+}
+
+.playerContainer {
+    display: grid;
+    place-items: center;
+    grid-template-rows: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px 10px;
+    margin: 30px 40px;
+}
+
+.playerCell {
+    background-color: white;
+    width: 85%;
+    height: 190px;
+    border-radius: 10px;
+}
+
+
+
 .monitors {
     max-width: 100%;
     height: 90vh;
@@ -24,7 +46,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: rgba(0, 0, 0, 0.8); 
+    background-color: rgba(0, 0, 0, 0.8);
     color: white;
     border-radius: 25px;
     padding: 20px;
@@ -33,4 +55,4 @@
     text-align: center;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.9);
     z-index: 1000;
-} 
+}

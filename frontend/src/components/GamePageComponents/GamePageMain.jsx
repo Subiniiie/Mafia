@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import { Client } from '@stomp/stompjs';
 import axios from "axios";
 import Monitor from "./Monitor";
@@ -14,22 +14,22 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // setPlayers(playes => players.sort((a, b) => a.creationTime - b.creationTime));
 
     // const [ currentPhase, setCurrentPhase ] = useState('night')                         // 게임 단계(night, police, discussion, finalDefense)
-    const [ nightTimer, setNightTimer ] = useState(30)                                  // 밤 타이머   
-    const [ policeTimer, setPoliceTimer ] = useState(30)                                // 첩보원 타이머
-    const [ discussionTimer, setDiscussionTimer ] = useState(90)                        // 토론(낮) 타이머
-    const [ finalDefenseTimer, setFinalDefenseTimer ] = useState(30)                    // 최후 변론 타이머
-    const [ emissaryTarget, setEmissaryTarget ] = useState(null)                        // 밀정이 선택한 시민
-    const [ policeTarget, setPoliceTarget ] = useState(null)                            // 첩보원이 선택한 시민
-    const [ finalDefensePlayer, setFinalDefensePlayer ] = useState(false)                // 최후 변론 플레이어
-    const [ choiceDieOrTurncoat, setchoiceDieOrTurncoat ] = useState(false)             // 독립운동가를 죽일지 변절자로 만들지 결정하는 변수
-    const [ showEmissaryModal, setShowEmissaryModal ] = useState(false)                 // 변절자 모달 표시 여부
-    const [ showPoliceModal, setShowPoliceModal ] = useState(false)                         // 첩보원 모달 표시 여부
-    const [ votes, setVotes ] = useState({});
-    const [ suspect, setSuspect ] = useState(null)
-    const [ winnerModal, setWinnerModal ] = useState(false)                                // 우승자 표시
+    const [nightTimer, setNightTimer] = useState(30)                                  // 밤 타이머   
+    const [policeTimer, setPoliceTimer] = useState(30)                                // 첩보원 타이머
+    const [discussionTimer, setDiscussionTimer] = useState(90)                        // 토론(낮) 타이머
+    const [finalDefenseTimer, setFinalDefenseTimer] = useState(30)                    // 최후 변론 타이머
+    const [emissaryTarget, setEmissaryTarget] = useState(null)                        // 밀정이 선택한 시민
+    const [policeTarget, setPoliceTarget] = useState(null)                            // 첩보원이 선택한 시민
+    const [finalDefensePlayer, setFinalDefensePlayer] = useState(false)                // 최후 변론 플레이어
+    const [choiceDieOrTurncoat, setchoiceDieOrTurncoat] = useState(false)             // 독립운동가를 죽일지 변절자로 만들지 결정하는 변수
+    const [showEmissaryModal, setShowEmissaryModal] = useState(false)                 // 변절자 모달 표시 여부
+    const [showPoliceModal, setShowPoliceModal] = useState(false)                         // 첩보원 모달 표시 여부
+    const [votes, setVotes] = useState({});
+    const [suspect, setSuspect] = useState(null)
+    const [winnerModal, setWinnerModal] = useState(false)                                // 우승자 표시
 
     const access = localStorage.getItem('access');
-    const header =  {'Authorization': `Bearer ${access}`}
+    const header = { 'Authorization': `Bearer ${access}` }
 
     // // 게임 시작하기
     // const gameStart = () => {
@@ -71,13 +71,13 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     const handleChoiceDieOrTurncoat = (choiced) => {
         if (choiced === '변절') {
             stompClient.current.send(
-                `/ws/pub/appease/${roomId}/${emissaryTarget}`, 
+                `/ws/pub/appease/${roomId}/${emissaryTarget}`,
                 header,
                 {}
             )
         } else if (choiced === '죽임') {
             stompClient.current.send(
-                `/ws/pub/kill/${roomId}/${emissaryTarget}`, 
+                `/ws/pub/kill/${roomId}/${emissaryTarget}`,
                 header,
                 {}
             )
@@ -89,18 +89,18 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // isMe 어떻게 오는지 확인하고 코드 바꾸기
     const policeTime = () => {
         const me = gameData.playerMap
-          .filter(player => player.isAlive)
-          .find(player => player.isMe)
+            .filter(player => player.isAlive)
+            .find(player => player.isMe)
         if (me) {
             setShowPoliceModal(true)
         }
     }
 
     // 첩보원이 선택한 플레이어의 역할을 아는 함수
-    const policeChoicedPlayer = function(targetId, targetNickname, targetRole) {
+    const policeChoicedPlayer = function (targetId, targetNickname, targetRole) {
         setShowPoliceModal(false)
         stompClient.current.send(
-            `/ws/pub/detect/${roomId}/${targetId}`, 
+            `/ws/pub/detect/${roomId}/${targetId}`,
             header,
             {}
         )
@@ -114,7 +114,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         }
         // 첩보원 활동이 끝났다는 메시지 보내기
         stompClient.current.send(
-            `/ws/pub/day/${roomId}`, 
+            `/ws/pub/day/${roomId}`,
             header,
             {}
         )
@@ -123,7 +123,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // 낮(토론 및 투표 중)
     const voteStart = (targetId) => {
         stompClient.current.send(
-            `/ws/pub//vote/${roomId}`, 
+            `/ws/pub//vote/${roomId}`,
             header,
             JSON.stringify({ targetId })
         )
@@ -144,9 +144,9 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     const handleVote = (targetId) => {
         if (stompClient.current && stompClient.connected) {
             stompClient.current.send(
-                 `/pub/vote/${roomId}`, 
-                 header, 
-                 JSON.stringify({ targetId })
+                `/pub/vote/${roomId}`,
+                header,
+                JSON.stringify({ targetId })
             )
             console.log('투표 메시지를 전송했습니다')
         } else {
@@ -169,12 +169,12 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
             streamManagers[publisherIdx].publishAideo(false);
 
             streamManagers
-              .filter(strMgr => strMgr.remote)
-              .forEach(strMgr => {
+                .filter(strMgr => strMgr.remote)
+                .forEach(strMgr => {
                     strMgr.subscribeToVideo(false);
                     strMgr.subscribeToAudio(false);
                 }
-              )
+                )
         }
     }
 
@@ -187,20 +187,20 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
             streamManagers[publisherIdx].publishAideo(true);
 
             streamManagers
-              .filter(strMgr => strMgr.remote)
-              .forEach(strMgr => {
+                .filter(strMgr => strMgr.remote)
+                .forEach(strMgr => {
                     strMgr.subscribeToVideo(true);
                     strMgr.subscribeToAudio(true);
                 }
-              )
+                )
         }
     }
 
     // 밤이 되었을 때, 채팅 모드 변환
     const changeToSecretChatMode = () => {
         const enemies = streamManagers
-          .filter((_, idx) => isEmissaryOrBetrayer(players[idx]))
-          .map(strMgr => strMgr.stream.connection);
+            .filter((_, idx) => isEmissaryOrBetrayer(players[idx]))
+            .map(strMgr => strMgr.stream.connection);
 
         setChatMode(() => { return { mode: 'signal:secretChat', to: enemies }; });
     }
@@ -268,9 +268,9 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         // 죽이는 거에 찬성하는지 반대하는지 어떻게 알지?
         if (choiced === '찬성') {
             stompClient.current.send(
-                `/pub/confirm/${roomId}`, 
-                header, 
-                JSON.stringify({targetId})
+                `/pub/confirm/${roomId}`,
+                header,
+                JSON.stringify({ targetId })
             )
         }
     }
@@ -278,8 +278,8 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // 게임 끝
     const gameEnd = () => {
         stompClient.current.send(
-            `/pub/end/${roomId}`, 
-            header, 
+            `/pub/end/${roomId}`,
+            header,
             {}
         )
         handleResult()
@@ -287,12 +287,12 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
 
     // 게임 결과 반영
-    const handleResult = async() => {
+    const handleResult = async () => {
         await axios.post('https://i11e106.p.ssafy.io/api/results', {}, {
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${access}`,
-            }, 
+            },
         })
             .then((response) => {
                 console.log(response)
@@ -301,11 +301,11 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
             .catch((error) => {
                 console.log(error)
             })
-        
+
     }
 
     // 업적 처리
-    const handleAchievenets = async() => {
+    const handleAchievenets = async () => {
         await axios.post('https://i11e106.p.ssafy.io//api/honors', {}, {
             headers: {
                 "Content-Type": "application/json",
@@ -323,7 +323,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
     // 결과 어케 받??
     // 직업으로 주지 않을까?
-    const showResult = async() => {
+    const showResult = async () => {
         const winnerJob = gameResponse.어쩌궞쩌구
         setWinnerModal(true)
 
@@ -333,12 +333,11 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     }
 
 
-    switch (nowGameState)
-    {
-        case 'STARTED' :
+    switch (nowGameState) {
+        case 'STARTED':
             gameStart()
             break
-        case 'NIGHT_EMISSARY' :
+        case 'NIGHT_EMISSARY':
             // 밤이 되었을 때, 비디오/오디오 처리
             handleVideoAudioAtNight();
             // 밤이 되었을 때, 채팅 처리
@@ -346,11 +345,11 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
             setSystemMessage('밤이 시작되었습니다. 밀정이 활동 중입니다.')
             emissaryTime()
             break
-        case 'NIGHT_POLICE' :
+        case 'NIGHT_POLICE':
             setSystemMessage('밤이 되었습니다. 첩보원이 활동 중입니다.')
             policeTime()
             break
-        case 'VOTE_START' :
+        case 'VOTE_START':
             // 낮이 되었을 때, 비디오/오디오 처리
             handleVideoAudioAtDay();
             // 낮이 되었을 때, 채팅 처리
@@ -358,36 +357,50 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
             setSystemMessage('낮이 되었습니다. 토론을 하며 투표를 진행하세요.')
             voteStart()
             break
-        case 'VOTE_END' :
+        case 'VOTE_END':
             setSystemMessage('낮이 되었습니다. 투표가 끝이 났습니다.')
             voteEnd()
             break
-        case 'REVOTE' :
+        case 'REVOTE':
             setSystemMessage('동점자가 나왔습니다. 재투표를 실시합니다.')
             voteAgain()
             break
-        case 'FINISH' :
+        case 'FINISH':
             setSystemMessage(`투표에 의해 ${suspect}님이 최종 용의자가 되었습니다.`)
             voteFinish()
             break
-        case 'CONFIRM_START' :
+        case 'CONFIRM_START':
             setSystemMessage(`최종 투표를 시작합니다.`)
             confirmStart()
             break
-        case 'CONFIRM_END' :
+        case 'CONFIRM_END':
             setSystemMessage(`최종 투표가 끝이 났습니다`)
             confirmEnd()
             break
-        case 'END' :
+        case 'END':
             setSystemMessage('게임이 끝이 났습니다.')
             gameEnd()
             break
     }
 
     return (
-      <>
-          <div className={styles.monitors}>
-              <p>MONITOR IN!!</p>
+        <>
+            <div className={styles.fakeHeaderContainer} />
+            <div className={styles.playerContainer}>
+                <div className={styles.playerCell}></div>
+                <div className={styles.playerCell}></div>
+                <div className={styles.playerCell}></div>
+                <div className={styles.playerCell}></div>
+                <div className={styles.playerCell}></div>
+                <div className={styles.playerCell}></div>
+                <div className={styles.playerCell}></div>
+                <div className={styles.playerCell}></div>
+            </div>
+
+
+
+            <div className={styles.monitors}>
+                {/* <p>MONITOR IN!!</p> */}
                 {zip(players, streamManagers).map((player, index) => (
                     <Monitor
                         key={index}
@@ -409,13 +422,13 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                 {currentPhase === 'finalDefense' && <p>최후 변론 시간: {finalDefensePlayer}초</p>} */}
             </div>
             <div>
-                {showEmissaryModal ? <EmissaryModal gameData={gameData} onAction={choicePlayer}/>
-                : null}
+                {showEmissaryModal ? <EmissaryModal gameData={gameData} onAction={choicePlayer} />
+                    : null}
                 {choiceDieOrTurncoat ? <ChoiceDieOrTurncoat onChioce={handleChoiceDieOrTurncoat} /> : null}
-                {showPoliceModal ? <PoliceModal gameData={gameData} onChioce={policeChoicedPlayer}/>: null}
-                {finalDefensePlayer ? <FinalDefensePlayerModal suspect={suspect} onMessage={handleFinalDefenseResult}/> : null }
+                {showPoliceModal ? <PoliceModal gameData={gameData} onChioce={policeChoicedPlayer} /> : null}
+                {finalDefensePlayer ? <FinalDefensePlayerModal suspect={suspect} onMessage={handleFinalDefenseResult} /> : null}
             </div>
-            { winnerModal ? <div className={styles.winner}><span style={{ color: 'red', fontWeight: 'bold' }}>{winnerJob}</span>의 승리입니다.</div> : null}
+            {winnerModal ? <div className={styles.winner}><span style={{ color: 'red', fontWeight: 'bold' }}>{winnerJob}</span>의 승리입니다.</div> : null}
         </>
     )
 }
