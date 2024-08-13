@@ -23,7 +23,7 @@ public class GameResponseDTO {
 
     private String ownerName;
 
-    private List<Player> emissary;
+    private Player emissary;
 
     private Player police;
 

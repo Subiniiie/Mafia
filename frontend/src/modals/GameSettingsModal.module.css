@@ -7,6 +7,20 @@
     background: rgba(0, 0, 0, 0.7);
     /* 배경을 더욱 어둡게 조정 */
     display: flex;
+    position: absolute; 
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 630px;
+    height: 420px;
+    border: 1px solid black;
+    border-radius: 20px;
+    /* background: rgba(34, 15, 15, 0.5); */
+    /* background: rgba(0, 0, 0, 0.7); */
+    background: #12151D;
+    color: white;
+    z-index: 200;
+    /* 추가함 */
     justify-content: center;
     align-items: center;
     z-index: 2000;

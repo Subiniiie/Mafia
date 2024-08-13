@@ -78,21 +78,30 @@ public class GameService {
 
         Map<Long, Player> playerMap = gameDTO.getPlayerMap();
         Player player = playerMap.get(userId);
-
+        log.info("지금 레디누른 유저 : {}", userId);
+        log.info("야홍 {}", player.getId());
         player.setReady(true);
+
+        for (Player value : playerMap.values()) {
+            log.info("playerId : {} , ready : {}",value.getId(), value.isReady());
+        }
 
         commonPublish(gameId, GameState.WAIT, CommonResult.SUCCESS);
 
         // 모두가 준비가 끝나면 알려주기.
-        if(playerMap.values().stream().allMatch(Player::isReady)){
-            gameDTO.setGameState(GameState.READY_COMPLETE);
+        // 로직 개대충 짰더니 일단 급하게 매꾸기
+//        if(playerMap.size() == 8){
+            if(playerMap.values().stream().allMatch(Player::isReady)){
+                gameDTO.setGameState(GameState.READY_COMPLETE);
 
-            publisher.publish(readyCompleteTopic, ReadyCompleteMessage.builder()
-                    .gameId(gameId)
-                    .gameState(GameState.READY_COMPLETE)
-                    .result(CommonResult.SUCCESS)
-                    .build());
-        }
+                publisher.publish(readyCompleteTopic, ReadyCompleteMessage.builder()
+                        .gameId(gameId)
+                        .gameState(GameState.READY_COMPLETE)
+                        .result(CommonResult.SUCCESS)
+                        .build());
+            }
+//        }
+        
 
         update(gameDTO);
     } // end of ready
@@ -124,13 +133,18 @@ public class GameService {
 
         // 역할부여
         Map<GameRole, Integer> roles = RoleUtils.getRole(gameDTO);
+        log.info("getRole");
         RoleUtils.grantRole(roles, gameDTO);
+        log.info("finish grantRole , gameDTO : {}", gameDTO);
 
         // 레디스에 저장하기
         update(gameDTO);
+        log.info("update redis");
 
         // 타이머 - 토론시간임.
-        nightEmissaryTask.setGameId(roomId);
+        Player emissary = gameDTO.getEmissary();
+        Player police = gameDTO.getPolice();
+        nightEmissaryTask.setGameIdAndTargets(roomId, emissary, police);
         scheduler.scheduleTask(roomId, TaskName.NIGHT_EMISSARY, nightEmissaryTask, 15, TimeUnit.SECONDS);
 
         publisher.publish(gameSetTopic, GameSetMessage.builder()
