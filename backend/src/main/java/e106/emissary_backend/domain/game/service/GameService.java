@@ -164,6 +164,7 @@ public class GameService {
      */
     @RedissonLock(value = "#gameId")
     public void kill(long gameId, long targetId) {
+        log.info("gameService kill run");
         GameDTO gameDTO = getGameDTO(gameId);
 
         Player targetPlayer = gameDTO.getPlayerMap().get(targetId);
@@ -179,7 +180,9 @@ public class GameService {
         // todo : Redis에 발행해야함
         publisher.publish(nightEmissaryTopic, NightEmissaryMessage.builder()
                         .gameId(gameId)
+                        .gameDTO(gameDTO)
                         .targetId(targetId)
+                        .gameState(GameState.KILL)
                         .result("success")
                         .build());
     } // end of Kill
@@ -212,6 +215,7 @@ public class GameService {
                 Random random = new Random();
                 Player newPolice = alivePerson.get(random.nextInt(alivePerson.size()));
                 newPolice.setRole(GameRole.POLICE);
+                gameDTO.setPolice(newPolice);
             }
         }
         targetPlayer.setRole(GameRole.BETRAYER);
@@ -222,13 +226,15 @@ public class GameService {
         //레디스에 발행
         publisher.publish(nightEmissaryTopic, NightEmissaryMessage.builder()
                         .gameId(gameId)
+                        .gameState(GameState.APPEASE)
                         .targetId(targetId)
+                        .gameDTO(gameDTO)
                         .result("success")
                         .build());
     } // end of appease
 
     @RedissonLock(value = "#gameId")
-    public void detect(long gameId, long targetId) {
+    public void detect(long gameId, long targetId, long userId) {
         // userId로 경찰인지 확인 해줘야하나? -> 해야하면 마피아도..
         GameDTO gameDTO = getGameDTO(gameId);
 
@@ -240,8 +246,13 @@ public class GameService {
         }
 
         // todo : 이미 조사한 유저에 대해서 어떻게하지? -> 그냥 다 모른다 쳐!
-        NightPoliceMessage nightPoliceMessage = NightPoliceMessage.builder().gameId(gameId).targetId(targetId).result(targetPlayer.getRole()).build();
-        publisher.publish(nightPoliceTopic, nightPoliceMessage);
+        publisher.publish(nightPoliceTopic,  NightPoliceMessage.builder()
+                        .gameId(gameId)
+                        .policeId(userId)
+                        .targetId(targetId)
+                        .gameState(GameState.NIGHT_POLICE)
+                        .result(targetPlayer.getRole())
+                        .build());
     } // end of detect
 
     @RedissonLock(value = "#gameId")

@@ -72,8 +72,9 @@ public class SocketGameController {
     }
 
     @MessageMapping("/detect/{roomId}/{targetId}")
-    public void detect(@DestinationVariable Long roomId, @DestinationVariable Long targetId) {
-        gameService.detect(roomId, targetId);
+    public void detect(SimpMessageHeaderAccessor headerAccessor, @DestinationVariable Long roomId, @DestinationVariable Long targetId) {
+        long userId = getUserIdIAccessor(headerAccessor);
+        gameService.detect(roomId, targetId, userId);
     }
 
     @MessageMapping("/day/{roomId}")

@@ -22,7 +22,8 @@ public class NightEmissarySubscriber {
         try {
             NightEmissaryMessage nightEmissaryMessage = objectMapper.readValue(message, NightEmissaryMessage.class);
 
-            simpMessagingTemplate.convertAndSend("/sub/" + nightEmissaryMessage.getGameId(), nightEmissaryMessage.getResult());
+            log.info("NightEmissarySubscriber run : {}", nightEmissaryMessage);
+            simpMessagingTemplate.convertAndSend("/sub/" + nightEmissaryMessage.getGameId(), nightEmissaryMessage);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
