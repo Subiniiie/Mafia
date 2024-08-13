@@ -12,9 +12,14 @@ const EmissaryModal = function({ players, onAction }) {
                 <div className={styles.container}>
                     <p>어떤 독립운동가를 변절, 혹은 죽이겠습니까?</p>
                 <div className={styles.btnContainer}>
-                   { players.map((player, index) => (
-                    <button onClick={() => choicedPlayer(player.id)} key={index}>{player.nickname}</button>
-                  ) )}
+                   { players
+                        .filter(player => player.id !== myId) 
+                        .map((player, index) => (
+                        <button onClick={() => choicedPlayer(player.id)} key={index}>
+                            {player.nickname}
+                        </button>
+                        ))
+                    }
                 </div>
                 </div>
             </div>
