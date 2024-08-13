@@ -8,6 +8,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -34,6 +37,8 @@ public class RoomDetailUserDto {
     @Builder.Default
     private boolean voted = false;
 
+    private long creationTime;
+
     public static RoomDetailUserDto of(User user, long ownerId, long userId){
         RoomDetailUserDto roomDetailUserDto = RoomDetailUserDto.builder()
                 .userId(user.getUserId())
@@ -52,6 +57,13 @@ public class RoomDetailUserDto {
         }else{
             this.me = false;
         }
+    }
+
+    public void changeTime(LocalDateTime creationTime) {
+        this.creationTime = creationTime
+                .atZone(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli();
     }
 
 }
