@@ -18,27 +18,27 @@ public class RoomDetailUserDto {
     private String nickname;
 
     @JsonProperty("owner")
-    private boolean isOwner;
+    private boolean owner;
 
     @JsonProperty("me")
-    private boolean isMe;
+    private boolean me;
 
     @Builder.Default
     private GameRole gameRole = GameRole.PERSON;
 
     @JsonProperty("alive")
     @Builder.Default
-    private boolean isAlive = true;
+    private boolean alive = true;
 
     @JsonProperty("voted")
     @Builder.Default
-    private boolean isVoted = false;
+    private boolean voted = false;
 
     public static RoomDetailUserDto of(User user, long ownerId, long userId){
         RoomDetailUserDto roomDetailUserDto = RoomDetailUserDto.builder()
                 .userId(user.getUserId())
                 .nickname(user.getNickname())
-                .isOwner(user.getUserId() == ownerId)
+                .owner(user.getUserId() == ownerId)
                 .build();
 
         roomDetailUserDto.changeProperty(userId);
@@ -48,9 +48,9 @@ public class RoomDetailUserDto {
 
     private void changeProperty(long userId) {
         if(userId == this.userId) {
-            this.isMe = true;
+            this.me = true;
         }else{
-            this.isMe = false;
+            this.me = false;
         }
     }
 

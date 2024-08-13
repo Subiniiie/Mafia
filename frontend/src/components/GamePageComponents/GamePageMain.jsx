@@ -53,6 +53,8 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         // 게임시작 알람 모달
         setShowModal(true)
         // 내 직업을 직업 카드에 뜨게 하자
+        console.log('너 여기까지 와', gameResponse)
+        console.log('너 여기까지 와22', gameResponse.playerMap)
         const playerArray = Object.values(gameResponse.playerMap)
         console.log(playerArray)
         console.log(myId);
@@ -81,6 +83,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
         // console.log('장하오', me)
         if (me) {
+            console.log("밀정시간 , setShowPoliceModal이 켜짐 :", me)
             setShowPoliceModal(true)
         }
         const intervalId = setInterval(() => {
@@ -94,11 +97,11 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
             })
         }, 1000)
         // return () => clearInterval(intervalId)
-        }
+    }   
 
-        useEffect(() => {
-            console.log('장하오', me)
-        }, [me])
+    useEffect(() => {
+        console.log('me 상태 변경', me)
+    }, [me])
 
     // 밀정이 밤에 죽일지 / 변절시킬 플레이어를 고름 / 죽일거야 변절시킬거야?
     const choicePlayer = (choicedId) => {
@@ -212,7 +215,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         console.log('Player is undefined')
         return false
        }
-       console.log('isEmissaryOrBetrayer', player)
+       console.log('플레이어 있어', player)
        return player.role === 'emissary' || player.role === 'betrayer'
     }
 
@@ -401,7 +404,9 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                 gameStart()
                 break
             case 'NIGHT_EMISSARY' :
-                // isEmissaryOrBetrayer(gameResponse.playerMap)
+                console.log("씨발 밤이야!!!", gameResponse);
+                console.log("야호야호 프레이어 : ", gameResponse.nowPlayer )
+                isEmissaryOrBetrayer(gameResponse.nowPlayer)
                 emissaryTime()
                 // 밤이 되었을 때, 비디오/오디오 처리
                 handleVideoAudioAtNight();
@@ -409,7 +414,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                 changeToSecretChatMode();
                 break
             case 'NIGHT_POLICE' :
-                policeTime()
+                // policeTime()
                 break
             case 'VOTE_START' :
                 // 낮이 되었을 때, 비디오/오디오 처리
@@ -449,14 +454,15 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
     useEffect(() => {
         // players 배열이 변경될 때마다 OpenVidu 화면을 재렌더링
+        console.log("이게 무슨일이니 씨발!!!!!", players);
         const updatedRenderedStreams = streamManagers.map((streamManager, index) => (
           <div key={index} id={`video-container-${index}`} className={styles.videoContainer}>
               {streamManager && (
                 <Monitor
                   nickname={players[index]?.nickname}
-                  isRoomManager={players[index]?.isRoomManager}
-                  isMe={players[index]?.isMe}
-                  isAlive={players[index].isAlive}
+                  isRoomManager={players[index]?.owner}
+                  isMe={players[index]?.me}
+                  isAlive={players[index]?.alive}
                   roomId={roomId}
                   streamManager={streamManager}
                   isVote={votes[players[index]?.id] || false}
@@ -498,6 +504,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
               {finalDefensePlayer ?
                 <FinalDefensePlayerModal suspect={suspect} onMessage={handleFinalDefenseResult}/> : null}
           </div>
+          {showModal ? <div className={styles.alarm}>지금부터 밀정1931을 시작합니다.</div> : null}
           {winnerModal ?
             <div className={styles.winner}><span style={{color: 'red', fontWeight: 'bold'}}>{winnerJob}</span>의 승리입니다.
             </div> : null}

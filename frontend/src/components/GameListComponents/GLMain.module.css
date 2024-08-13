@@ -29,6 +29,8 @@
     gap: 20px;
     padding: 0 20px;
     margin-top: 240px;
+    /* margin-bottom: 100px; */
+    /* box-sizing: border-box; */
 }
 
 .cardWrapper {

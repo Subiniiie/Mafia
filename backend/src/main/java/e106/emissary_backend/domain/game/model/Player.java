@@ -1,6 +1,7 @@
 package e106.emissary_backend.domain.game.model;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import e106.emissary_backend.domain.game.enumType.GameRole;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -12,9 +13,6 @@ import java.time.ZoneId;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.redis.core.RedisHash;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.redis.core.RedisHash;
 
 //@RedisHash("player")
 @Slf4j
@@ -33,20 +31,26 @@ public class Player implements Serializable {
     @Enumerated(EnumType.STRING)
     private GameRole role;
 
-    private boolean isReady;
+    @JsonProperty("ready")
+    private boolean ready;
 
-    private boolean isLeft;
+    @JsonProperty("left")
+    private boolean left;
 
-    private boolean isVoted;
-
-    @Builder.Default
-    private boolean isAlive = true;
-
-    @Builder.Default
-    private boolean isWin = false;
+    @JsonProperty("voted")
+    private boolean voted;
 
     @Builder.Default
-    private boolean isMe = false;
+    @JsonProperty("alive")
+    private boolean alive = true;
+
+    @Builder.Default
+    @JsonProperty("win")
+    private boolean win = false;
+
+    @Builder.Default
+    @JsonProperty("me")
+    private boolean me = false;
 
     private long creationTime;
 
@@ -54,11 +58,11 @@ public class Player implements Serializable {
         return Player.builder()
                 .id(id)
                 .nickname(nickname)
-                .isReady(false)
-                .isLeft(false)
-                .isVoted(false)
+                .ready(false)
+                .left(false)
+                .voted(false)
                 .creationTime(creationTime.atZone(ZoneId.systemDefault()).toEpochSecond())
-                .isAlive(true)
+                .alive(true)
                 .build();
     }
 }
