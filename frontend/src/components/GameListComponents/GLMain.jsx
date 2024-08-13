@@ -39,14 +39,20 @@ const GLMain = ({ setViduToken, checkPublic, checkPrivate, checkCanEnter }) => {
                 let response
 
                 // 필터링 여부에 따라 API 엔드포인트 결정
+                let filter1 = checkPublic ? 'true' : 'false'
+                let filter2 = checkPrivate ? 'true' : 'false'
+                const filter3 = checkCanEnter ? 'true' : 'false'
+                const search = '' // 필요에 따라 검색 문자열 추가 가능
+
+                // filter1과 filter2가 둘 다 true이면 둘 다 false로 변경
+                if (filter1 === 'true' && filter2 === 'true') {
+                    filter1 = 'false'
+                    filter2 = 'false'
+                }
+
                 if (checkPublic || checkPrivate || checkCanEnter) {
                     // 하나 이상의 필터가 체크된 경우
-                    const filter1 = checkPublic ? 'true' : 'false'
-                    const filter2 = checkPrivate ? 'true' : 'false'
-                    const filter3 = checkCanEnter ? 'true' : 'false'
-                    const search = '' // 필요에 따라 검색 문자열 추가 가능
-
-                    const filterUrl = `https://i11e106.p.ssafy.io/api/rooms/filter?filter1=${filter1}&filter2=${filter2}&filter3=${filter3}&search=${search}`;
+                    const filterUrl = `https://i11e106.p.ssafy.io/api/rooms/filter?filter1=${filter1}&filter2=${filter2}&filter3=${filter3}&search=${search}&page=0&size=200`;
 
                     response = await axios.get(filterUrl, {
                         headers: {
@@ -65,8 +71,6 @@ const GLMain = ({ setViduToken, checkPublic, checkPrivate, checkCanEnter }) => {
                 }
 
                 setRooms(response.data)
-                console.log(response.data)
-                console.log(rooms)
             } catch (error) {
                 console.log("Failed to fetch rooms :", error)
             }
