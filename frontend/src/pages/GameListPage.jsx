@@ -13,6 +13,8 @@ function GameListPage({ setViduToken, isSpeakerOn }) {
     const [checkPublic, setCheckPublic] = useState(false)
     const [checkPrivate, setCheckPrivate] = useState(false)
     const [checkCanEnter, setCheckCanEnter] = useState(false)
+    const [search, setSearch] = useState("") // 검색어 상태 추가
+    const [triggerSearch, setTriggerSearch] = useState(false) // 검색 트리거 상태
 
     useEffect(() => {
         const audio = audioRef.current;
@@ -24,6 +26,10 @@ function GameListPage({ setViduToken, isSpeakerOn }) {
             audio.pause()
         }
     }, [isSpeakerOn])
+
+    const handleSearchTrigger = () => {
+        setTriggerSearch(!triggerSearch) // 트리거 상태 변경
+    }
 
     return (
         <div className={styles.pageContainer}>
@@ -38,6 +44,8 @@ function GameListPage({ setViduToken, isSpeakerOn }) {
                 setCheckPrivate={setCheckPrivate}
                 checkCanEnter={checkCanEnter}
                 setCheckCanEnter={setCheckCanEnter}
+                setSearch={setSearch} // 검색어 설정 함수 전달
+                handleSearchTrigger={handleSearchTrigger} // 검색 트리거 함수 전달
             />
             <div className={styles.contentWrapper}>
                 <main className={styles.mainContent}>
@@ -46,6 +54,8 @@ function GameListPage({ setViduToken, isSpeakerOn }) {
                         checkPublic={checkPublic}
                         checkPrivate={checkPrivate}
                         checkCanEnter={checkCanEnter}
+                        search={search} // 검색어 전달
+                        triggerSearch={triggerSearch} // 트리거 상태 전달
                     />
                 </main>
                 <GLFooter className={styles.footer} />
