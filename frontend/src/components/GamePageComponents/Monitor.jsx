@@ -35,7 +35,7 @@ const Monitor = function({ nickname, isRoomManager, isMe, isAlive, onVote, isVot
     }, [isVote]);
 
 
-    const handleVote = function() {
+    const handleVote = function () {
         // setIsVote(prevState => !prevState)
         // 투표 당한 플레이어의 닉네임을 GamePageMain에 보낼거야
         onVote(id)
@@ -43,11 +43,14 @@ const Monitor = function({ nickname, isRoomManager, isMe, isAlive, onVote, isVot
 
     const [ isMuteVoice, setIsMuteVoice ] = useState(false)
 
-    const handleVoice = function() {
-        if (!isMuteVoice) streamManager.subscribeToAudio(false);
-        else streamManager.subscribeToAudio(true);
-
-        setIsMuteVoice(prevState => !prevState)
+    const handleVoice = function () {
+        if (streamManager.remote){
+            if (!isMuteVoice) streamManager.subscribeToAudio(false);
+            else streamManager.subscribeToAudio(true);
+            setIsMuteVoice(prevState => !prevState)
+        } else {
+            console.log("자기자신은 mute 할 수 없습니다.")
+        }
     }
 
     // 강퇴 기능
@@ -74,20 +77,16 @@ const Monitor = function({ nickname, isRoomManager, isMe, isAlive, onVote, isVot
     return (
         <>
             <div className={styles.monitor}>
-                <video autoPlay={true} ref={videoRef} className={styles.videoBox} />
+                <video autoPlay={true} ref={videoRef} className={styles.videoBox}/>
+
                 <div className={styles.monitorHeader}>
-                    <div>
-                        <div className={styles.monitorHeader}>
-                            <div className={styles.nickname}>
-                                {/* 닉네임 출력하기
-                                {nickname} */}
-                                { isMe ? 'me' : nickname}
-                            </div>
-                        </div>
+                    <div className={styles.nickname}>
+                        {/* 닉네임 출력하기 */}
+                        {isMe ? 'me' : nickname}
                     </div>
-                    {/* 죽으면 어쩔겨 
-                    투표창은 회색으로 하고 인덱스는 그대로 유지
-                    */}
+
+
+                    {/* 투표창 | 죽으면 회색으로 하고 인덱스는 그대로 유지 */}
                     <div
                       className={isAlive ? isVote ? styles.voteBtnRed : styles.voteBtnGreen : styles.deadBtn}
                       disabled={!isAlive}
@@ -95,6 +94,8 @@ const Monitor = function({ nickname, isRoomManager, isMe, isAlive, onVote, isVot
                       onClick={handleVote}>
                     </div>
                 </div>
+
+
                 <div className={styles.monitorFooter}>
                     {/* 클릭해서 음소거 가능 */}
                     <img className={styles.voiceBtn} onClick={handleVoice}
@@ -102,6 +103,7 @@ const Monitor = function({ nickname, isRoomManager, isMe, isAlive, onVote, isVot
                     {isRoomManager ? null : <button className={styles.outBtn} onClick={getOutPlayer}>내보내기</button>}
                 </div>
             </div>
+
         </>
     )
 }
