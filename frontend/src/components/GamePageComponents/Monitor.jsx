@@ -74,26 +74,31 @@ const Monitor = function({ nickname, isRoomManager, isMe, isAlive, onVote, isVot
     return (
         <>
             <div className={styles.monitor}>
-                <video autoPlay={true} ref={videoRef} />
+                <video autoPlay={true} ref={videoRef} className={styles.videoBox} />
                 <div className={styles.monitorHeader}>
                     <div>
-                        {/* 닉네임 출력하기
-                        {nickname} */}
-                        { isMe ? 'me' : nickname}
+                        <div className={styles.monitorHeader}>
+                            <div className={styles.nickname}>
+                                {/* 닉네임 출력하기
+                                {nickname} */}
+                                { isMe ? 'me' : nickname}
+                            </div>
+                        </div>
                     </div>
                     {/* 죽으면 어쩔겨 
                     투표창은 회색으로 하고 인덱스는 그대로 유지
                     */}
-                    <button 
-                        className={isAlive ? isVote ? styles.voteBtnRed : styles.voteBtnGreen : styles.deadBtn} 
-                        disabled={!isAlive}
-                        // 투표 당한 플레이어의 닉네임 전송
-                        onClick={handleVote}>
-                    </button>
+                    <div
+                      className={isAlive ? isVote ? styles.voteBtnRed : styles.voteBtnGreen : styles.deadBtn}
+                      disabled={!isAlive}
+                      // 투표 당한 플레이어의 닉네임 전송
+                      onClick={handleVote}>
+                    </div>
                 </div>
                 <div className={styles.monitorFooter}>
                     {/* 클릭해서 음소거 가능 */}
-                    <img className={styles.voiceBtn} onClick={handleVoice} src={ isMuteVoice ? "/volume_mute.png" : "/volume.png"} alt="volume"></img>
+                    <img className={styles.voiceBtn} onClick={handleVoice}
+                         src={isMuteVoice ? "/volume_mute.png" : "/volume.png"} alt="volume"></img>
                     {isRoomManager ? null : <button className={styles.outBtn} onClick={getOutPlayer}>내보내기</button>}
                 </div>
             </div>

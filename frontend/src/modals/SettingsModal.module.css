@@ -4,20 +4,22 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.7);
     /* 배경을 더욱 어둡게 조정 */
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 2000;
 }
 
 .modalContent {
-    background: #220F0F;
-    padding: 20px;
+    background: #12151D;
+    padding: 20px 30px 40px 30px;
+    /* border: 1px solid white; */
+    border: 3px solid #1E2940;
     border-radius: 10px;
     /* 모서리를 둥글게 */
-    width: 400px;
+    width: 500px;
     /* 너비 조정 */
     max-width: 90%;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -25,6 +27,14 @@
     position: relative;
     display: flex;
     flex-direction: column;
+}
+
+.formContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    /* 요소 사이 간격 추가 */
+    margin: 15px 50px 0 50px;
 }
 
 .sound {
