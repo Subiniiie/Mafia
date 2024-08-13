@@ -48,7 +48,7 @@ public class NightEmissaryTask implements GameTask {
                         .build());
 
         nightPoliceTask.setGameIdAndTarget(gameId, police);
-        scheduler.scheduleTask(gameId, TaskName.NIGHT_POLICE, nightPoliceTask, 0, TimeUnit.SECONDS);
+        scheduler.scheduleTask(gameId, TaskName.NIGHT_POLICE, nightPoliceTask, 15, TimeUnit.SECONDS);
     }
 
     public void setGameIdAndTargets(long gameId, Player emissary, Player police){

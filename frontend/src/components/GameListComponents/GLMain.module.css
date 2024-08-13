@@ -29,8 +29,9 @@
     gap: 20px;
     padding: 0 20px;
     margin-top: 240px;
-    /* margin-bottom: 100px; */
-    /* box-sizing: border-box; */
+    flex-grow: 1;
+    overflow-y: auto;
+    /* 많은 방이 있을 경우 스크롤 가능하도록 */
 }
 
 .cardWrapper {
