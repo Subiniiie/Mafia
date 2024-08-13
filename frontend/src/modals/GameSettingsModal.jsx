@@ -4,7 +4,7 @@ import classNames from "classnames";
 import ModalHeader from "../components/ModalHeader"
 import RoomName from "../components/GamePageComponents/RoomName";
 import SecretMode from "../components/GamePageComponents/SecretMode";
-import Password from "../components/GamePageComponents/Password";
+// import Password from "../components/GamePageComponents/Password";
 import Turncoat from "../components/GamePageComponents/Turncoat";
 import styles from "./GameSettingsModal.module.css";
 import { decode } from "jwt-js-decode";
@@ -112,32 +112,40 @@ function GameSettingsModal({ isOpen, openModal, roomId }) {
     const GSModalClass = classNames('kimjungchul-gothic-regular', styles.modalContent)
 
     return (
-        <>
-            <div className={styles.modalOverlay} onClick={openModal}>
-                <div className={GSModalClass} onClick={(e) => e.stopPropagation()}>
-                    {/* 각 컴포넌트들이랑 값을 주고 받아서 바뀌는 걸 알아야 함 */}
-                    <ModalHeader modalTitle="게임 설정" openModal={openModal} />
-                    <div className={styles.formContainer}>
-                        <RoomName value={roomName} onChange={setRoomName} />
-                        <div className={styles.rowStyle}>
-                            <SecretMode checked={isSecret} onChange={setIsSecret} />
-                            <Password
+        <div className={styles.modalOverlay} onClick={openModal}>
+            <div className={GSModalClass} onClick={(e) => e.stopPropagation()}>
+                {/* 각 컴포넌트들이랑 값을 주고 받아서 바뀌는 걸 알아야 함 */}
+                <ModalHeader modalTitle="게임 설정" openModal={openModal} />
+                <div className={styles.formContainer}>
+                    <RoomName value={roomName} onChange={setRoomName} />
+                    <div className={styles.rowStyle}>
+                        <SecretMode checked={isSecret} onChange={setIsSecret} />
+                        {/* <Password
                                 value={password}
                                 onChange={setPassword}
                                 required={isSecret}  //비공개일 때 필수임
-                            />
+                            /> */}
+                        <div className={styles.containerStyle}>
+                            <span className={styles.labelStyle}>비밀번호</span>
+                            <input
+                                className={styles.inputStyle}
+                                type="text"
+                                placeholder="비밀번호를 입력해주세요."
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            ></input>
                         </div>
-                        <div>
-                            <Turncoat checked={isTurncoat} onChange={setIsTurncoat} />
-                        </div>
-                        {/* 변경 버튼을 누르면 변경된 내용이 서버에 적용되고 모달 닫힘 */}
-                        <div className={styles.btnBox}>
-                            <button className={styles.btn} onClick={() => handleSave(roomId, roomName, isSecret, password, isTurncoat)}>변경</button>
-                        </div>
+                    </div>
+                    <div>
+                        <Turncoat checked={isTurncoat} onChange={setIsTurncoat} />
+                    </div>
+                    {/* 변경 버튼을 누르면 변경된 내용이 서버에 적용되고 모달 닫힘 */}
+                    <div className={styles.btnBox}>
+                        <button className={styles.btn} onClick={() => handleSave(roomId, roomName, isSecret, password, isTurncoat)}>변경</button>
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     )
 }
 
