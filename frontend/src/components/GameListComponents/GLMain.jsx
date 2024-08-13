@@ -56,7 +56,7 @@ const GLMain = ({ setViduToken, checkPublic, checkPrivate, checkCanEnter }) => {
                     })
                 } else {
                     // 모든 필터가 해제된 경우
-                    response = await axios.get('https://i11e106.p.ssafy.io/api/rooms?page=0&size=20', {
+                    response = await axios.get('https://i11e106.p.ssafy.io/api/rooms?page=0&size=200', {
                         headers: {
                             "Content-Type": "application/json",
                             "Authorization": `Bearer ${access}`,
