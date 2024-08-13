@@ -83,6 +83,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
         // console.log('장하오', me)
         if (me) {
+            console.log("밀정시간 , setShowPoliceModal이 켜짐 :", me)
             setShowPoliceModal(true)
         }
         const intervalId = setInterval(() => {
@@ -96,11 +97,11 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
             })
         }, 1000)
         // return () => clearInterval(intervalId)
-        }
+    }   
 
-        useEffect(() => {
-            console.log('장하오', me)
-        }, [me])
+    useEffect(() => {
+        console.log('me 상태 변경', me)
+    }, [me])
 
     // 밀정이 밤에 죽일지 / 변절시킬 플레이어를 고름 / 죽일거야 변절시킬거야?
     const choicePlayer = (choicedId) => {
@@ -214,7 +215,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         console.log('Player is undefined')
         return false
        }
-       console.log('isEmissaryOrBetrayer', player)
+       console.log('플레이어 있어', player)
        return player.role === 'emissary' || player.role === 'betrayer'
     }
 
@@ -403,12 +404,14 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                 gameStart()
                 break
             case 'NIGHT_EMISSARY' :
-                // isEmissaryOrBetrayer(gameResponse.playerMap)
-                // emissaryTime()
+                console.log("씨발 밤이야!!!", gameResponse);
+                console.log("야호야호 프레이어 : ", gameResponse.nowPlayer )
+                isEmissaryOrBetrayer(gameResponse.nowPlayer)
+                emissaryTime()
                 // 밤이 되었을 때, 비디오/오디오 처리
-                // handleVideoAudioAtNight();
+                handleVideoAudioAtNight();
                 // 밤이 되었을 때, 채팅 처리
-                // changeToSecretChatMode();
+                changeToSecretChatMode();
                 break
             case 'NIGHT_POLICE' :
                 // policeTime()
@@ -501,6 +504,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
               {finalDefensePlayer ?
                 <FinalDefensePlayerModal suspect={suspect} onMessage={handleFinalDefenseResult}/> : null}
           </div>
+          {showModal ? <div className={styles.alarm}>지금부터 밀정1931을 시작합니다.</div> : null}
           {winnerModal ?
             <div className={styles.winner}><span style={{color: 'red', fontWeight: 'bold'}}>{winnerJob}</span>의 승리입니다.
             </div> : null}
