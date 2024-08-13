@@ -11,13 +11,15 @@ const GLMain = ({ setViduToken }) => {
         const fetchRooms = async () => {
             try {
                 const access = localStorage.getItem('access')
-                const response = await axios.get('https://i11e106.p.ssafy.io/api/rooms', {
+                const response = await axios.get('https://i11e106.p.ssafy.io/api/rooms?page=0&size=20', {
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${access}`,
                     }
                 })
+
                 setRooms(response.data)
+                console.log(rooms)
 
             } catch (error) {
                 console.error("Failed to fetch rooms :", error)

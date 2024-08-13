@@ -14,6 +14,7 @@ const Monitor = function({ nickname, isRoomManager, isMe, isAlive, onVote, isVot
     // const [ isVote, setIsVote ] = useState(false)
     // 투표한 플레이어의 닉네임을 저장하는 변수
     const [ votedPlayer, setVotedPlayer ] = useState(null)
+    const access = localStorage.getItem("access");
 
     // 비디오가 실제로 추가될 부분
     const videoRef = useRef();
@@ -56,7 +57,16 @@ const Monitor = function({ nickname, isRoomManager, isMe, isAlive, onVote, isVot
 
         // 백엔드 서버에 강퇴 요청 => 해당 streamManager에 대해 SessionDisconnected Event 발생
         // event.reason === 'forceDisconnectByServer' 인지 확인 후 조건 분기하여 처리
-        axios.delete('https://i11e106.p.ssafy.io/api/rooms/kick', { data: { roomId, connectionId: streamManager.stream.connection.connectionId } })
+        axios.delete('https://i11e106.p.ssafy.io/api/rooms/kick', {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${access}`,
+            },
+            data: {
+                roomId,
+                connectionId: streamManager.stream.connection.connectionId
+            }
+        })
              .then(response => console.log('Player kicked successfully:', response.data))
              .catch(error => console.error('Error kicking player:', error))
     }
@@ -64,26 +74,31 @@ const Monitor = function({ nickname, isRoomManager, isMe, isAlive, onVote, isVot
     return (
         <>
             <div className={styles.monitor}>
-                <video autoPlay={true} ref={videoRef} />
+                <video autoPlay={true} ref={videoRef} className={styles.videoBox} />
                 <div className={styles.monitorHeader}>
                     <div>
-                        {/* 닉네임 출력하기
-                        {nickname} */}
-                        { isMe ? 'me' : nickname}
+                        <div className={styles.monitorHeader}>
+                            <div className={styles.nickname}>
+                                {/* 닉네임 출력하기
+                                {nickname} */}
+                                { isMe ? 'me' : nickname}
+                            </div>
+                        </div>
                     </div>
                     {/* 죽으면 어쩔겨 
                     투표창은 회색으로 하고 인덱스는 그대로 유지
                     */}
-                    <button 
-                        className={isAlive ? isVote ? styles.voteBtnRed : styles.voteBtnGreen : styles.deadBtn} 
-                        disabled={!isAlive}
-                        // 투표 당한 플레이어의 닉네임 전송
-                        onClick={handleVote}>
-                    </button>
+                    <div
+                      className={isAlive ? isVote ? styles.voteBtnRed : styles.voteBtnGreen : styles.deadBtn}
+                      disabled={!isAlive}
+                      // 투표 당한 플레이어의 닉네임 전송
+                      onClick={handleVote}>
+                    </div>
                 </div>
                 <div className={styles.monitorFooter}>
                     {/* 클릭해서 음소거 가능 */}
-                    <img className={styles.voiceBtn} onClick={handleVoice} src={ isMuteVoice ? "/volume_mute.png" : "/volume.png"} alt="volume"></img>
+                    <img className={styles.voiceBtn} onClick={handleVoice}
+                         src={isMuteVoice ? "/volume_mute.png" : "/volume.png"} alt="volume"></img>
                     {isRoomManager ? null : <button className={styles.outBtn} onClick={getOutPlayer}>내보내기</button>}
                 </div>
             </div>

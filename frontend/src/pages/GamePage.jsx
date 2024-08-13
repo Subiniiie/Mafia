@@ -38,7 +38,7 @@ function GamePage() {
     // const [viduToken, setViduToken] = useState("");
     // setViduToken(state);
     const [chatHistory, setChatHistory] = useState([]);
-    // 일반 채팅: signal:chat, 밤 채팅: signal:signal:secretChat
+    // 일반 채팅: signal:chat, 밤 채팅: signal:secretChat
     // 초기 상태 == 일반 채팅, 모든 유저에게 브로드캐스팅
     // GamePageMain에서 변경되고, GameChat에서 사용
     const [chatMode, setChatMode] = useState({ mode: 'signal:chat', to: [] });
@@ -67,7 +67,7 @@ function GamePage() {
     useEffect(() => {
         const access = localStorage.getItem('access');
 
-        async function gameRoomInfo() {
+        const gameRoomInfo = async () => {
             await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`, {
                 headers: {
                     "Content-Type": "application/json",
@@ -173,9 +173,9 @@ function GamePage() {
             console.log("No session found to disconnect.");
         }
 
-        this.OV = null;
-        setSession(undefined);
-        setStreamManagers([]);
+        // this.OV = null;
+        // setSession(undefined);
+        // setStreamManagers([]);
     }
 
     // creationTime 순으로 정렬된 streamManagers 배열을 반환
@@ -185,128 +185,6 @@ function GamePage() {
 
     const stompClient = useRef(null)
     const access = localStorage.getItem('access');
-
-    // 방 정보 가져오기
-    useEffect(() => {
-        const gameRoomInfo = async() => {
-            try {
-                const response = await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${access}`,
-                    }
-                })
-                console.log(response)
-                setGameData(response.data)
-                console.log('Game Data 출력', gameData);
-            } catch (error) {
-                console.log("게임방 API를 불러오지 못했습니다", error)
-            }
-        }
-        gameRoomInfo()
-    }, [roomId, access])
-
-
-    // useEffect( () => {
-    //
-    //     // TODO: get nickname & userId from accessToken
-    //     const nickname = "ssafy";
-    //     const userId = "ssafy@ssafy.com";
-    //
-    //     setNickname(nickname);
-    //     setUserId(userId);
-    //
-    //
-    //     const mySession = OV.initSession();
-    //     setSession(mySession);
-    //
-    //     const addStreamManager =
-    //         strMgr => setStreamManagers(subs => [...subs, strMgr]);
-    //
-    //     const deleteStreamManager =
-    //         strMgr => setStreamManagers(subs => subs.filter(s => s !== strMgr));
-    //
-    //     const handleStreamCreated = (event) => {
-    //         mySession.subscribeAsync(event.stream, undefined)
-    //                  .then(strMgr => addStreamManager(strMgr));
-    //     }
-    //
-    //     const handleStreamDestroyed =
-    //         event => deleteStreamManager(event.stream.streamManager);
-    //
-    //     const handleChatSignal = (event) => {
-    //         const message = event.data;
-    //         const nickname = JSON.parse(event.from).nickname;
-    //         setChatHistory(prevHistory => [ ...prevHistory, { nickname, message } ]);
-    //     }
-    //
-    //     const handleSecretChatSignal = (event) => {
-    //         const message = event.data;
-    //         const nickname = JSON.parse(event.from).nickname;
-    //         setChatHistory(prevHistory => [ ...prevHistory, { nickname, message } ]);
-    //     }
-    //
-    //     // 세션 이벤트 추가
-    //     mySession.on("streamCreated", handleStreamCreated);
-    //     mySession.on("streamDestroyed", handleStreamDestroyed);
-    //     mySession.on("signal:chat", handleChatSignal);
-    //     mySession.on("signal:secretChat", handleSecretChatSignal);
-    //     mySession.on("exception", exception => console.warn(exception));
-    //
-    //     // 메타 데이터, Connection 객체에서 꺼내 쓸 수 있음
-    //     const data = {
-    //         nickname, id
-    //     };
-    //
-    //     // 세션 연결 및 publisher 객체 streamManagers 배열에 추가
-    //     mySession.connect(location.state.option.ownerToken, data)
-    //         .then(async () => {
-    //             const publisher = OV.initPublisher(undefined, {
-    //                 audioSource: undefined,
-    //                 videoSource: undefined,
-    //                 publishAudio: true,
-    //                 publishVideo: true,
-    //                 resolution: '300x200',
-    //                 frameRate: 30,
-    //                 insertMode: 'APPEND',
-    //                 mirror: true,
-    //             });
-    //
-    //             await mySession.publish(publisher);
-    //             addStreamManager(publisher);
-    //         })
-    //         .catch(error => console.warn(error));
-    //
-    //     return () => {
-    //         window.onbeforeunload = () => {};
-    //     }
-    //
-    // }, [location] );
-
-
-    // const leaveSession = () => {
-    //     const mySession = session;
-    //
-    //     // 서버에서 유저 삭제 등 처리를 위해 axios로 API 호출
-    //     axios.delete(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`)
-    //          .then(response => console.log('Player left successfully:', response.data))
-    //          .catch(error => console.error('Error leaving session:', error))
-    //
-    //     if (mySession) mySession.disconnect();
-    //
-    //     this.OV = null;
-    //     setSession(undefined);
-    //     setStreamManagers([]);
-    //     window.location.reload();
-    // }
-
-    // creationTime 순으로 정렬된 streamManagers 배열을 반환
-    // const getSortedStreamManagers =
-    //     strMgrs => [...strMgrs].sort((a, b) => a.stream.creationTime - b.stream.creationTime);
-    //
-    //
-    // const stompClient = useRef(null)
-    // const { id }  = useParams()
 
     // 구독할래
     useEffect(() => {
@@ -323,13 +201,23 @@ function GamePage() {
         stompClient.current.connect({
             'Authorization': `Bearer ${access}`
         }, () => {
-            stompClient.current.subscribe(`/ws/sub/${roomId}`, (message) =>
+            stompClient.current.subscribe(`/sub/${roomId}`, (message) =>
                 {
-                    const messageJson = JSON.parse(message.body)
-                    console.log("입장 데이터 확인 : ", messageJson)
-                    setGameResponse(messageJson)
-                    setNowGameState('입장 하고 데이터 받는다ㅏㅏ', messageJson.gameState)
-                })
+                    if(message.body){
+                        console.log("IN! WS");
+                        console.log(message.body);
+                        const messageJson = JSON.parse(message.body);
+                        setGameResponse(messageJson);
+                        setNowGameState(messageJson.gameState)
+                        console.log(messageJson);
+                    } else {
+                       console.log("OUT! WS");
+                    }
+                    // const messageJson = JSON.parse(message.body)
+                    // console.log("입장 데이터 확인 : ", messageJson)
+                    // setGameResponse(messageJson)
+                    // setNowGameState('입장 하고 데이터 받는다ㅏㅏ', messageJson.gameState)
+            })
         })
 
         return () => {
