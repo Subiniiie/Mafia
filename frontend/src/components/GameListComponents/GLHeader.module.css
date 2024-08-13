@@ -123,6 +123,7 @@
 .searchButton {
     height: 54px;
     width: auto;
+    cursor: pointer;
 }
 
 .searchBarInput::placeholder {
