@@ -36,7 +36,8 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     const header =  {'Authorization': `Bearer ${access}`}
     const navigate = useNavigate();
     const decodedAccess = decode(localStorage.getItem("access"));
-    const myId = decodedAccess.payload.userId;
+    // 바꿈
+    const myId = Number(decodedAccess.payload.userId);
 
     //todo
     // 강퇴처리
@@ -56,6 +57,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         console.log('너 여기까지 와', gameResponse)
         console.log('너 여기까지 와22', gameResponse.playerMap)
         const playerArray = Object.values(gameResponse.playerMap)
+        // setPlayers(gameResponse.playerMap)
         console.log(playerArray)
         console.log(myId);
         const myUser = playerArray.find(user => user.id === Number(myId))
@@ -67,6 +69,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
     const [me, setMe] = useState(false)
 
+    // 바꿈
     // 밀정 시간
     const emissaryTime = () => {
         setSystemMessage('밤이 시작되었습니다. 밀정이 활동 중입니다.')
@@ -74,23 +77,30 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         // 밀정 정보 가져오기
         console.log('밀정정보', gameResponse)
         // 나중에 응답확인
-        console.log('밀정정보22', gameResponse.nowPlayer.id)
+        console.log('밀정정보22', gameResponse.nowPlayer.id, "시발 이거 타입 : ", typeof gameResponse.nowPlayer.id);
         // 밀정 플레이어의 id 저장
         // const findEmissary = gameResponse.nowPlayer.find(id === myId)
+        console.log("myId : ", myId, " 씨발 이거 타입 : ", typeof myId);
+        // todo
+        console.log("비교 : ", gameResponse.nowPlayer.id === myId)
+        let tempMe = false;
         if (gameResponse.nowPlayer.id === myId) {
+            console.log("하이")
             setMe(true)
+            tempMe = true;
         }
 
+        console.log("나는 밀정인가?" , me);
         // console.log('장하오', me)
-        if (me) {
+        if (tempMe) {
             console.log("밀정시간 , setShowPoliceModal이 켜짐 :", me)
-            setShowPoliceModal(true)
+            setShowEmissaryModal(true)
         }
         const intervalId = setInterval(() => {
             setNightTimer(prevState => {
                 if (prevState <= 1) {
                     clearInterval(intervalId)
-                    setShowEmissaryModal(true)
+                    setShowPoliceModal(true)
                     return 0
                 }
                 return prevState - 1
@@ -216,18 +226,19 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         return false
        }
        console.log('플레이어 있어', player)
-       return player.role === 'emissary' || player.role === 'betrayer'
+       return player.role === 'EMISSARY' || player.role === 'BETRAYER'
     }
 
     // 밤이 되었을 때 비디오/오디오 처리 handler
     const handleVideoAudioAtNight = () => {
         const publisherIdx = streamManagers.findIndex(strMgr => !strMgr.remote);
-        console.log('밤이 되었다', publisherIdx)
-        console.log('밤이 되었다22', streamManagers)
+        // console.log('밤이 되었다', publisherIdx)
+        // console.log('밤이 되었다22', streamManagers)
 
         // 밀정, 변절자를 제외한 유저는 비디오/오디오를 publish 하지도 않고,
         // 다른 유저들의 비디오/오디오를 subscribe 하지도 않는다.
-        if (!isEmissaryOrBetrayer(players[publisherIdx])) {
+        //if (!isEmissaryOrBetrayer(players[publisherIdx])) {
+        if (!isEmissaryOrBetrayer(gameResponse.nowPlayer))
             streamManagers[publisherIdx].publishVideo(false);
             streamManagers[publisherIdx].publishAudio(false);
 
@@ -238,14 +249,17 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                     strMgr.subscribeToAudio(false);
                 }
               )
-        }
-    }
+            }
+        
+    
 
     // 낮이 되었을 때 비디오/오디오 처리 handler
     const handleVideoAudioAtDay = () => {
         const publisherIdx = streamManagers.findIndex(strMgr => !strMgr.remote);
+        // console.log('publisherIdx:', publisherIdx)
 
-        if (!isEmissaryOrBetrayer(players[publisherIdx])) {
+        //if (!isEmissaryOrBetrayer(players[publisherIdx])) {
+            if (!isEmissaryOrBetrayer(gameResponse.nowPlayer)) {
             streamManagers[publisherIdx].publishVideo(true);
             streamManagers[publisherIdx].publishAudio(true);
 
@@ -497,7 +511,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                 {currentPhase === 'finalDefense' && <p>최후 변론 시간: {finalDefensePlayer}초</p>} */}
           </div>
           <div>
-              {showEmissaryModal ? <EmissaryModal gameData={gameData} onAction={choicePlayer}/>
+              {showEmissaryModal ? <EmissaryModal gameData={gameData} onAction={choicePlayer} players={players}/>
                 : null}
               {choiceDieOrTurncoat ? <ChoiceDieOrTurncoat onChioce={handleChoiceDieOrTurncoat}/> : null}
               {showPoliceModal ? <PoliceModal gameData={gameData} onChioce={policeChoicedPlayer}/> : null}

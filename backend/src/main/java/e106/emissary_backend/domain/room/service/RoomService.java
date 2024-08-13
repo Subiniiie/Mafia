@@ -184,7 +184,7 @@ public class RoomService {
     public CommonResponseDto deleteUser(Long roomId, Long userId) {
         roomRepository.findByRoomId(roomId).orElseThrow(() -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
         userInRoomRepository.findByPk_UserId(userId).orElseThrow(() -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION));
-        userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
+        userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(userId, roomId);
 
         Game game = redisGameRepository.findByGameId(roomId).orElseThrow(() -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
         GameDTO gameDTO = GameDTO.toDto(game);
@@ -371,7 +371,7 @@ public class RoomService {
             // 유저일 경우 나가기 처리
             users.remove(token);
             System.out.println("remove session @vidu complete");
-            userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
+            userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(userId, roomId);
             System.out.println("remove session @mysql complete");
             //remove user @redis
             publishRemoveUser(roomId, userId);
@@ -395,7 +395,7 @@ public class RoomService {
                 Room room = userInRoom.getRoom();
                 room.changeOwner(ownerId);
 
-                userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
+                userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(userId, roomId);
                 System.out.println("remove session @mysql complete");
                 //remove user @redis
                 publishRemoveUser(roomId, userId);
@@ -470,7 +470,7 @@ public class RoomService {
             log.info("방장이 스스로를 강퇴하면 안돼.");
             return false;
         }
-        userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomKickDto.getRoomId(), targetId);
+        userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(targetId, roomKickDto.getRoomId());
         log.info("여긴가");
 
         // 레디스 처리하고
