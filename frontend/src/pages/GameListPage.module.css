@@ -1,0 +1,28 @@
+/* GameListPage.module.css or relevant global CSS file */
+
+.pageContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.contentWrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.mainContent {
+    flex: 1;
+    padding-bottom: 100px;
+    /* GLFooter가 올라오지 않도록 여유 공간 확보 */
+}
+
+.footer {
+    flex-shrink: 0;
+    padding: 20px;
+    background-color: #333;
+    /* 예시 색상 */
+    text-align: center;
+}
