@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
-// import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import classNames from "classnames"
 import GameRoomCard from "./GameRoomCard";
 import styles from "./GLMain.module.css";
 
 const GLMain = ({ setViduToken }) => {
     const [rooms, setRooms] = useState([])
+
+    const GLMainClass = classNames('kimjungchul-bold', styles.container)
 
     useEffect(() => {
         const fetchRooms = async () => {
@@ -35,7 +37,7 @@ const GLMain = ({ setViduToken }) => {
     return (
         <>
 
-            <div className={styles.container}>
+            <div className={GLMainClass}>
 
                 {rooms.map((room) => (
                     // <div className={styles.cardWrapper} key={room.roomId}>
