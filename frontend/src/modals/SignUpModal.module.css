@@ -53,6 +53,7 @@
     /* 글자 크기 조정 */
     color: black;
     width: 100%;
+    margin-right: 5px;
 }
 
 .inputField.valid {
@@ -103,7 +104,7 @@
     background-color: #CECACA;
     /* 버튼 배경색 */
     color: white;
-    padding: 10px 15px;
+    padding: 12px 12px;
     border-radius: 5px;
     /* 버튼 모서리 둥글게 */
     border: none;
