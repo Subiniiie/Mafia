@@ -17,13 +17,11 @@ public class ReadyCompleteSubscriber {
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     public void sendMessage(String message){
-        /**
-        프론트로 webSocket을 통해 데이터 내리기
-          */
         try {
             ReadyCompleteMessage readyCompleteMessage = objectMapper.readValue(message, ReadyCompleteMessage.class);
             long gameId = readyCompleteMessage.getGameId();
 
+            log.info("ReadyCompleteSubscriber run : {}", readyCompleteMessage);
             simpMessagingTemplate.convertAndSend("/sub/" + gameId, readyCompleteMessage);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
