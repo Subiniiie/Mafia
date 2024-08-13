@@ -18,7 +18,7 @@ public class GameSetSubscriber {
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     public void sendMessage(String message){
-        //Todo : 프론트로 webSocket을 통해 데이터 내리기
+        log.info("GameSetSubscriber Run");
         try {
             GameSetMessage gameSetMessage = objectMapper.readValue(message, GameSetMessage.class);
             Long gameId = gameSetMessage.getGameId();
@@ -27,6 +27,7 @@ public class GameSetSubscriber {
 
             GameDTO gameDTO = gameSetMessage.getGameDTO();
 
+            log.info("publish gameDTO in GameSetSubscriber : {}", gameDTO);
             simpMessagingTemplate.convertAndSend("/sub/" + gameId, gameDTO);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
