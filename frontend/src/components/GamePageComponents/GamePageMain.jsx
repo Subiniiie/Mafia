@@ -56,19 +56,33 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         const playerArray = Object.values(gameResponse.playerMap)
         console.log(playerArray)
         console.log(myId);
-        // console.log('반복문화깅ㄴ', playerArray)
         const myUser = playerArray.find(user => user.id === Number(myId))
-        console.log('dkssyd', myUser)
         getMyJob(myUser.role)
         setTimeout(() => {
             setShowModal(false)
         }, 15000)
     }
 
+    const [me, setMe] = useState(false)
 
     // 밀정 시간
     const emissaryTime = () => {
+        setSystemMessage('밤이 시작되었습니다. 밀정이 활동 중입니다.')
         // 30초 동안 타이머를 1초 간격으로 감소
+        // 밀정 정보 가져오기
+        console.log('밀정정보', gameResponse)
+        // 나중에 응답확인
+        console.log('밀정정보22', gameResponse.nowPlayer.id)
+        // 밀정 플레이어의 id 저장
+        // const findEmissary = gameResponse.nowPlayer.find(id === myId)
+        if (gameResponse.nowPlayer.id === myId) {
+            setMe(true)
+        }
+
+        // console.log('장하오', me)
+        if (me) {
+            setShowPoliceModal(true)
+        }
         const intervalId = setInterval(() => {
             setNightTimer(prevState => {
                 if (prevState <= 1) {
@@ -80,7 +94,11 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
             })
         }, 1000)
         // return () => clearInterval(intervalId)
-    }
+        }
+
+        useEffect(() => {
+            console.log('장하오', me)
+        }, [me])
 
     // 밀정이 밤에 죽일지 / 변절시킬 플레이어를 고름 / 죽일거야 변절시킬거야?
     const choicePlayer = (choicedId) => {
@@ -109,13 +127,20 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
     // 첩보원이 활동한다
     const policeTime = () => {
-        const me = gameResponse.playerMap
-          .filter(player => player.isAlive)
-          .find(player => player.Me)
+        setSystemMessage('밤이 되었습니다. 첩보원이 활동 중입니다.')
+
+        console.log('첩보원활동', gameResponse)
+        // 나중에 응답확인
+        console.log('첩보원활동22', gameResponse.gameId)
+        // 첩보원 플레이어의 id 저장
+        // const me = gameResponse.playerMap.find(user => user.id === myId)
+        const findPolice = gameResponse.playerMap.find(user => user.role === 'POLICE')
+        const me = findPolice.id === Number(myId)
         if (me) {
             setShowPoliceModal(true)
         }
     }
+    
 
     // 첩보원이 선택한 플레이어의 역할을 아는 함수
     const policeChoicedPlayer = function(targetId, targetNickname, targetRole) {
@@ -127,9 +152,9 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         )
         // 첩보원 화면에만 뜨게 하기
         // isMe 어떻게 뜨는지 확인22
-        const me = gameData.playerMap
-            .filter(player => player.isAlive)
-            .find(player => player.isMe)
+        // const me = gameData.playerMap
+        //     .filter(player => player.isAlive)
+        //     .find(player => player.isMe)
         if (me) {
             setSystemMessage(`${targetNickname}님은 ${targetRole}입니다.`)
         }
@@ -143,6 +168,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
     // 낮(토론 및 투표 중)
     const voteStart = (targetId) => {
+        setSystemMessage('낮이 되었습니다. 토론을 하며 투표를 진행하세요.')
         stompClient.current.send(
             `/ws/pub/vote/${roomId}`, 
             header,
@@ -175,6 +201,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         }
     }
 
+
     // const isEmissaryOrBetrayer = (player) => {
     //     console.log('isEmissaryOrBetrayer:', player)
     //     return player.role === 'emissary' || player.role === 'betrayer';
@@ -192,12 +219,14 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // 밤이 되었을 때 비디오/오디오 처리 handler
     const handleVideoAudioAtNight = () => {
         const publisherIdx = streamManagers.findIndex(strMgr => !strMgr.remote);
+        console.log('밤이 되었다', publisherIdx)
+        console.log('밤이 되었다22', streamManagers)
 
         // 밀정, 변절자를 제외한 유저는 비디오/오디오를 publish 하지도 않고,
         // 다른 유저들의 비디오/오디오를 subscribe 하지도 않는다.
         if (!isEmissaryOrBetrayer(players[publisherIdx])) {
             streamManagers[publisherIdx].publishVideo(false);
-            streamManagers[publisherIdx].publishAideo(false);
+            streamManagers[publisherIdx].publishAudio(false);
 
             streamManagers
               .filter(strMgr => strMgr.remote)
@@ -272,7 +301,8 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
     // 재투표를 해야할 때
     const voteAgain = () => {
-        setVotes(prevState => {s
+        setSystemMessage('동점자가 나왔습니다. 재투표를 실시합니다.')
+        setVotes(prevState => {
             const updatedVotes = {}
             Object.keys(prevState).forEach(playerId => {
                 updatedVotes[playerId] = false
@@ -283,12 +313,13 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
     // 최종 용의자 한 명이 나옴
     const voteFinish = () => {
-        setSystemMessage('최종 변론을 실시하세요.')
+        setSystemMessage(`투표에 의해 ${suspect}님이 최종 용의자가 되었습니다. 최종 변론을 실시하세요.`)
         setSuspect(gameData.maxPlayerList[0])
     }
 
     // 최종 투표 찬반
     const confirmStart = () => {
+        setSystemMessage(`최종 투표를 시작합니다.`)
         setFinalDefensePlayer(true)
     }
 
@@ -308,6 +339,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
     // 게임 끝
     const gameEnd = () => {
+        setSystemMessage('게임이 끝이 났습니다.')
         stompClient.current.send(
             `/ws/pub/end/${roomId}`,
             header, 
@@ -370,15 +402,13 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                 break
             case 'NIGHT_EMISSARY' :
                 // isEmissaryOrBetrayer(gameResponse.playerMap)
+                emissaryTime()
                 // 밤이 되었을 때, 비디오/오디오 처리
                 handleVideoAudioAtNight();
                 // 밤이 되었을 때, 채팅 처리
                 changeToSecretChatMode();
-                setSystemMessage('밤이 시작되었습니다. 밀정이 활동 중입니다.')
-                emissaryTime()
                 break
             case 'NIGHT_POLICE' :
-                setSystemMessage('밤이 되었습니다. 첩보원이 활동 중입니다.')
                 policeTime()
                 break
             case 'VOTE_START' :
@@ -386,7 +416,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                 handleVideoAudioAtDay();
                 // 낮이 되었을 때, 채팅 처리
                 changeToNormalChatMode();
-                setSystemMessage('낮이 되었습니다. 토론을 하며 투표를 진행하세요.')
+                
                 voteStart()
                 break
             case 'VOTE_END' :
@@ -394,23 +424,18 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                 voteEnd()
                 break
             case 'REVOTE' :
-                setSystemMessage('동점자가 나왔습니다. 재투표를 실시합니다.')
                 voteAgain()
                 break
             case 'FINISH' :
-                setSystemMessage(`투표에 의해 ${suspect}님이 최종 용의자가 되었습니다.`)
                 voteFinish()
                 break
             case 'CONFIRM_START' :
-                setSystemMessage(`최종 투표를 시작합니다.`)
                 confirmStart()
                 break
             case 'CONFIRM_END' :
-                setSystemMessage(`최종 투표가 끝이 났습니다`)
                 confirmEnd()
                 break
             case 'END' :
-                setSystemMessage('게임이 끝이 났습니다.')
                 gameEnd()
                 break
             default :

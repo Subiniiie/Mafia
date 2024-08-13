@@ -195,6 +195,17 @@ function GamePage() {
     const stompClient = useRef(null)
     const access = localStorage.getItem('access');
 
+    // const activeWebsocket = setInterval(() => {
+    //     console.log('의미없는 메시지지지')
+    //     stompClient.current.send(
+    //         `/ws/pub/connect/${roomId}`, 
+    //         {
+    //             'Authorization': `Bearer ${access}`
+    //         }, 
+    //         {}
+    //     )
+    // }, 20000)
+
     // 구독할래
     useEffect(() => {
         // 원래 했던 거
@@ -223,10 +234,14 @@ function GamePage() {
                        console.log("OUT! WS");
                     }
                     // const messageJson = JSON.parse(message.body)
-                    // console.log("입장 데이터 확인 : ", messageJson)
-                    // setGameResponse(messageJson)
-                    // setNowGameState('입장 하고 데이터 받는다ㅏㅏ', messageJson.gameState)
+                    console.log("입장 데이터 확인 : ", messageJson)
+                    setGameResponse(messageJson)
+                    // setNowGameState(messageJson.gameState)
             })
+            // activeWebsocket()
+
+                // 20초 간격으로 웹소켓한테 의미없는 데이터 쏘기
+
         })
 
         return () => {
@@ -236,6 +251,8 @@ function GamePage() {
         }
 
     }, [])
+
+
 
       
     return (

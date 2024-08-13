@@ -1,10 +1,10 @@
-.container {
+/* .container {
     display: flex;
     flex-direction: row;
     border: 5px solid red;
-    /* overflow: auto;
-    white-space: nowrap; */
-}
+    overflow: auto;
+    white-space: nowrap;
+} */
 
 /* .container {
     color: white; 
@@ -28,9 +28,25 @@
 .slides {
     display: flex;
     flex-direction: row;
-    width: 700px;
+    width: auto;
     overflow: auto;
-    white-space: nowrap;
-
+    margin-top : 150px;
+    margin-left : 30px;
+    margin-right : 50px;
+    border-radius: 10px;
 }
 
+.slides::-webkit-scrollbar{
+    height: 10px;
+}
+
+.slides::-webkit-scrollbar-thumb{
+    background-color: rgba(239, 242, 247, 0.1);
+    border-radius: 10px;
+    border: 2px solid #1f2845;;
+  }
+
+.slides::-webkit-scrollbar-track{
+    border-radius: 10px;
+    background-color: #1f2845;
+}
