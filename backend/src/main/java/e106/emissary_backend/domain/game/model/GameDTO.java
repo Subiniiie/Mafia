@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
 
+@ToString
 @Setter
 @Getter
 @Builder
@@ -30,8 +31,7 @@ public class GameDTO {
 
     private int maxPlayer;
 
-    @Builder.Default
-    private List<Player> emissary = new ArrayList<>();
+    private Player emissary;
 
     private Player police;
 
@@ -64,6 +64,7 @@ public class GameDTO {
                         .nickname(player.getNickname())
                         .isAlive(false)
                         .isLeft(false)
+                        .isReady(player.isReady())
                         .role(GameRole.PERSON)
                         .build());
     }

@@ -2,6 +2,7 @@ package e106.emissary_backend.domain.game.service.timer.task;
 
 import e106.emissary_backend.domain.game.enumType.CommonResult;
 import e106.emissary_backend.domain.game.enumType.GameState;
+import e106.emissary_backend.domain.game.model.Player;
 import e106.emissary_backend.domain.game.service.publisher.RedisPublisher;
 import e106.emissary_backend.domain.game.service.subscriber.message.CommonMessage;
 import e106.emissary_backend.domain.game.service.timer.SchedulerService;
@@ -19,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class NightPoliceTask implements GameTask {
     private Long gameId;
+    private Player police;
 
     private final RedisPublisher publisher;
 
@@ -39,10 +41,12 @@ public class NightPoliceTask implements GameTask {
                         .gameId(gameId)
                         .gameState(GameState.NIGHT_POLICE)
                         .result(CommonResult.SUCCESS)
+                        .nowPlayer(police)
                         .build());
     }
 
-    public void setGameId(long gameId){
+    public void setGameIdAndTarget(long gameId, Player police){
         this.gameId = gameId;
+        this.police = police;
     }
 }

@@ -12,7 +12,7 @@
     /* background: rgba(0, 0, 0, 0.7); */
     background: #12151D;
     color: white;
-    z-index: 100;
+    z-index: 200;
     /* 추가함 */
     justify-content: center;
     align-items: center;
