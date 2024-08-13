@@ -54,7 +54,11 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         setShowModal(true)
         // 내 직업을 직업 카드에 뜨게 하자
         const playerArray = Object.values(gameResponse.playerMap)
-        const myUser = playerArray.find(user => user.me === true)
+        console.log(playerArray)
+        console.log(myId);
+        // console.log('반복문화깅ㄴ', playerArray)
+        const myUser = playerArray.find(user => user.id === Number(myId))
+        console.log('dkssyd', myUser)
         getMyJob(myUser.role)
         setTimeout(() => {
             setShowModal(false)
@@ -104,11 +108,10 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     }
 
     // 첩보원이 활동한다
-    // isMe 어떻게 오는지 확인하고 코드 바꾸기
     const policeTime = () => {
-        const me = gameData.playerMap
+        const me = gameResponse.playerMap
           .filter(player => player.isAlive)
-          .find(player => player.isMe)
+          .find(player => player.Me)
         if (me) {
             setShowPoliceModal(true)
         }
@@ -172,8 +175,18 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         }
     }
 
+    // const isEmissaryOrBetrayer = (player) => {
+    //     console.log('isEmissaryOrBetrayer:', player)
+    //     return player.role === 'emissary' || player.role === 'betrayer';
+    // }
+
     const isEmissaryOrBetrayer = (player) => {
-        return player.role === 'emissary' || player.role === 'betrayer';
+       if (!player) {
+        console.log('Player is undefined')
+        return false
+       }
+       console.log('isEmissaryOrBetrayer', player)
+       return player.role === 'emissary' || player.role === 'betrayer'
     }
 
     // 밤이 되었을 때 비디오/오디오 처리 handler
@@ -356,6 +369,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                 gameStart()
                 break
             case 'NIGHT_EMISSARY' :
+                // isEmissaryOrBetrayer(gameResponse.playerMap)
                 // 밤이 되었을 때, 비디오/오디오 처리
                 handleVideoAudioAtNight();
                 // 밤이 되었을 때, 채팅 처리
