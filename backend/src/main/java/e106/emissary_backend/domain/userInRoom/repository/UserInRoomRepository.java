@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface UserInRoomRepository extends JpaRepository<UserInRoom, UserInRoom.Pk> {
     int countPeopleByRoom_RoomId(long roomId);
 
-    void deletePeopleByPk_UserIdAndRoom_RoomId(long roomId, long userId);
+    void deletePeopleByPk_UserIdAndRoom_RoomId(long userId, long roomId);
 
     void deleteByPk_UserId(long userId);
 
