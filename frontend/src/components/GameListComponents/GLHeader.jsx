@@ -1,11 +1,11 @@
 import { useState } from "react"
 import classNames from "classnames"
-import FilterBox from "./FilterBox"
 import SearchBar from "../../components/SearchBar"
 import CreateRoomModal from "../../modals/CreateRoomModal"
 import styles from "./GLHeader.module.css";
 import FilterChecked from "../../assets/Buttons/FilterChecked.png"
 import FilterUnchecked from "../../assets/Buttons/FilterUnchecked.png"
+import SearchButton from "../../assets/Buttons/SearchButton.png"
 
 
 const GLHeader = ({ setViduToken }) => {
@@ -27,7 +27,6 @@ const GLHeader = ({ setViduToken }) => {
     return (
         <header className={GLHeaderClass}>
             <div className={styles.filterBoxContainer}>
-                {/* <FilterBox /> */}
                 <div className={styles.filterBoxContainerLarge}>
                     <div className={styles.filterContainer}>
                         공개 임무
@@ -58,9 +57,25 @@ const GLHeader = ({ setViduToken }) => {
                     </div>
                 </div>
             </div>
-            <div className={styles.searchBarContainer}>
+
+            {/* <div className={styles.searchBarContainer}>
                 <SearchBar placeholder="터전을 찾아보세요." />
+            </div> */}
+
+            <div>
+                <form className={styles.searchBarContainer}>
+                    <div className={styles.inputUnderline}>
+                        <input
+                            required
+                            type="text"
+                            placeholder={"터전을 찾아보세요."}
+                            className={styles.searchBarInput}
+                        />
+                    </div>
+                    <img src={SearchButton} alt="SearchButton" className={styles.searchButton} />
+                </form>
             </div>
+
             <div className={styles.CreateRoomButtonContainer}>
                 <button onClick={openModal} className={styles.CreateRoomButton}>새로운 도전 +</button>
                 <CreateRoomModal isOpen={isModalOpen} openModal={openModal} setViduToken={setViduToken} />
