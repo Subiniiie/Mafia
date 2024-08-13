@@ -1,7 +1,7 @@
 .container {
     position: fixed;
-    top: 100px;
-    height: 8vh;
+    top: 105px;
+    height: 50px;
     width: 100%;
 }
 
@@ -15,13 +15,15 @@
 .roomTitle {
     font-family: 'KimjungchulMyungjo-Bold';
     font-size: 28px;
-    margin-left: 10px;
+    margin-left: 40px;
+    display: flex;
+    text-align: center;
 }
 
-.right {
-    margin: 0;
+.contentBox {
+    margin-right: 40px;
     display: flex;
-    flex-direction: row;
+    /* flex-direction: row; */
     justify-content: center;
     align-items: center;
 }
