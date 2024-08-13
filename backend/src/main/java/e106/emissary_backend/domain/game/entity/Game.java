@@ -37,7 +37,8 @@ public class Game {
 
     private int maxPlayer;
 
-    private Player emissary;
+    @Builder.Default
+    private List<Player> emissary = new ArrayList<>();
 
     private Player police;
 
