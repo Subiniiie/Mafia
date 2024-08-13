@@ -65,6 +65,7 @@ const GLMain = ({ setViduToken, checkPublic, checkPrivate, checkCanEnter }) => {
                 }
 
                 setRooms(response.data)
+                console.log(response.data)
                 console.log(rooms)
             } catch (error) {
                 console.log("Failed to fetch rooms :", error)
