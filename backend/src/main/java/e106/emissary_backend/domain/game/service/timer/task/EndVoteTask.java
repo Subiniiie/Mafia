@@ -7,7 +7,6 @@ import e106.emissary_backend.domain.game.enumType.GameState;
 import e106.emissary_backend.domain.game.enumType.VoteState;
 import e106.emissary_backend.domain.game.model.GameDTO;
 import e106.emissary_backend.domain.game.repository.RedisGameRepository;
-import e106.emissary_backend.domain.game.service.GameService;
 import e106.emissary_backend.domain.game.service.publisher.RedisPublisher;
 import e106.emissary_backend.domain.game.service.subscriber.message.EndVoteMessage;
 import e106.emissary_backend.domain.game.service.subscriber.message.StartVoteMessage;
@@ -23,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 

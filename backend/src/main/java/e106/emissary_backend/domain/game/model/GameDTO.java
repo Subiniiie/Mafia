@@ -9,11 +9,9 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.*;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.redis.core.RedisHash;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.List;
 
 @ToString
 @Setter
@@ -62,9 +60,9 @@ public class GameDTO {
                 Player.builder()
                         .id(player.getId())
                         .nickname(player.getNickname())
-                        .isAlive(false)
-                        .isLeft(false)
-                        .isReady(player.isReady())
+                        .alive(false)
+                        .left(false)
+                        .ready(player.isReady())
                         .role(GameRole.PERSON)
                         .build());
     }

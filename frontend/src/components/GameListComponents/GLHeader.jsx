@@ -1,6 +1,6 @@
 import { useState } from "react"
 import classNames from "classnames"
-import SearchBar from "../../components/SearchBar"
+// import SearchBar from "../../components/SearchBar"
 import CreateRoomModal from "../../modals/CreateRoomModal"
 import styles from "./GLHeader.module.css";
 import FilterChecked from "../../assets/Buttons/FilterChecked.png"
@@ -8,19 +8,14 @@ import FilterUnchecked from "../../assets/Buttons/FilterUnchecked.png"
 import SearchButton from "../../assets/Buttons/SearchButton.png"
 
 
-const GLHeader = ({ setViduToken }) => {
+const GLHeader = ({ setViduToken, checkPublic, setCheckPublic, checkPrivate, setCheckPrivate, checkCanEnter, setCheckCanEnter }) => {
 
     const [isModalOpen, setIsModalOpen] = useState(false)
     const openModal = () => setIsModalOpen(!isModalOpen)
 
-    const [isCheckedPublic, setIsCheckedPublic] = useState(false)
-    const checkFilterPublic = () => setIsCheckedPublic(!isCheckedPublic)
-
-    const [isCheckedPrivate, setIsCheckedPrivate] = useState(false)
-    const checkFilterPrivate = () => setIsCheckedPrivate(!isCheckedPrivate)
-
-    const [isCheckedPlaying, setIsCheckedPlaying] = useState(false)
-    const checkFilterPlaying = () => setIsCheckedPlaying(!isCheckedPlaying)
+    const checkFilterPublic = () => setCheckPublic(!checkPublic)
+    const checkFilterPrivate = () => setCheckPrivate(!checkPrivate)
+    const checkFilterCanEnter = () => setCheckCanEnter(!checkCanEnter)
 
     const GLHeaderClass = classNames('east-sea-dokdo-regular', styles.container)
 
@@ -30,7 +25,7 @@ const GLHeader = ({ setViduToken }) => {
                 <div className={styles.filterBoxContainerLarge}>
                     <div className={styles.filterContainer}>
                         공개 임무
-                        {isCheckedPublic ? (
+                        {checkPublic ? (
                             <img src={FilterChecked} alt="FilterChecked" className={styles.filterButtons} onClick={checkFilterPublic} />
                         ) : (
                             <img src={FilterUnchecked} alt="FilterUnchecked" className={styles.filterButtons} onClick={checkFilterPublic} />
@@ -39,7 +34,7 @@ const GLHeader = ({ setViduToken }) => {
 
                     <div className={styles.filterContainer}>
                         극비 임무
-                        {isCheckedPrivate ? (
+                        {checkPrivate ? (
                             <img src={FilterChecked} alt="FilterChecked" className={styles.filterButtons} onClick={checkFilterPrivate} />
                         ) : (
                             <img src={FilterUnchecked} alt="FilterUnchecked" className={styles.filterButtons} onClick={checkFilterPrivate} />
@@ -49,10 +44,10 @@ const GLHeader = ({ setViduToken }) => {
                 <div className={styles.filterBoxContainerMini}>
                     <div className={styles.filterContainer}>
                         임무 시작 전
-                        {isCheckedPlaying ? (
-                            <img src={FilterChecked} alt="FilterChecked" className={styles.filterButtons} onClick={checkFilterPlaying} />
+                        {checkCanEnter ? (
+                            <img src={FilterChecked} alt="FilterChecked" className={styles.filterButtons} onClick={checkFilterCanEnter} />
                         ) : (
-                            <img src={FilterUnchecked} alt="FilterUnchecked" className={styles.filterButtons} onClick={checkFilterPlaying} />
+                            <img src={FilterUnchecked} alt="FilterUnchecked" className={styles.filterButtons} onClick={checkFilterCanEnter} />
                         )}
                     </div>
                 </div>
