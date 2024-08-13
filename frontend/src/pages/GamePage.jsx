@@ -12,6 +12,12 @@ function GamePage() {
     const {state} = useLocation();
     console.log(state);
 
+    // 직업 카드에 보여지는 직업 정의
+    const [ myJob, setMyJob ] = useState("")
+    const getMyJob = (job) => {
+        setMyJob(job)
+    }
+
     // 화면 이동 시 LeaveSession
     // useEffect(()=>{
     //     // window.onbeforeunload = () => leaveSession();
@@ -53,14 +59,14 @@ function GamePage() {
 
     // player 설정
     const [players, setPlayers] = useState([
-        {nickname: 'player1', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-        {nickname: 'player2', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-        {nickname: 'player3', role: 'emissary', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-        {nickname: 'player4', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-        {nickname: 'player5', role: 'police', isRoomManager: true, isMe: false, isAlive: true, hasVoted: false},
-        {nickname: 'player6', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
-        {nickname: 'player7', role: 'independenceActivist', isRoomManager: false, isMe: true, isAlive: true, hasVoted: false},
-        {nickname: 'player8', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+        // {nickname: 'player1', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+        // {nickname: 'player2', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+        // {nickname: 'player3', role: 'emissary', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+        // {nickname: 'player4', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+        // {nickname: 'player5', role: 'police', isRoomManager: true, isMe: false, isAlive: true, hasVoted: false},
+        // {nickname: 'player6', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
+        // {nickname: 'player7', role: 'independenceActivist', isRoomManager: false, isMe: true, isAlive: true, hasVoted: false},
+        // {nickname: 'player8', role: 'independenceActivist', isRoomManager: false, isMe: false, isAlive: true, hasVoted: false},
     ]);
 
     // 방 정보 가져오기
@@ -76,6 +82,8 @@ function GamePage() {
             }).then((res) => {
                 setGameData(res.data);
                 console.log("RES",res.data);
+                setPlayers(res.data.userList)
+             
             }).catch ((err) => {
                 console.log("게임방 API를 불러오지 못했습니다", err);
             })
@@ -83,6 +91,7 @@ function GamePage() {
 
         gameRoomInfo();
     }, [])
+
 
     useEffect( () => {
         const access = localStorage.getItem('access');
@@ -209,7 +218,7 @@ function GamePage() {
                         const messageJson = JSON.parse(message.body);
                         setGameResponse(messageJson);
                         setNowGameState(messageJson.gameState)
-                        console.log(messageJson);
+                        console.log('웹소켓을 구독하고 받은 message, gameResponse', messageJson);
                     } else {
                        console.log("OUT! WS");
                     }
@@ -249,6 +258,7 @@ function GamePage() {
                         gameResponse={gameResponse}
                         players={players}
                         setPlayers={setPlayers}
+                        getMyJob={getMyJob}
                     />
                 }
                 {gameData && gameData.userList && Array.isArray(gameData.userList) &&
@@ -263,6 +273,7 @@ function GamePage() {
                         chatHistory={chatHistory}
                         chatMode={chatMode}
                         players={players}
+                        myJob={myJob}
                     />
                 }
             </div>

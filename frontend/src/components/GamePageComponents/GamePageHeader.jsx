@@ -21,7 +21,7 @@ function GamePageHeader({ gameData, id, leaveSession }) {
     const [ blackBackground, setBlackBackground ] = useState(false)
     
     function openModal() {
-        setIsModalOpen(!isModalOpen)
+        setIsModalOpen((preState) => !preState)
         setBlackBackground((preState) => !preState)
     }
 
@@ -72,6 +72,7 @@ function GamePageHeader({ gameData, id, leaveSession }) {
                     </div>
                     <div className={styles.contentBox}>
                         {roomManager ? roomManagerSettings : null}
+                        { blackBackground ? <div className={styles.black} onClick={openModal}></div> : null}
                             <Link to="/game-list" className={styles.exit} onClick={exitHandler}>
                                 <img src="/exit.png" alt="exit.png" className={styles.exitImage} />
                                 나가기
@@ -79,7 +80,7 @@ function GamePageHeader({ gameData, id, leaveSession }) {
                     </div>
                 </div>
                 <div>
-                    {isModalOpen ? <GameSettingsModal isOpen={isModalOpen} openModal={openModal} roomId={roomId} /> : null}
+                    {isModalOpen ? <GameSettingsModal isOpen={isModalOpen} openModal={openModal} roomId={roomId} className={styles.modal}/> : null}
                 </div>
             </div>
             { blackBackground ? <div className={styles.black} onClick={openModal}></div> : null }

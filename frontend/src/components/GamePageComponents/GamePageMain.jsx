@@ -10,7 +10,7 @@ import styles from "./GamePageMain.module.css"
 import { useNavigate } from "react-router-dom";
 import { decode } from "jwt-js-decode";
 
-function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, stompClient, gameData, nowGameState, gameResponse, players, setPlayers }) {
+function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, stompClient, gameData, nowGameState, gameResponse, players, setPlayers, getMyJob }) {
     // players 배열을 생성된 시간 순으로 정렬
     // streamManagers와 순서를 맞춰야 하므로 정렬이 필요함
     // setPlayers(playes => players.sort((a, b) => a.creationTime - b.creationTime));
@@ -28,17 +28,19 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     const [ showPoliceModal, setShowPoliceModal ] = useState(false)                         // 첩보원 모달 표시 여부
     const [ votes, setVotes ] = useState({});
     const [ suspect, setSuspect ] = useState(null)
-    const [ showModal, setShowModal] = useState(false);
+    const [ showModal, setShowModal ] = useState(false)
     const [ winnerModal, setWinnerModal ] = useState(false)                                // 우승자 표시
+    
 
     const access = localStorage.getItem('access');
     const header =  {'Authorization': `Bearer ${access}`}
     const navigate = useNavigate();
-    const decodedAccess = decode(access);
+    const decodedAccess = decode(localStorage.getItem("access"));
     const myId = decodedAccess.payload.userId;
 
-    // 강퇴 처리
-    const kick = () => {
+    //todo
+    // 강퇴처리
+    const kick = () =>{
         console.log("제아이디는 이것입니다 : ", myId);
         console.log("넌 강퇴야! : ", gameResponse.targetId);
         if(gameResponse.targetId == myId){
@@ -46,13 +48,23 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         }
     }
 
-    //게임 시작
+    // 게임 시작하기
     const gameStart = () => {
-        setShowModal(true);
+        // 게임시작 알람 모달
+        setShowModal(true)
+        // 내 직업을 직업 카드에 뜨게 하자
+        const playerArray = Object.values(gameResponse.playerMap)
+        console.log(playerArray)
+        console.log(myId);
+        // console.log('반복문화깅ㄴ', playerArray)
+        const myUser = playerArray.find(user => user.id === Number(myId))
+        console.log('dkssyd', myUser)
+        getMyJob(myUser.role)
         setTimeout(() => {
             setShowModal(false)
         }, 15000)
     }
+
 
     // 밀정 시간
     const emissaryTime = () => {
@@ -62,10 +74,12 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                 if (prevState <= 1) {
                     clearInterval(intervalId)
                     setShowEmissaryModal(true)
+                    return 0
                 }
+                return prevState - 1
             })
         }, 1000)
-        return () => clearInterval(intervalId)
+        // return () => clearInterval(intervalId)
     }
 
     // 밀정이 밤에 죽일지 / 변절시킬 플레이어를 고름 / 죽일거야 변절시킬거야?
@@ -94,11 +108,10 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     }
 
     // 첩보원이 활동한다
-    // isMe 어떻게 오는지 확인하고 코드 바꾸기
     const policeTime = () => {
-        const me = gameData.playerMap
+        const me = gameResponse.playerMap
           .filter(player => player.isAlive)
-          .find(player => player.isMe)
+          .find(player => player.Me)
         if (me) {
             setShowPoliceModal(true)
         }
@@ -131,7 +144,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // 낮(토론 및 투표 중)
     const voteStart = (targetId) => {
         stompClient.current.send(
-            `/ws/pub//vote/${roomId}`, 
+            `/ws/pub/vote/${roomId}`, 
             header,
             JSON.stringify({ targetId })
         )
@@ -162,8 +175,18 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         }
     }
 
+    // const isEmissaryOrBetrayer = (player) => {
+    //     console.log('isEmissaryOrBetrayer:', player)
+    //     return player.role === 'emissary' || player.role === 'betrayer';
+    // }
+
     const isEmissaryOrBetrayer = (player) => {
-        return player.role === 'emissary' || player.role === 'betrayer';
+       if (!player) {
+        console.log('Player is undefined')
+        return false
+       }
+       console.log('isEmissaryOrBetrayer', player)
+       return player.role === 'emissary' || player.role === 'betrayer'
     }
 
     // 밤이 되었을 때 비디오/오디오 처리 handler
@@ -249,7 +272,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
     // 재투표를 해야할 때
     const voteAgain = () => {
-        setVotes(prevState => {
+        setVotes(prevState => {s
             const updatedVotes = {}
             Object.keys(prevState).forEach(playerId => {
                 updatedVotes[playerId] = false
@@ -296,37 +319,34 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
     // 게임 결과 반영
     const handleResult = async() => {
-        await axios.post('https://i11e106.p.ssafy.io/api/results', {}, {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${access}`,
-            }, 
+        try {
+            const response = await axios.post('https://i11e106.p.ssafy.io/api/results', {}, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${access}`,
+                }, 
         })
-            .then((response) => {
-                console.log(response)
-                handleAchievenets()
-            })
-            .catch((error) => {
-                console.log(error)
-            })
-        
+        console.log(response)
+        handleAchievenets()
+        } catch(error) {
+            console.log(error)
+        }
     }
 
     // 업적 처리
     const handleAchievenets = async() => {
-        await axios.post('https://i11e106.p.ssafy.io//api/honors', {}, {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${access}`,
-            },
-        })
-            .then((response) => {
-                console.log(response)
-                showResult()
+        try {
+            const response = await axios.post('https://i11e106.p.ssafy.io//api/honors', {}, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${access}`,
+                },
             })
-            .catch((error) => {
-                console.log(error)
-            })
+            console.log(response)
+            showResult()
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     // 결과 어케 받??
@@ -340,7 +360,6 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         }, 3000)
     }
 
-
     useEffect(() => {
         switch (nowGameState) {
             case 'KICK':
@@ -350,6 +369,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                 gameStart()
                 break
             case 'NIGHT_EMISSARY' :
+                // isEmissaryOrBetrayer(gameResponse.playerMap)
                 // 밤이 되었을 때, 비디오/오디오 처리
                 handleVideoAudioAtNight();
                 // 밤이 되었을 때, 채팅 처리

@@ -39,6 +39,24 @@
     color: white;
 }
 
+.alarm {
+    font-family: 'KimjungchulMyungjo-Bold';
+    font-size: 60px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.8); 
+    color: white;
+    border-radius: 25px;
+    padding: 20px;
+    width: 920px;
+    height: 135px;
+    text-align: center;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+  }
+
 
 .winner {
     font-family: 'KimjungchulMyungjo-Bold';
