@@ -5,12 +5,7 @@ import axios from "axios";
 import ModalHeader from "../components/ModalHeader";
 import styles from "./JobModal.module.css"
 
-function JobModal({ isOpen, openModal, gameData }) {
-    const [ myJob, setMyJob ] = useState(null)
-    const [myJobInfo, setMyJobInfo ] = useState(null)
-    const [ myJobImage, setMyJobImage ] = useState(null)
-    const [ playerMap, setPlayerMap ] = useState({})
-
+function JobModal({ isOpen, openModal, gameData, JobModal, myJob }) {
     const jobs = {
         'PERSON': {
             '설명': ' 독립운동가는 밀정과 변절자를 찾아내서 제거해야합니다.\n' +
@@ -34,11 +29,16 @@ function JobModal({ isOpen, openModal, gameData }) {
             '이미지': '/jobs/변절자.png'
         }
     }
+    const [myJobInfo, setMyJobInfo ] = useState(null)
+    const [myJobImage, setMyJobImage ] = useState(null)
 
-    const getMe= gameData.userList.find()   // isMe로 나인 거 알기
-    setMyJob(getMe.role)
-    setMyJobInfo(jobs[myJob]['설명'])
-    setMyJobImage(jobs[myJob]['이미지'])
+    useEffect(() => {
+        if (myJob) {
+            setMyJobInfo(jobs[myJob]['설명'])
+            setMyJobImage(jobs[myJob]['이미지'])
+        }
+    }, [myJob])
+
 
 
     return (
@@ -51,7 +51,7 @@ function JobModal({ isOpen, openModal, gameData }) {
                     <div className={styles.back}>
                         <ModalHeader modalTitle="직업 설명" openModal={openModal} />
                         <div className={styles.backContent}>
-                            <h3>당신은<span style={{ color:'rgba(139, 0, 0, 0.9)', fontWeight: 'bold'}}>{myJob}</span>입니다.</h3>
+                            <h3>당신은<span style={{ color:'rgba(139, 0, 0, 0.9)', fontWeight: 'bold'}}> {myJob} </span>입니다.</h3>
                             <br />
                             <p>{myJobInfo}</p>
                         </div>
