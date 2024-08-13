@@ -21,7 +21,8 @@ public class NightPoliceSubscriber {
         try {
             NightPoliceMessage nightPoliceMessage = objectMapper.readValue(message, NightPoliceMessage.class);
 
-            simpMessagingTemplate.convertAndSend("/sub/" + nightPoliceMessage.getGameId(), nightPoliceMessage.getResult());
+            log.info("NightPoliceSubscriber run : {}", nightPoliceMessage);
+            simpMessagingTemplate.convertAndSend("/sub/" + nightPoliceMessage.getGameId(), nightPoliceMessage);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

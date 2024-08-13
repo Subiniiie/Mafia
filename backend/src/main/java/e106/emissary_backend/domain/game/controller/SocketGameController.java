@@ -4,6 +4,7 @@ package e106.emissary_backend.domain.game.controller;
 import e106.emissary_backend.domain.game.model.ConfirmVoteRequestDTO;
 import e106.emissary_backend.domain.game.model.VoteRequestDTO;
 import e106.emissary_backend.domain.game.service.GameService;
+import e106.emissary_backend.domain.game.service.subscriber.message.ConnectMessage;
 import e106.emissary_backend.domain.user.dto.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,9 +33,8 @@ public class SocketGameController {
 
     @MessageMapping("/connect/{roomId}")
     @SendTo("/sub/{roomId}")
-    public String connect(@DestinationVariable long roomId){
-        String result = "연결이 유지되고 있습니다";
-        return result;
+    public ConnectMessage connect(@DestinationVariable long roomId){
+        return ConnectMessage.builder().build();
     }
 
     @MessageMapping("/ready/{roomId}")
@@ -72,8 +72,9 @@ public class SocketGameController {
     }
 
     @MessageMapping("/detect/{roomId}/{targetId}")
-    public void detect(@DestinationVariable Long roomId, @DestinationVariable Long targetId) {
-        gameService.detect(roomId, targetId);
+    public void detect(SimpMessageHeaderAccessor headerAccessor, @DestinationVariable Long roomId, @DestinationVariable Long targetId) {
+        long userId = getUserIdIAccessor(headerAccessor);
+        gameService.detect(roomId, targetId, userId);
     }
 
     @MessageMapping("/day/{roomId}")

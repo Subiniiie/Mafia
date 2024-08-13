@@ -80,7 +80,6 @@ function GamePageHeader({ gameData, id, leaveSession }) {
                 </div>
                 <div>
                     {isModalOpen ? <GameSettingsModal isOpen={isModalOpen} openModal={openModal} roomId={roomId} className={styles.modal}/> : null}
-                    {isModalOpen ? <GameSettingsModal isOpen={isModalOpen} openModal={openModal} roomId={roomId} className={styles.modal}/> : null}
                 </div>
             </div>
             { blackBackground ? <div className={styles.black} onClick={openModal}></div> : null }
