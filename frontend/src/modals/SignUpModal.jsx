@@ -315,7 +315,7 @@ const SignUpModal = ({ isOpen, openModal, openLoginModal }) => {
                             </div>
                         </div>
 
-                        <div>
+                        <div className={styles.formContainerMini}>
                             <h5>비밀번호</h5>
                             <div className={styles.inputContainer}>
                                 <input
@@ -334,7 +334,7 @@ const SignUpModal = ({ isOpen, openModal, openLoginModal }) => {
                             </div>
                         </div>
 
-                        <div>
+                        <div className={styles.formContainerMini}>
                             <h5>비밀번호 확인</h5>
                             <div className={styles.inputContainer}>
                                 <input
