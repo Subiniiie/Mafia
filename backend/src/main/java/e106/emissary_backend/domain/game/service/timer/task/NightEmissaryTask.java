@@ -43,6 +43,7 @@ public class NightEmissaryTask implements GameTask {
                         .gameId(gameId)
                         .gameState(GameState.NIGHT_EMISSARY)
                         .result(CommonResult.SUCCESS)
+                        .nowId(emissaryId)
                         .build());
 
         nightPoliceTask.setGameIdAndTarget(gameId, policeId);

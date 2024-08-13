@@ -40,6 +40,7 @@ public class NightPoliceTask implements GameTask {
                         .gameId(gameId)
                         .gameState(GameState.NIGHT_POLICE)
                         .result(CommonResult.SUCCESS)
+                        .nowId(policeId)
                         .build());
     }
 

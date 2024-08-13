@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Getter
 public class CommonMessage {
     private long gameId;
-    private Long targetId;
+    private Long nowId;
     private GameState gameState;
     private CommonResult result;
 }
