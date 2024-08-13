@@ -2,6 +2,7 @@ package e106.emissary_backend.domain.game.service.timer.task;
 
 import e106.emissary_backend.domain.game.enumType.CommonResult;
 import e106.emissary_backend.domain.game.enumType.GameState;
+import e106.emissary_backend.domain.game.model.Player;
 import e106.emissary_backend.domain.game.service.publisher.RedisPublisher;
 import e106.emissary_backend.domain.game.service.subscriber.message.CommonMessage;
 import e106.emissary_backend.domain.game.service.subscriber.message.StartVoteMessage;
@@ -21,8 +22,8 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class NightEmissaryTask implements GameTask {
     private Long gameId;
-    private Long emissaryId;
-    private Long policeId;
+    private Player emissary;
+    private Player police;
 
     private final RedisPublisher publisher;
 
@@ -43,16 +44,16 @@ public class NightEmissaryTask implements GameTask {
                         .gameId(gameId)
                         .gameState(GameState.NIGHT_EMISSARY)
                         .result(CommonResult.SUCCESS)
-                        .nowId(emissaryId)
+                        .nowPlayer(emissary)
                         .build());
 
-        nightPoliceTask.setGameIdAndTarget(gameId, policeId);
+        nightPoliceTask.setGameIdAndTarget(gameId, police);
         scheduler.scheduleTask(gameId, TaskName.NIGHT_POLICE, nightPoliceTask, 0, TimeUnit.SECONDS);
     }
 
-    public void setGameIdAndTargets(long gameId, long emissaryId, long policeId){
+    public void setGameIdAndTargets(long gameId, Player emissary, Player police){
         this.gameId = gameId;
-        this.emissaryId = emissaryId;
-        this.policeId = policeId;
+        this.emissary = emissary;
+        this.police = police;
     }
 }
