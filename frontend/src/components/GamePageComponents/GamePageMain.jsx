@@ -244,7 +244,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
         if (!isEmissaryOrBetrayer(players[publisherIdx])) {
             streamManagers[publisherIdx].publishVideo(true);
-            streamManagers[publisherIdx].publishAideo(true);
+            streamManagers[publisherIdx].publishAudio(true);
 
             streamManagers
               .filter(strMgr => strMgr.remote)
@@ -443,39 +443,65 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         }
     }, [nowGameState])
 
+    // 화면 8개 고정 배열
+
+    const [renderedStreams, setRenderedStreams] = useState([])
+
+    useEffect(() => {
+        // players 배열이 변경될 때마다 OpenVidu 화면을 재렌더링
+        const updatedRenderedStreams = streamManagers.map((streamManager, index) => (
+          <div key={index} id={`video-container-${index}`} className={styles.videoContainer}>
+              {streamManager && (
+                <Monitor
+                  nickname={players[index]?.nickname}
+                  isRoomManager={players[index]?.isRoomManager}
+                  isMe={players[index]?.isMe}
+                  isAlive={players[index].isAlive}
+                  roomId={roomId}
+                  streamManager={streamManager}
+                  isVote={votes[players[index]?.id] || false}
+                  onVote={handleVote}
+                />
+              )}
+          </div>
+        ))
+
+        setRenderedStreams(updatedRenderedStreams)
+    }, [players, streamManagers])
+
+
+
     return (
       <>
-          <div className={styles.monitors}>
-                {zip(players, streamManagers).map((player, index) => (
-                    <Monitor
-                        key={index}
-                        nickname={player[0].nickname}
-                        isRoomManager={player[0].isRoomManager}
-                        isMe={player[0].isMe}
-                        isAlive={player[0].isAlive}
-                        roomId={roomId}
-                        streamManager={player[1]}
-                        isVote={votes[player.id] || false}
-                        onVote={handleVote}
-                    />
-                ))}
-            </div>
-            <div className={styles.timer}>
-                {/* {currentPhase === 'night' && <p>밤 시간: {nightTimer}초</p>}
+          <div className={styles.fakeHeaderContainer}/>
+          <div className={styles.playerContainer}>
+              {/* OpenVidu 화면을 채우기 위해 div를 렌더링 */}
+              {renderedStreams}
+              {/* 나머지 div 태그 그대로 놔두기 */}
+              {Array.from({length: 8 - streamManagers.length}, (_, index) => (
+                <div key={`empty-${index}`} className={styles.playerCell}></div>
+              ))}
+          </div>
+
+
+          <div className={styles.timer}>
+              {/* {currentPhase === 'night' && <p>밤 시간: {nightTimer}초</p>}
                 {currentPhase === 'police' && <p>첩보원 시간: {policeTimer}초</p>}
                 {currentPhase === 'discussion' && <p>토론 시간: {discussionTimer}초</p>}
                 {currentPhase === 'finalDefense' && <p>최후 변론 시간: {finalDefensePlayer}초</p>} */}
-            </div>
-            <div>
-                {showEmissaryModal ? <EmissaryModal gameData={gameData} onAction={choicePlayer}/>
+          </div>
+          <div>
+              {showEmissaryModal ? <EmissaryModal gameData={gameData} onAction={choicePlayer}/>
                 : null}
-                {choiceDieOrTurncoat ? <ChoiceDieOrTurncoat onChioce={handleChoiceDieOrTurncoat} /> : null}
-                {showPoliceModal ? <PoliceModal gameData={gameData} onChioce={policeChoicedPlayer}/>: null}
-                {finalDefensePlayer ? <FinalDefensePlayerModal suspect={suspect} onMessage={handleFinalDefenseResult}/> : null }
-            </div>
-            {showModal && <div className={styles.alarm}>지금부터 밀정1931을 시작합니다.</div>}
-            { winnerModal ? <div className={styles.winner}><span style={{ color: 'red', fontWeight: 'bold' }}>{winnerJob}</span>의 승리입니다.</div> : null}
-        </>
+              {choiceDieOrTurncoat ? <ChoiceDieOrTurncoat onChioce={handleChoiceDieOrTurncoat}/> : null}
+              {showPoliceModal ? <PoliceModal gameData={gameData} onChioce={policeChoicedPlayer}/> : null}
+              {finalDefensePlayer ?
+                <FinalDefensePlayerModal suspect={suspect} onMessage={handleFinalDefenseResult}/> : null}
+          </div>
+          {winnerModal ?
+            <div className={styles.winner}><span style={{color: 'red', fontWeight: 'bold'}}>{winnerJob}</span>의 승리입니다.
+            </div> : null}
+      </>
     )
 }
 

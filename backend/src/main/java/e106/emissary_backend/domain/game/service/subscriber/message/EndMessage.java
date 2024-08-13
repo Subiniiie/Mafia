@@ -3,6 +3,7 @@ package e106.emissary_backend.domain.game.service.subscriber.message;
 import e106.emissary_backend.domain.game.enumType.CommonResult;
 import e106.emissary_backend.domain.game.enumType.GameRole;
 import e106.emissary_backend.domain.game.enumType.GameState;
+import e106.emissary_backend.domain.game.model.GameDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,5 +17,6 @@ public class EndMessage {
     private long gameId;
     private GameState gameState;
     private CommonResult result;
+    private GameDTO gameDto;
     private GameRole winRole;
 }
