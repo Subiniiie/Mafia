@@ -20,17 +20,17 @@ public class RoomDetailUserDto {
     @JsonProperty("owner")
     private boolean isOwner;
 
-    @JsonProperty("isMe")
+    @JsonProperty("me")
     private boolean isMe;
 
     @Builder.Default
     private GameRole gameRole = GameRole.PERSON;
 
-    @JsonProperty("isAlive")
+    @JsonProperty("alive")
     @Builder.Default
     private boolean isAlive = true;
 
-    @JsonProperty("isVoted")
+    @JsonProperty("voted")
     @Builder.Default
     private boolean isVoted = false;
 
