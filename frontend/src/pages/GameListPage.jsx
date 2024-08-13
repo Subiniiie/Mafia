@@ -4,6 +4,8 @@ import GLMain from "../components/GameListComponents/GLMain";
 import GLFooter from "../components/GameListComponents/GLFooter";
 import React from "react";
 import BGM from "../assets/BGM/LobbyBGM.mp3"
+import styles from "./GameListPage.module.css";
+
 
 
 function GameListPage({ setViduToken, isSpeakerOn }) {
@@ -24,7 +26,7 @@ function GameListPage({ setViduToken, isSpeakerOn }) {
     }, [isSpeakerOn])
 
     return (
-        <div>
+        <div className={styles.pageContainer}>
             <audio ref={audioRef} autoPlay loop >
                 <source src={BGM} type="audio/mp3" />
             </audio>
@@ -37,10 +39,17 @@ function GameListPage({ setViduToken, isSpeakerOn }) {
                 checkCanEnter={checkCanEnter}
                 setCheckCanEnter={setCheckCanEnter}
             />
-            <main>
-                <GLMain setViduToken={setViduToken} checkPublic={checkPublic} checkPrivate={checkPrivate} checkCanEnter={checkCanEnter} />
-            </main>
-            <GLFooter />
+            <div className={styles.contentWrapper}>
+                <main className={styles.mainContent}>
+                    <GLMain
+                        setViduToken={setViduToken}
+                        checkPublic={checkPublic}
+                        checkPrivate={checkPrivate}
+                        checkCanEnter={checkCanEnter}
+                    />
+                </main>
+                <GLFooter className={styles.footer} />
+            </div>
         </div>
     );
 
