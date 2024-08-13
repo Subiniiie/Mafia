@@ -53,6 +53,8 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         // 게임시작 알람 모달
         setShowModal(true)
         // 내 직업을 직업 카드에 뜨게 하자
+        console.log('너 여기까지 와', gameResponse)
+        console.log('너 여기까지 와22', gameResponse.playerMap)
         const playerArray = Object.values(gameResponse.playerMap)
         console.log(playerArray)
         console.log(myId);
@@ -402,14 +404,14 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                 break
             case 'NIGHT_EMISSARY' :
                 // isEmissaryOrBetrayer(gameResponse.playerMap)
-                emissaryTime()
+                // emissaryTime()
                 // 밤이 되었을 때, 비디오/오디오 처리
-                handleVideoAudioAtNight();
+                // handleVideoAudioAtNight();
                 // 밤이 되었을 때, 채팅 처리
-                changeToSecretChatMode();
+                // changeToSecretChatMode();
                 break
             case 'NIGHT_POLICE' :
-                policeTime()
+                // policeTime()
                 break
             case 'VOTE_START' :
                 // 낮이 되었을 때, 비디오/오디오 처리
@@ -449,14 +451,15 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
     useEffect(() => {
         // players 배열이 변경될 때마다 OpenVidu 화면을 재렌더링
+        console.log("이게 무슨일이니 씨발!!!!!", players);
         const updatedRenderedStreams = streamManagers.map((streamManager, index) => (
           <div key={index} id={`video-container-${index}`} className={styles.videoContainer}>
               {streamManager && (
                 <Monitor
                   nickname={players[index]?.nickname}
-                  isRoomManager={players[index]?.isRoomManager}
-                  isMe={players[index]?.isMe}
-                  isAlive={players[index].isAlive}
+                  isRoomManager={players[index]?.owner}
+                  isMe={players[index]?.me}
+                  isAlive={players[index]?.alive}
                   roomId={roomId}
                   streamManager={streamManager}
                   isVote={votes[players[index]?.id] || false}
