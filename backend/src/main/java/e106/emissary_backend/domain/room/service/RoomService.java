@@ -242,8 +242,6 @@ public class RoomService {
                 .gameState(GameState.WAIT)
                 .build();
         Player player = Player.createPlayer(user.getUserId(), user.getNickname(), userInRoom.getConnectTime());
-        player.setReady(true);
-
         gameDTO.addPlayer(player);
 
         Game game = gameDTO.toDao();

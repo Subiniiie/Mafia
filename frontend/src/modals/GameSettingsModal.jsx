@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import classNames from "classnames";
 import ModalHeader from "../components/ModalHeader"
 import RoomName from "../components/GamePageComponents/RoomName";
 import SecretMode from "../components/GamePageComponents/SecretMode";
@@ -9,7 +8,7 @@ import Turncoat from "../components/GamePageComponents/Turncoat";
 import styles from "./GameSettingsModal.module.css";
 import { decode } from "jwt-js-decode";
 
-function GameSettingsModal({ isOpen, openModal, roomId }) {
+function GameSettingsModal({ openModal, roomId }) {
 
     const [roomName, setRoomName] = useState('')
     const [isSecret, setIsSecret] = useState(false)
@@ -20,7 +19,7 @@ function GameSettingsModal({ isOpen, openModal, roomId }) {
 
     // 게임방 정보를 가지고 오자
     useEffect(() => {
-        const openGameSettingModal = async () => {
+        const openGameSettingModal = async() => {
             console.log(roomId)
             try {
                 const access = localStorage.getItem('access')
@@ -109,32 +108,34 @@ function GameSettingsModal({ isOpen, openModal, roomId }) {
         console.log(password)
     }, [roomName, isSecret, password])
 
-    const GSModalClass = classNames('kimjungchul-gothic-regular', styles.modalContent)
-
     return (
         <>
-            <div className={styles.modalOverlay} onclick={openModal}>
-                <div className={GSModalClass} onclick={(e) => e.stopPropagation()}>
-                    <ModalHeader modalTitle="게임 설정" openModal={openModal}/>
-                    <div className={styles.formContainer}>
-                        <RoomName value={roomName} onChange={setRoomName}/>
-                        <div className={styles.rowStyle}>
-                            <SecretMode checked={isSecret} onChange={setIsSecret}/>
-                            <Password
-                              value={password}
-                              onChange={setPassword}
-                              required={isSecret}  //비공개일 때 필수임
-                            />
+            {/* 각 컴포넌트들이랑 값을 주고 받아서 바뀌는 걸 알아야 함 */}
+            <div className={styles.modal}>
+                <div className={styles.box}>
+                    <div className={styles.modalTitle}>
+                        <ModalHeader modalTitle="게임 설정" openModal={openModal} />
+                    </div>
+                    <div className={styles.container}>
+                        <div className={styles.content}>
+                            <RoomName value={roomName} onChange={setRoomName} />
+                            <div className={styles.rowStyle}>
+                                <SecretMode checked={isSecret} onChange={setIsSecret} />
+                                <Password 
+                                    value={password} 
+                                    onChange={setPassword} 
+                                    required={isSecret}  //비공개일 때 필수임
+                                />
+                            </div>
+                            <div>
+                                <Turncoat checked={isTurncoat} onChange={setIsTurncoat}/>
+                            </div>
+                                {/* 변경 버튼을 누르면 변경된 내용이 서버에 적용되고 모달 닫힘 */}
+                            <div className={styles.btnBox}>
+                                <button className={styles.btn} onClick={() => handleSave(roomId, roomName, isSecret, password, isTurncoat)}>변경</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div>
-                    <Turncoat checked={isTurncoat} onChange={setIsTurncoat}/>
-                </div>
-                <div className={styles.btnBox}>
-                    <button className={styles.btn}
-                            onClick={() => handleSave(roomId, roomName, isSecret, password, isTurncoat)}>변경
-                    </button>
                 </div>
             </div>
         </>
