@@ -103,4 +103,9 @@
     /* text-align: right; */
     margin-left: 15px;
     text-shadow: -1px -1px 0 #3F262B, 1px -1px 0 #3F262B, -1px 1px 0 #3F262B, 1px 1px 0 #3F262B;
+    background-color: transparent;
+}
+
+.privateStyle {
+    background-color: transparent;
 }

@@ -325,10 +325,15 @@ public class RoomService {
 
             // Redis 발행 로직
             List<RoomDetailUserDto> userList = userInRoomList.stream()
-                    .map(UserInRoom::getUser)
-                    .map(nowUser -> RoomDetailUserDto.of(nowUser, room.getOwnerId(), userId))
+                    .map(nowUserInRoom -> {
+                        User nowUser = nowUserInRoom.getUser();
+                        RoomDetailUserDto nowDto = RoomDetailUserDto.of(nowUser, room.getOwnerId(), userId);
+                        nowDto.changeTime(nowUserInRoom.getConnectTime());
+                        return nowDto;
+                    })
                     .collect(Collectors.toList());
             RoomDetailUserDto dto = RoomDetailUserDto.of(user, room.getOwnerId(), userId);
+            dto.changeTime(LocalDateTime.now());
             userList.add(dto);
 
             RoomDetailDto roomDetailDto = RoomDetailDto.toDTO(room, userList);
@@ -529,9 +534,13 @@ public class RoomService {
         Room room = userInRoom.get(0).getRoom();
 
         List<RoomDetailUserDto> roomDetailUserDtoList = userInRoom.stream()
-                .map(UserInRoom::getUser)
-                .map(user -> RoomDetailUserDto.of(user, room.getOwnerId(), userId))
-                .toList();
+                .map(nowUserInRoom -> {
+                    User nowUser = nowUserInRoom.getUser();
+                    RoomDetailUserDto nowDto = RoomDetailUserDto.of(nowUser, room.getOwnerId(), userId);
+                    nowDto.changeTime(nowUserInRoom.getConnectTime());
+                    return nowDto;
+                })
+                .collect(Collectors.toList());
 
         return RoomDetailDto.toDTO(room, roomDetailUserDtoList);
     }
@@ -552,9 +561,13 @@ public class RoomService {
                 () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
         Room room = userInRoomList.get(0).getRoom();
         List<RoomDetailUserDto> userList = userInRoomList.stream()
-                .map(UserInRoom::getUser)
-                .map(nowUser -> RoomDetailUserDto.of(nowUser, room.getOwnerId(), userId))
-                .toList();
+                .map(nowUserInRoom -> {
+                    User nowUser = nowUserInRoom.getUser();
+                    RoomDetailUserDto nowDto = RoomDetailUserDto.of(nowUser, room.getOwnerId(), userId);
+                    nowDto.changeTime(nowUserInRoom.getConnectTime());
+                    return nowDto;
+                })
+                .collect(Collectors.toList());
 
         for (RoomDetailUserDto roomDetailUserDto : userList) {
             log.info(roomDetailUserDto.toString());

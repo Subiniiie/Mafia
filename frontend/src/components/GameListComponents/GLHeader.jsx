@@ -1,6 +1,5 @@
 import { useState } from "react"
 import classNames from "classnames"
-// import SearchBar from "../../components/SearchBar"
 import CreateRoomModal from "../../modals/CreateRoomModal"
 import styles from "./GLHeader.module.css";
 import FilterChecked from "../../assets/Buttons/FilterChecked.png"
@@ -8,14 +7,22 @@ import FilterUnchecked from "../../assets/Buttons/FilterUnchecked.png"
 import SearchButton from "../../assets/Buttons/SearchButton.png"
 
 
-const GLHeader = ({ setViduToken, checkPublic, setCheckPublic, checkPrivate, setCheckPrivate, checkCanEnter, setCheckCanEnter }) => {
+const GLHeader = ({ setViduToken, checkPublic, setCheckPublic, checkPrivate, setCheckPrivate, checkCanEnter, setCheckCanEnter, setSearch, handleSearchTrigger }) => {
 
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [searchTerm, setSearchTerm] = useState("") // 로컬 검색어 상태 관리
+
     const openModal = () => setIsModalOpen(!isModalOpen)
 
     const checkFilterPublic = () => setCheckPublic(!checkPublic)
     const checkFilterPrivate = () => setCheckPrivate(!checkPrivate)
     const checkFilterCanEnter = () => setCheckCanEnter(!checkCanEnter)
+
+    const handleSearch = (e) => {
+        e.preventDefault() // 기본 폼 제출 동작 방지
+        setSearch(searchTerm) // 입력된 검색어를 상위 컴포넌트에 전달
+        handleSearchTrigger() // 검색어 설정 후 방 목록 갱신
+    }
 
     const GLHeaderClass = classNames('east-sea-dokdo-regular', styles.container)
 
@@ -53,21 +60,19 @@ const GLHeader = ({ setViduToken, checkPublic, setCheckPublic, checkPrivate, set
                 </div>
             </div>
 
-            {/* <div className={styles.searchBarContainer}>
-                <SearchBar placeholder="터전을 찾아보세요." />
-            </div> */}
-
             <div>
-                <form className={styles.searchBarContainer}>
+                <form className={styles.searchBarContainer} onSubmit={handleSearch}>
                     <div className={styles.inputUnderline}>
                         <input
                             required
                             type="text"
                             placeholder={"터전을 찾아보세요."}
                             className={styles.searchBarInput}
+                            value={searchTerm} // 입력된 검색어를 바인딩
+                            onChange={(e) => setSearchTerm(e.target.value)} // 입력값 변경 시 상태 업데이트
                         />
                     </div>
-                    <img src={SearchButton} alt="SearchButton" className={styles.searchButton} />
+                    <img src={SearchButton} alt="SearchButton" className={styles.searchButton} onClick={handleSearch} />
                 </form>
             </div>
 
