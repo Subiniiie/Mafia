@@ -22,7 +22,6 @@ function GameListPage({ setViduToken, isSpeakerOn }) {
 
     return (
         <div>
-            <div className="h-32"></div>
             <audio ref={audioRef} autoPlay loop >
                 <source src={BGM} type="audio/mp3" />
             </audio>
