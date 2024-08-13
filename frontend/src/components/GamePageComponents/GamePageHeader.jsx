@@ -15,7 +15,6 @@ function GamePageHeader({ gameData, id, leaveSession }) {
 
     const access = localStorage.getItem("access");
     
-    
     // 방장만 게임 설정 바꿀 수 있게
     // 버튼을 클릭하면 게임 설정 모달이 열림
     const [ isModalOpen, setIsModalOpen ] = useState(false)
@@ -71,7 +70,7 @@ function GamePageHeader({ gameData, id, leaveSession }) {
                     <div className={styles.roomTitle}>
                         {roomTitle}
                     </div>
-                    <div className={styles.right}>
+                    <div className={styles.contentBox}>
                         {roomManager ? roomManagerSettings : null}
                         { blackBackground ? <div className={styles.black} onClick={openModal}></div> : null}
                             <Link to="/game-list" className={styles.exit} onClick={exitHandler}>
@@ -84,6 +83,7 @@ function GamePageHeader({ gameData, id, leaveSession }) {
                     {isModalOpen ? <GameSettingsModal isOpen={isModalOpen} openModal={openModal} roomId={roomId} className={styles.modal}/> : null}
                 </div>
             </div>
+            { blackBackground ? <div className={styles.black} onClick={openModal}></div> : null }
         </>
     )
 }
