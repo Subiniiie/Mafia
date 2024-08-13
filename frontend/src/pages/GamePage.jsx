@@ -81,8 +81,9 @@ function GamePage() {
                 }
             }).then((res) => {
                 setGameData(res.data);
-                console.log("RES",res.data);
+                console.log("API요청으로 데이터 들고옴",res.data);
                 setPlayers(res.data.userList)
+                console.log("API요청으로 들고온 USER", res.data.userList);
              
             }).catch ((err) => {
                 console.log("게임방 API를 불러오지 못했습니다", err);
@@ -230,6 +231,8 @@ function GamePage() {
                         setGameResponse(messageJson);
                         setNowGameState(messageJson.gameState)
                         console.log('웹소켓을 구독하고 받은 message, gameResponse', messageJson);
+                        // activeWebsocket()
+
                     } else {
                        console.log("OUT! WS");
                     }
@@ -238,11 +241,9 @@ function GamePage() {
                     setGameResponse(messageJson)
                     // setNowGameState(messageJson.gameState)
             })
-            // activeWebsocket()
-
-                // 20초 간격으로 웹소켓한테 의미없는 데이터 쏘기
 
         })
+        
 
         return () => {
             if (stompClient.current) {
