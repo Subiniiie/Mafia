@@ -17,14 +17,12 @@ public class RoleUtils {
         int playerNum = gameDTO.getPlayerMap().size();
 
         int emissary = 2;
-        int betray = gameDTO.isHaveBetrayer() ? 1 : 0;
         int police = 1;
 
         if(playerNum < 6){
             emissary = 1;
         }
 
-        roles.put(GameRole.BETRAYER, betray);
         roles.put(GameRole.EMISSARY, emissary);
         roles.put(GameRole.POLICE, police);
 
@@ -33,8 +31,6 @@ public class RoleUtils {
 
     public static void grantRole(Map<GameRole, Integer> roles, GameDTO gameDTO) {
         log.info("grantRole Started");
-        List<Player> emissary = new ArrayList<>();
-
         int playerNum = gameDTO.getPlayerMap().size();
 
         Map<Long, Player> playerMap = gameDTO.getPlayerMap();
@@ -53,12 +49,9 @@ public class RoleUtils {
                 player.setAlive(true);
 
                 if (role == GameRole.EMISSARY) {
-                    emissary.add(player);
+                    gameDTO.setEmissary(player);
                 } else if (role == GameRole.POLICE) {
                     gameDTO.setPolice(player);
-                } else if (role == GameRole.BETRAYER) {
-                    gameDTO.setBetrayer(player);
-                    gameDTO.setHaveBetrayer(true);
                 }
 
                 index++;
@@ -73,7 +66,5 @@ public class RoleUtils {
             player.setAlive(true);
             log.info("player : {} granted : {}", player.getId(), GameRole.PERSON);
         }
-
-        gameDTO.setEmissary(emissary);
     }
 }

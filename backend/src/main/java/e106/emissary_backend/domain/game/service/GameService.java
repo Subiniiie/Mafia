@@ -142,7 +142,9 @@ public class GameService {
         log.info("update redis");
 
         // 타이머 - 토론시간임.
-        nightEmissaryTask.setGameId(roomId);
+        Long emissaryId = gameDTO.getEmissary().getId();
+        Long policeId = gameDTO.getPolice().getId();
+        nightEmissaryTask.setGameIdAndTargets(roomId, emissaryId ,policeId);
         scheduler.scheduleTask(roomId, TaskName.NIGHT_EMISSARY, nightEmissaryTask, 15, TimeUnit.SECONDS);
 
         publisher.publish(gameSetTopic, GameSetMessage.builder()

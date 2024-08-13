@@ -12,6 +12,7 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -20,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class NightEmissaryTask implements GameTask {
     private Long gameId;
+    private Long emissaryId;
+    private Long policeId;
 
     private final RedisPublisher publisher;
 
@@ -42,11 +45,13 @@ public class NightEmissaryTask implements GameTask {
                         .result(CommonResult.SUCCESS)
                         .build());
 
-        nightPoliceTask.setGameId(gameId);
+        nightPoliceTask.setGameIdAndTarget(gameId, policeId);
         scheduler.scheduleTask(gameId, TaskName.NIGHT_POLICE, nightPoliceTask, 0, TimeUnit.SECONDS);
     }
 
-    public void setGameId(long gameId){
+    public void setGameIdAndTargets(long gameId, long emissaryId, long policeId){
         this.gameId = gameId;
+        this.emissaryId = emissaryId;
+        this.policeId = policeId;
     }
 }

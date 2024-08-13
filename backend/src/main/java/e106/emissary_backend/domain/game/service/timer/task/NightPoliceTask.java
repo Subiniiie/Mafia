@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class NightPoliceTask implements GameTask {
     private Long gameId;
+    private Long policeId;
 
     private final RedisPublisher publisher;
 
@@ -42,7 +43,8 @@ public class NightPoliceTask implements GameTask {
                         .build());
     }
 
-    public void setGameId(long gameId){
+    public void setGameIdAndTarget(long gameId, long policeId){
         this.gameId = gameId;
+        this.policeId = policeId;
     }
 }
