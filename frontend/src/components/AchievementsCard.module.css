@@ -5,6 +5,7 @@
     height: 400px;
     margin: 10px;
     perspective: 1000px;
+    border-radius: 20px;
 }
 
 .inner {
@@ -41,7 +42,7 @@
     background-color: #fff;
     box-shadow: 0 4px 15px rgba(128, 128, 128);
     overflow: hidden;
-}
+}  */
 
 .front, .back {
     position: absolute;
@@ -52,6 +53,7 @@
     width: 100%;
     height: 100%;
     backface-visibility: hidden;
+    border-radius: 20px;
     }
 
 .front {
@@ -90,7 +92,7 @@
 }
 
 .content:hover {
-    height: 100%;
+    height: 110%;
 }
 
 .content:hover .back {
@@ -112,4 +114,4 @@
 
 .back {
     transform: rotateY(180deg);
-}  */
+}

@@ -33,6 +33,8 @@ const GLMain = ({ setViduToken }) => {
 
 
     return (
+        <>
+        <div className="h-32"></div>
         <div className={styles.container}>
         <div className="h-32"></div>
             {rooms.map((room) => (
@@ -49,6 +51,7 @@ const GLMain = ({ setViduToken }) => {
                 </div>
             ))}
         </div>
+        </>
     );
 };
 

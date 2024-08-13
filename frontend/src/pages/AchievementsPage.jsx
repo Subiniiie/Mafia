@@ -55,8 +55,8 @@ function AchievementsPage() {
 
 
     return (
-        // <div className={styles.container}>
-        //     <div className={styles.main}>
+        <div className={styles.container}>
+        <div className={styles.main}>
                 <div className={styles.slides}>
                     {myAchievementsCard.concat(myAchievementsCard).map((achievement) => (
                             <AchievementsCard 
@@ -65,11 +65,12 @@ function AchievementsPage() {
                                 achievementDate={achievement.achievementDate}
                                 description={achievement.description}
                                 image={achievement.image}
+                                className={styles.card}
                             />
                     ))}
                 </div>
-        //  </div>
-        // </div>
+        </div>
+    </div>
     )
 }
 
