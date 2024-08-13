@@ -34,23 +34,23 @@ const GLMain = ({ setViduToken }) => {
 
     return (
         <>
-        <div className="h-32"></div>
-        <div className={styles.container}>
-        <div className="h-32"></div>
-            {rooms.map((room) => (
-                // <div className={styles.cardWrapper} key={room.roomId}>
-                <div className={styles.cardWrapper} key={room.roomId}>
-                    <GameRoomCard
-                        id={room.roomId}
-                        title={room.title}
-                        leader={room.ownerName}
-                        progress={room.nowPlayer}
-                        inInProgress={room.maxPlayer}
-                        setViduToken={setViduToken}
-                    />
-                </div>
-            ))}
-        </div>
+
+            <div className={styles.container}>
+
+                {rooms.map((room) => (
+                    // <div className={styles.cardWrapper} key={room.roomId}>
+                    <div className={styles.cardWrapper} key={room.roomId}>
+                        <GameRoomCard
+                            id={room.roomId}
+                            title={room.title}
+                            leader={room.ownerName}
+                            progress={room.nowPlayer}
+                            inInProgress={room.maxPlayer}
+                            setViduToken={setViduToken}
+                        />
+                    </div>
+                ))}
+            </div>
         </>
     );
 };
