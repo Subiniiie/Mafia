@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import styles from "./GameRoomCard.module.css";
 
-const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
+const GameRoomCard = ({ id, title, leader, progress, isInProgress, password, isPrivate }) => {
     // const [gameData, setGameData] = useState({})
     const [viduToken, setViduToken] = useState("");
     const navigate = useNavigate();
@@ -13,6 +13,7 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
     // 입장 시 로직 변경
     const handleEnterRoom = async (e) => {
         e.preventDefault();
+        console.log("isPrivate", isPrivate)
 
         // 현재 입장 인원이 8명이면 입장 불가능, 안내 메시지 띄우기
         if (progress === 8) {
@@ -43,7 +44,10 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress }) => {
                     <p className={styles.leader}>대장 동지 : {leader}</p>
                 </div>
                 <div className={`${styles.cardMain} ${isInProgress ? styles.inProgressContent : styles.notStartedContent}`}>
-                    <p className={styles.progress}>{progress}/8</p>
+                    <p className={styles.progress}>
+                        {progress}/8
+                        {isPrivate && <span>극비 임무</span>}
+                    </p>
                 </div>
             </div>
         </Link>
