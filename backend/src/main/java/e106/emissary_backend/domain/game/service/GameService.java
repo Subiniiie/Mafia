@@ -410,4 +410,10 @@ public class GameService {
                 .result(commonResult)
                 .build());
     } // end of commonPublish
+
+    public GameRole getRole(long userId, long roomId) {
+        Game game = redisGameRepository.findByGameId(roomId).orElseThrow(() -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+
+        return game.getPlayerMap().get(userId).getRole();
+    } // end of getRole
 }
