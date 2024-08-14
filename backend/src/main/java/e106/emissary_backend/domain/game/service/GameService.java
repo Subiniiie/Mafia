@@ -302,6 +302,10 @@ public class GameService {
     public void startVote(long gameId, long userId, long targetId) {
         GameDTO gameDTO = getGameDTO(gameId);
 
+        if(gameDTO.getGameState().equals(GameState.VOTE_START)){
+            throw new NotTimeToVoteException(CommonErrorCode.NOT_TIME_TO_VOTE_EXCEPTION);
+        }
+
         Map<Long, Player> playerMap = gameDTO.getPlayerMap().entrySet().stream()
                 .filter(entry -> entry.getValue().isAlive())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -309,7 +313,6 @@ public class GameService {
         Player player = playerMap.get(userId);
 
         player.setVoted(true);
-        gameDTO.setGameState(GameState.VOTE_START);
         gameDTO.setDay(gameDTO.getDay() + 1);
 
         update(gameDTO);
@@ -355,6 +358,10 @@ public class GameService {
     @RedissonLock(value = "#gameId")
     public void startConfirm(long gameId, long userId, boolean confirm) {
         GameDTO gameDTO = getGameDTO(gameId);
+
+        if(gameDTO.getGameState().equals(GameState.CONFIRM_START)){
+            throw new NotTimeToVoteException(CommonErrorCode.NOT_TIME_TO_VOTE_EXCEPTION);
+        }
 
         Map<Long, Player> playerMap = gameDTO.getPlayerMap().entrySet().stream()
                 .filter(entry -> entry.getValue().isAlive())

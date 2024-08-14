@@ -16,12 +16,8 @@ public class RoleUtils {
 
         int playerNum = gameDTO.getPlayerMap().size();
 
-        int emissary = 2;
+        int emissary = 1;
         int police = 1;
-
-        if(playerNum < 6){
-            emissary = 1;
-        }
 
         roles.put(GameRole.EMISSARY, emissary);
         roles.put(GameRole.POLICE, police);
