@@ -26,7 +26,7 @@ public class StartConfirmSubscriber {
             StartConfirmMessage startConfirmMessage = objectMapper.readValue(message, StartConfirmMessage.class);
             long gameId = startConfirmMessage.getGameId();
 
-            simpMessagingTemplate.convertAndSend("/sub/" + gameId, GameState.VOTE_START);
+            simpMessagingTemplate.convertAndSend("/sub/" + gameId, startConfirmMessage);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

@@ -68,4 +68,13 @@ public class Player implements Serializable {
                 .alive(true)
                 .build();
     }
+
+    public void resetPlayer(){
+        ready = false;
+        left = false;
+        voted = false;
+        alive = true;
+        win = false;
+        me = false;
+    }
 }

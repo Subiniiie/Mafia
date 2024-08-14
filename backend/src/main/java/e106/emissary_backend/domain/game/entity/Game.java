@@ -64,4 +64,10 @@ public class Game {
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime finishAt;
+
+    public void resetGame(){
+        gameState = GameState.WAIT;
+        day = 0;
+        playerMap.values().stream().forEach(Player::resetPlayer);
+    }
 }

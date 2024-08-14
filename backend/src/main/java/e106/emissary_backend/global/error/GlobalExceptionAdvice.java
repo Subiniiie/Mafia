@@ -39,6 +39,12 @@ public class GlobalExceptionAdvice {
     }
 
     @ExceptionHandler
+    public ResponseEntity<Object> alreadyStartRoom(AlreadyStartRoomException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return handleExceptionInternal(errorCode);
+    }
+
+    @ExceptionHandler
     public ResponseEntity<Object> noTitle(NoTitleException e) {
         ErrorCode errorCode = e.getErrorCode();
         return handleExceptionInternal(errorCode);

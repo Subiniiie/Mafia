@@ -27,6 +27,7 @@ import e106.emissary_backend.domain.userInRoom.repository.UserInRoomRepository;
 import e106.emissary_backend.global.error.CommonErrorCode;
 import e106.emissary_backend.global.error.exception.*;
 import io.jsonwebtoken.lang.Objects;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.misc.Hash;
@@ -44,6 +45,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class GameService {
 
     private final RedisGameRepository redisGameRepository;
@@ -134,6 +136,7 @@ public class GameService {
     } // end of readyCancel
 
 
+    @RedissonLock(value = "#roomId")
     public void setGame(long roomId, long userId) {
         GameDTO gameDTO = getGameDTO(roomId);
         Map<Long, Player> playerMap = gameDTO.getPlayerMap();
@@ -169,9 +172,11 @@ public class GameService {
                         .build());
 
         // room 상태 변경해서 DB에 넣기
+        log.info("상태변경 시작");
         Room room = roomRepository.findById(roomId).orElseThrow(
                 () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
         room.changeState(RoomState.STARTED);
+        log.info(room.getRoomState().toString());
     } // end of startGame
 
     /**

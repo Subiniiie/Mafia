@@ -273,6 +273,10 @@ public class RoomService {
 
             Room room = userInRoomList.get(0).getRoom();
 
+            if(room.getRoomState().equals(RoomState.STARTED)){
+                throw new AlreadyStartRoomException(CommonErrorCode.ALREADY_START_ROOM_EXCEPTION);
+            }
+
             if(userInRoomList.size() > room.getMaxPlayer()) {
                 throw new GameFullException(CommonErrorCode.GAME_FULL_EXCEPTION);
             }
