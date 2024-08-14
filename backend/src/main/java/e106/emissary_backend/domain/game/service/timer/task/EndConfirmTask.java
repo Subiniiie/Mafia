@@ -55,7 +55,7 @@ public class EndConfirmTask implements GameTask {
         Map<Long, Player> playerMap = gameDTO.getPlayerMap();
         playerMap.values().forEach(player -> {player.setVoted(false);});
 
-        redisKeyValueTemplate.update(gameDTO.toDao());
+//        redisKeyValueTemplate.update(gameDTO.toDao());
 
         String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
         HashMap<Long, Integer> voteMap = voteRedisTemplate.opsForValue().get(voteKey);
@@ -63,7 +63,10 @@ public class EndConfirmTask implements GameTask {
             voteMap = new HashMap<>();
         }
 
-        EndConfirmMessage endConfirmMessage = EndConfirmMessage.builder().gameId(gameId).voteMap(voteMap).build();
+        EndConfirmMessage endConfirmMessage = EndConfirmMessage.builder()
+                .gameId(gameId)
+                .voteMap(voteMap)
+                .build();
 
         endConfirmMessage.organizeVote();
 
@@ -72,7 +75,14 @@ public class EndConfirmTask implements GameTask {
             playerMap.get(endConfirmMessage.getTargetId()).setAlive(false);
         }
 
+        endConfirmMessage.setPlayerMap(playerMap);
+
+        // 레디스에 업데이트
+        redisKeyValueTemplate.update(gameDTO.toDao());
+
         publisher.publish(endConfirmTopic, endConfirmMessage);
+
+
 
         // 레디스에 결과 삭제
         voteRedisTemplate.delete(voteKey);
