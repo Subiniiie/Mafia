@@ -183,6 +183,8 @@ public class GameUtil {
     @RedissonLock(value = "#gameId")
     private void endPublish(long gameId, GameRole role, GameDTO gameDTO){
         log.info("발행하기");
+        // todo : 삭제 대신 정보를 초기화 하는게 맞아.
+        log.info("레디스에서 게임 삭제");
         redisGameRepository.deleteById(gameId);
 
         redisPublisher.publish(endTopic, EndMessage.builder()
