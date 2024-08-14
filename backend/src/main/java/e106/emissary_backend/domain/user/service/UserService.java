@@ -207,6 +207,17 @@ public class UserService implements UserDetailsService {
         return tmp;
     }
 
+    public String verifyUser(String email){
+        Optional<User> user = userRepository.findByEmail(email);
+        if(user.isPresent()){
+            String code = sendMail(MailRequest.builder()
+                    .mail(email).build());
+            return code;
+        } else {
+            throw new UsernameNotFoundException(" 일치하는 이메일이 없습니다 ");
+        }
+    }
+
     public List<User> getContainNickname(String s){
         return userRepository.findByNicknameContaining(s);
     }
