@@ -71,7 +71,7 @@ const SignUpModal = ({ isOpen, openModal, openLoginModal }) => {
                 password: password
             }
             console.log(body)
-            const response = await axios.post('http://localhost:8080/api/user', JSON.stringify(body), {
+            const response = await axios.post('https://i11e106.p.ssafy.io/api/user', JSON.stringify(body), {
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -93,7 +93,7 @@ const SignUpModal = ({ isOpen, openModal, openLoginModal }) => {
         console.log(email)
 
         try {
-            const response = await axios.get(`http://localhost:8080/api/checkemail?email=${email}`);
+            const response = await axios.get(`https://i11e106.p.ssafy.io/api/checkemail?email=${email}`);
             console.log(response.data)
             if (response.data.status === 'success') {
                 setEmailSentMessage('이메일로 인증번호를 보내드렸습니다. 이메일을 확인해주세요.'); // 이메일 인증 메시지 설정
@@ -101,7 +101,7 @@ const SignUpModal = ({ isOpen, openModal, openLoginModal }) => {
                 setEmailError(false)
                 try {
                     setShowVerificationCodeInput(true)
-                    const mailResponse = await axios.post('http://localhost:8080/api/mail',
+                    const mailResponse = await axios.post('https://i11e106.p.ssafy.io/api/mail',
                         JSON.stringify(
                             { mail: email }
                         ), {
@@ -147,7 +147,7 @@ const SignUpModal = ({ isOpen, openModal, openLoginModal }) => {
 
     const handleNicknameCheck = async () => {
         try {
-            const response = await axios.get(`http://localhost:8080/api/checknick?nickname=${nickname}`);
+            const response = await axios.get(`https://i11e106.p.ssafy.io/api/checknick?nickname=${nickname}`);
             console.log(response.data)
             if (response.data.status === 'success') {
                 setNicknameValid(true)
