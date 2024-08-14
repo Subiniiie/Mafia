@@ -12,6 +12,9 @@ import e106.emissary_backend.domain.game.repository.RedisGameRepository;
 import e106.emissary_backend.domain.game.service.publisher.RedisPublisher;
 import e106.emissary_backend.domain.game.service.subscriber.message.CommonMessage;
 import e106.emissary_backend.domain.game.service.subscriber.message.EndMessage;
+import e106.emissary_backend.domain.room.entity.Room;
+import e106.emissary_backend.domain.room.enumType.RoomState;
+import e106.emissary_backend.domain.room.repository.RoomRepository;
 import e106.emissary_backend.domain.user.entity.User;
 import e106.emissary_backend.domain.user.repository.UserRepository;
 import e106.emissary_backend.domain.userInRoom.entity.UserInRoom;
@@ -31,6 +34,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Transactional
 @Service
 @RequiredArgsConstructor
 public class GameUtil {
@@ -43,8 +47,8 @@ public class GameUtil {
     private final ChannelTopic commonTopic;
     private final ChannelTopic endTopic;
     private final UserRepository userRepository;
+    private final RoomRepository roomRepository;
 
-    @Transactional
     @RedissonLock(value = "#gameId")
     public boolean isEnd(long gameId){
         log.info("Game is End Validation run in GameUtil.java");
@@ -66,14 +70,18 @@ public class GameUtil {
 //                () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
 
         boolean result = true;
+        // 시민승
         if(emissaryCnt == 0){
 //            update(userInRooms, playerMap, -1);
             update(gameId, playerMap, -1);
             endPublish(gameId, GameRole.PERSON, gameDTO);
+            game.resetGame();
+        // 마피아 승
         }else if(emissaryCnt >= personCnt){
 //            update(userInRooms, playerMap, 1);
             update(gameId, playerMap, 1);
             endPublish(gameId, GameRole.EMISSARY, gameDTO);
+            game.resetGame();
         }else{
             result = false;
         }
@@ -111,19 +119,19 @@ public class GameUtil {
         log.info("직업별 유저 리스트 뽑아서 늘려주기");
         List<User> personUsers = getUpdateUsers(userInRooms,
                 getRoleList(playerMap, GameRole.PERSON),
-                -1 * value,
+                value == -1 ? 1 : 0,
                 GameRole.PERSON);
         List<User> policeUsers = getUpdateUsers(userInRooms,
                 getRoleList(playerMap, GameRole.POLICE),
-                -1 * value,
+                value == -1 ? 1 : 0,
                 GameRole.POLICE);
         List<User> emissaryUsers = getUpdateUsers(userInRooms,
                 getRoleList(playerMap, GameRole.EMISSARY),
-                value,
+                value == 1 ? 1 : 0,
                 GameRole.EMISSARY);
         List<User> betrayerUsers = getUpdateUsers(userInRooms,
                 getRoleList(playerMap, GameRole.BETRAYER),
-                value,
+                value == 1 ? 1 : 0,
                 GameRole.BETRAYER);
 
 
@@ -182,11 +190,6 @@ public class GameUtil {
 
     @RedissonLock(value = "#gameId")
     private void endPublish(long gameId, GameRole role, GameDTO gameDTO){
-        log.info("발행하기");
-        // todo : 삭제 대신 정보를 초기화 하는게 맞아.
-        log.info("레디스에서 게임 삭제");
-        redisGameRepository.deleteById(gameId);
-
         redisPublisher.publish(endTopic, EndMessage.builder()
                         .gameId(gameId)
                         .gameState(GameState.END)
@@ -194,5 +197,12 @@ public class GameUtil {
                         .gameDto(gameDTO)
                         .winRole(role)
                         .build());
+    }
+
+    public void changeRoomState(long gameId){
+        Room room = roomRepository.findByRoomId(gameId).orElseThrow(
+                () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
+
+        room.changeState(RoomState.WAIT);
     }
 }

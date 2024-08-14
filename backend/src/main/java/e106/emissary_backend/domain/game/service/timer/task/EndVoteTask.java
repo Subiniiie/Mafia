@@ -13,6 +13,7 @@ import e106.emissary_backend.domain.game.service.subscriber.message.StartVoteMes
 import e106.emissary_backend.domain.game.service.timer.SchedulerService;
 import e106.emissary_backend.global.error.CommonErrorCode;
 import e106.emissary_backend.global.error.exception.NotFoundGameException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisKeyValueTemplate;
@@ -27,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class EndVoteTask implements GameTask {
     private Long gameId;
