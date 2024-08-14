@@ -42,6 +42,12 @@ public class SocketGameController {
         return ConnectMessage.builder().build();
     }
 
+    @MessageMapping("/enter/{roomId}")
+    public void enter(@DestinationVariable Long roomId, SimpMessageHeaderAccessor headerAccessor) {
+        long userId = getUserIdIAccessor(headerAccessor);
+
+        gameService.enter(roomId, userId);
+    }
     @MessageMapping("/ready/{roomId}")
     public void ready(@DestinationVariable Long roomId, SimpMessageHeaderAccessor headerAccessor) {
         long userId = getUserIdIAccessor(headerAccessor);
