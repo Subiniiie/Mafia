@@ -19,19 +19,14 @@
     /* background: #1E2940; */
     background: #12151D;
     padding: 20px 30px 40px 30px;
-    /* border: 1px solid white; */
     border: 3px solid #1E2940;
     border-radius: 10px;
-    /* 모서리를 둥글게 */
     width: 500px;
-    /* 너비 조정 */
     max-width: 90%;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    /* 그림자 추가 */
     position: relative;
     display: flex;
     flex-direction: column;
-    /* padding-top: 10px; */
 }
 
 
@@ -106,6 +101,7 @@
     display: flex;
     justify-content: center;
     font-size: 14px;
+    cursor: pointer;
 }
 
 /* .findPw:hover {
