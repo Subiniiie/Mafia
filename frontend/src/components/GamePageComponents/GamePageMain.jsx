@@ -91,7 +91,6 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         }
 
         console.log("나는 밀정인가?" , me);
-        // console.log('장하오', me)
         if (tempMe) {
             console.log("밀정시간 , setShowPoliceModal이 켜짐 :", me)
             setShowEmissaryModal(true)
@@ -230,15 +229,25 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     }
 
     // 밤이 되었을 때 비디오/오디오 처리 handler
-    const handleVideoAudioAtNight = () => {
+    const handleVideoAudioAtNight = async () => {
         const publisherIdx = streamManagers.findIndex(strMgr => !strMgr.remote);
         // console.log('밤이 되었다', publisherIdx)
         // console.log('밤이 되었다22', streamManagers)
 
+        const response = await axios.get(`https://i11e106.p.ssafy.io/api/games/roles/${roomId}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${access}`,
+                }
+            }   
+        );
+        const myRole = response.data;
+        console.log('내 직업 : ', response.data);
+
         // 밀정, 변절자를 제외한 유저는 비디오/오디오를 publish 하지도 않고,
         // 다른 유저들의 비디오/오디오를 subscribe 하지도 않는다.
         //if (!isEmissaryOrBetrayer(players[publisherIdx])) {
-        if (!isEmissaryOrBetrayer(gameResponse.nowPlayer))
+        if (!(myRole === 'EMISSARY' || myRole === 'BETRAYER'))
             streamManagers[publisherIdx].publishVideo(false);
             streamManagers[publisherIdx].publishAudio(false);
 
@@ -254,12 +263,17 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     
 
     // 낮이 되었을 때 비디오/오디오 처리 handler
-    const handleVideoAudioAtDay = () => {
+    const handleVideoAudioAtDay = async () => {
         const publisherIdx = streamManagers.findIndex(strMgr => !strMgr.remote);
         // console.log('publisherIdx:', publisherIdx)
 
+        const response = await axios.get(`https://i11e106.p.ssafy.io/api/games/roles/${roomId}`);
+        const myRole = response.data;
+        console.log('내 직업 : ', response.data);
+
         //if (!isEmissaryOrBetrayer(players[publisherIdx])) {
-            if (!isEmissaryOrBetrayer(gameResponse.nowPlayer)) {
+            // if (!isEmissaryOrBetrayer(gameResponse.nowPlayer)) {
+        if (!(myRole === 'EMISSARY' || myRole === 'BETRAYER'))
             streamManagers[publisherIdx].publishVideo(true);
             streamManagers[publisherIdx].publishAudio(true);
 
@@ -271,7 +285,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                 }
               )
         }
-    }
+    
 
     // 밤이 되었을 때, 채팅 모드 변환
     const changeToSecretChatMode = () => {
@@ -307,6 +321,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         // 기존 players와 비교하여 변경된 경우에만 업데이트
         setPlayers(prevPlayers => {
             const newSortedPlayers = [...players].sort((a, b) => a.creationTime - b.creationTime);
+            console.log('플레이어들이 정렬되는지 확인:', newSortedPlayers)
             // 상태가 변경된 경우에만 업데이트
             if (JSON.stringify(prevPlayers) !== JSON.stringify(newSortedPlayers)) {
                 return newSortedPlayers;
