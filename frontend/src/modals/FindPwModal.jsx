@@ -1,4 +1,5 @@
 import classNames from "classnames";
+import axios from 'axios'
 import ModalHeader from "../components/ModalHeader"
 import styles from "./FindPwModal.module.css"
 import { useState, useRef } from "react";
@@ -36,7 +37,6 @@ const FindPwModal = ({ isOpen, openModal }) => {
 
     const [showVerificationCodeInput, setShowVerificationCodeInput] = useState(false)
     const [showNewPasswordInput, setShowNewPasswordInput] = useState(false)
-    const [showConfirmPasswordInput, setShowConfirmPasswordInput] = useState(false)
 
     const emailRef = useRef()
     const verificationCodeRef = useRef()
@@ -44,6 +44,8 @@ const FindPwModal = ({ isOpen, openModal }) => {
     const confirmPasswordRef = useRef()
     const emailButtonRef = useRef()
     const verificationCodeButtonRef = useRef()
+    const passwordButtonRef = useRef()
+    const confirmPasswordButtonRef = useRef()
     const submitButtonRef = useRef()
 
     const FindPwModalClass = classNames('kimjungchul-gothic-regular', styles.modalContent)
@@ -51,74 +53,69 @@ const FindPwModal = ({ isOpen, openModal }) => {
     const handleEmailKeyDown = async (e) => {
         if (e.key === 'Enter') {
             console.log('Email inputField 에서 Enter를 눌렀네! 유효성 검증을 해볼게')
-            if (email === '') {
-                setEmailValid(false)
-                setEmailError(true)
-                setEmailMessage('이메일을 입력해주세요.')
-            } else {
-                console.log('Email을 입력했네! handleEmailCheck를 실행시켜볼게')
-                setEmailMessage('')
-                handleEmailCheck()
-            }
+            setEmailMessage('')
+            handleEmailCheck()
         }
     }
 
     const handleEmailCheck = async () => {
-        setEmailValid(true)
-        setEmailError(false)
-        setEmailSentMessage('이메일로 인증번호를 보내드렸습니다. 이메일을 확인해주세요.')
-        setShowVerificationCodeInput(true)
+        if (email === '') {
+            setEmailValid(false)
+            setEmailError(true)
+            setEmailMessage('이메일을 입력해주세요.')
+        } else {
+            console.log('Email을 입력했네! handleEmailCheck를 실행시켜볼게')
+            // setEmailValid(true)
+            // setEmailError(false)
+            setEmailMessage('')
+            // setEmailSentMessage('이메일로 인증번호를 보내드렸습니다. 이메일을 확인해주세요.')
+            setShowVerificationCodeInput(true)
 
-        // console.log('안녕, 난 handleEmailCheck. 이제 작업을 시작해보지.')
-        // console.log(email)
+            console.log('안녕, 난 handleEmailCheck. 이제 작업을 시작해보지.')
+            console.log(email)
 
-        // try {
-        //     const response = await axios.get(`https://i11e106.p.ssafy.io/api/checkemail?email=${email}`);
-        //     console.log(response.data)
-        //     if (response.data.status === 'success') {
-        //         setEmailSentMessage('이메일로 인증번호를 보내드렸습니다. 이메일을 확인해주세요.'); // 이메일 인증 메시지 설정
-        //         setEmailValid(true)
-        //         setEmailError(false)
-        //         try {
-        //             setShowVerificationCodeInput(true)
-        //             const mailResponse = await axios.post('https://i11e106.p.ssafy.io/api/mail',
-        //                 JSON.stringify(
-        //                     { mail: email }
-        //                 ), {
-        //                 headers: {
-        //                     "Content-Type": "application/json",
-        //                 }
-        //             });
-        //             console.log(mailResponse.data)
-        //             setGivenCode(mailResponse.data)
-        //             verificationCodeRef.current.focus()
-        //         } catch (error) {
-        //             console.log('mail axios 요청 뭔가 이상해', error)
-        //         }
-
-        //     } else {
-        //         setEmailValid(false)
-        //         setEmailError(true)
-        //         alert(response.data.message)
-        //     }
-        //     // 개발 error
-        // } catch (error) {
-        //     console.error('유효성 검증 실패 :', error)
-        //     alert('유효성 검증에 실패했습니다. 다시 시도해주세요.')
-        //     setEmailValid(false)
-        //     setEmailError(true)
-        // }
+            try {
+                const body = {
+                    "data": email,
+                }
+                const response = await axios.post(`https://i11e106.p.ssafy.io/api/users/verify`, JSON.stringify(body), {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+                console.log(response.data)
+                if (response.data.status === 'success') {
+                    setEmailSentMessage('이메일로 인증번호를 보내드렸습니다. 이메일을 확인해주세요.'); // 이메일 인증 메시지 설정
+                    setEmailValid(true)
+                    setEmailError(false)
+                    setGivenCode(response.data.code)
+                } else {
+                    setEmailValid(false)
+                    setEmailError(true)
+                    setEmailSentMessage(response.data.message)
+                }
+                // 개발 error
+            } catch (error) {
+                console.error('유효성 검증 실패 :', error)
+                alert('유효성 검증에 실패했습니다. 다시 시도해주세요.')
+                setEmailValid(false)
+                setEmailError(true)
+            }
+        }
     }
 
     const handleVerificationCodeCheck = () => {
-        if (verificationCode === givenCode) {
+        if (verificationCode === '') {
+            setVerificationMessage('인증번호를 입력해주세요.')
+        } else if (verificationCode === givenCode) {
+            setShowNewPasswordInput(true)
             setVerificationCodeValid(true)
             setVerificationCodeError(false)
             setEmailSentMessage(''); // 이메일 인증 메시지 설정
             setIsVerified(true)
             passwordRef.current.focus()
         } else {
-            alert('올바른 인증코드를 입력해주세요.')
+            setVerificationMessage('올바른 인증코드를 입력해주세요.')
             setVerificationCodeValid(false)
             setVerificationCodeError(true)
         }
@@ -126,37 +123,85 @@ const FindPwModal = ({ isOpen, openModal }) => {
 
     const handleVerificationCodeKeyDown = (e) => {
         if (e.key === 'Enter') {
-            if (verificationCode === '') {
-                setVerificationMessage('인증번호를 입력해주세요.')
-            } else {
-                setVerificationMessage('')
-                // handleVerificationCodeCheck()
-            }
+            setVerificationMessage('')
+            handleVerificationCodeCheck()
+        }
+    }
+
+    const handlePasswordCheck = () => {
+        var specialRule = /[`~!@#$%^&*|'";:/?]/
+
+        if (password === '') {
+            setPasswordMessage('비밀번호를 입력해주세요.')
+        } else if (password.length < 8) {
+            setPasswordMessage('비밀번호를 8자 이상으로 설정해주세요.')
+            setPasswordValid(false)
+            setPasswordError(true)
+        } else if (!specialRule.test(password)) {
+            setPasswordMessage('비밀번호에 특수문자를 넣어서 설정해주세요.')
+            setPasswordValid(false)
+            setPasswordError(true)
+        } else {
+            setPasswordValid(true)
+            setPasswordError(false)
+            setPasswordMessage('')
+            confirmPasswordRef.current.focus()
         }
     }
 
     const handlePasswordKeyDown = (e) => {
         if (e.key === 'Enter') {
             console.log('Enter를 눌렀네! 비밀번호를 검증해볼게')
-            if (password === '') {
-                setPasswordMessage('비밀번호를 입력해주세요.')
-            } else {
-                setPasswordMessage('')
-                // handlePasswordCheck()
-            }
+            handlePasswordCheck()
+        }
+    }
+
+    const handleConfirmPasswordCheck = () => {
+        if (confirmPassword === '') {
+            setConfirmPasswordMessage('비밀번호를 다시 한번 입력해주세요.')
+        } else if (password === confirmPassword) {
+            setConfirmPasswordValid(true)
+            setConfirmPasswordError(false)
+            submitButtonRef.current.focus()
+        } else {
+            setConfirmPasswordMessage('비밀번호가 일치하지 않습니다.')
+            setConfirmPasswordValid(false)
+            setConfirmPasswordError(true)
         }
     }
 
     const handleConfirmPasswordKeyDown = (e) => {
         if (e.key === 'Enter') {
-            if (confirmPassword === '') {
-                setConfirmPasswordMessage('비밀번호를 다시 한번 입력해주세요.')
-            } else {
-                setConfirmPasswordMessage('')
-                // handleConfirmPasswordCheck()
-            }
+            handleConfirmPasswordCheck()
         }
     }
+
+    const handlePasswordReset = async () => {
+        try {
+            const body = {
+                "nickname": email, // Assuming the email is used as a nickname or modify as needed
+                "password": password
+            };
+
+            const response = await axios.patch('https://i11e106.p.ssafy.io/api/updatelostpw', body, {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (response.data.status === 'success') {
+                alert('비밀번호가 성공적으로 변경되었습니다.');
+                // Optionally close the modal or redirect the user to the login page
+                openModal();
+            } else {
+                alert('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
+            }
+        } catch (error) {
+            console.error('비밀번호 변경 실패 :', error);
+            alert('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');
+        }
+    };
+
 
     if (!isOpen) return null; // 모달이 열리지 않았다면 렌더링하지 않음
 
@@ -177,7 +222,6 @@ const FindPwModal = ({ isOpen, openModal }) => {
                                 onChange={(e) => setEmail(e.target.value)}
                                 onKeyDown={handleEmailKeyDown}
                                 ref={emailRef}
-
                             />
                             <button className={styles.validButton} onClick={handleEmailCheck} ref={emailButtonRef}>
                                 입력
@@ -224,8 +268,7 @@ const FindPwModal = ({ isOpen, openModal }) => {
                                     onKeyDown={handlePasswordKeyDown}
                                     ref={passwordRef}
                                 />
-                                <button className={styles.validButton}>
-                                    {/* <button className={styles.validButton} onClick={handlePasswordCheck} ref={submitButtonRef}> */}
+                                <button className={styles.validButton} onClick={handlePasswordCheck} ref={passwordButtonRef}>
                                     입력
                                 </button>
                             </div>
@@ -233,7 +276,8 @@ const FindPwModal = ({ isOpen, openModal }) => {
                         </div>
                     )}
 
-                    {showConfirmPasswordInput && (
+                    {/* {showConfirmPasswordInput && ( */}
+                    {showNewPasswordInput && (
                         <div className={styles.formContainerMini}>
                             <h5>비밀번호 확인</h5>
                             <div className={styles.inputContainer}>
@@ -247,8 +291,7 @@ const FindPwModal = ({ isOpen, openModal }) => {
                                     onKeyDown={handleConfirmPasswordKeyDown}
                                     ref={confirmPasswordRef}
                                 />
-                                <button className={styles.validButton}>
-                                    {/* <button className={styles.validButton} onClick={handleConfirmPasswordCheck} ref={submitButtonRef}> */}
+                                <button className={styles.validButton} onClick={handleConfirmPasswordCheck} ref={confirmPasswordButtonRef}>
                                     입력
                                 </button>
                             </div>
@@ -256,7 +299,7 @@ const FindPwModal = ({ isOpen, openModal }) => {
                         </div>
                     )}
 
-                    <button className={styles.submitButton} onClick={openChangePwModal}>
+                    <button className={styles.submitButton} onClick={handlePasswordReset} ref={submitButtonRef}>
                         비밀번호 재설정
                     </button>
                 </div>
