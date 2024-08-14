@@ -2,12 +2,14 @@ package e106.emissary_backend.domain.game.service.subscriber.message;
 
 import e106.emissary_backend.domain.game.enumType.GameState;
 import e106.emissary_backend.domain.game.enumType.VoteState;
+import e106.emissary_backend.domain.game.model.Player;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
+import java.util.Map;
 
 @Builder
 @NoArgsConstructor
@@ -20,6 +22,8 @@ public class EndConfirmMessage {
     private HashMap<Long, Integer> voteMap;
     private Long targetId;
     private String result;
+    @Builder.Default
+    private Map<Long, Player> playerMap = new HashMap<>();
 
     public void organizeVote() {
         if (voteMap == null || voteMap.isEmpty()) {
@@ -43,5 +47,9 @@ public class EndConfirmMessage {
         } else {
             result = "CONTINUE";
         }
+    }
+
+    public void setPlayerMap(Map<Long, Player> playerMap) {
+        this.playerMap = playerMap;
     }
 }
