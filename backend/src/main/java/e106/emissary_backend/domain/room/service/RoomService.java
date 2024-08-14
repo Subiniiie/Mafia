@@ -340,10 +340,10 @@ public class RoomService {
 
             RoomDetailDto roomDetailDto = RoomDetailDto.toDTO(room, userList);
 
-            redisPublisher.publish(enterRoomTopic, EnterRoomMessage.builder()
-                            .gameState(GameState.ENTER)
-                            .roomDetailDto(roomDetailDto)
-                            .build());
+//            redisPublisher.publish(enterRoomTopic, EnterRoomMessage.builder()
+//                            .gameState(GameState.ENTER)
+//                            .roomDetailDto(roomDetailDto)
+//                            .build());
             // 다했으면 leave나 kick할시에 발행하는것도 해야해
             log.info("발행완료");
 
