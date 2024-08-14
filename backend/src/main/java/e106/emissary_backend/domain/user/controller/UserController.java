@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -131,6 +132,21 @@ public class UserController {
             map.put("status", "fail");
             map.put("message", e.getMessage());
             return ResponseEntity.ok(map);
+        }
+    }
+
+    @GetMapping("/api/users/verify")
+    public ResponseEntity<Map<String,Object>> verifyEmail(@AuthenticationPrincipal CustomUserDetails currentUser) {
+        Map<String, Object> map = new HashMap<>();
+        try {
+            String code = userService.verifyUser(currentUser.getEmail());
+            map.put("status", "success");
+            map.put("code", code);
+            return ResponseEntity.ok(map);
+        } catch (UsernameNotFoundException e){
+            map.put("status", "fail");
+            map.put("message", e.getMessage());
+            return ResponseEntity.internalServerError().body(map);
         }
     }
 }
