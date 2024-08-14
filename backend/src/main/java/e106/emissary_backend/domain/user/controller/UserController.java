@@ -136,10 +136,10 @@ public class UserController {
     }
 
     @GetMapping("/api/users/verify")
-    public ResponseEntity<Map<String,Object>> verifyEmail(@AuthenticationPrincipal CustomUserDetails currentUser) {
+    public ResponseEntity<Map<String,Object>> verifyEmail(@RequestBody CheckRequest request ) {
         Map<String, Object> map = new HashMap<>();
         try {
-            String code = userService.verifyUser(currentUser.getEmail());
+            String code = userService.verifyUser(request.getData());
             map.put("status", "success");
             map.put("code", code);
             return ResponseEntity.ok(map);
