@@ -573,7 +573,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
             </div> : null}
       </>
     )
+    }
 }
-
 
 export default GamePageMain;
