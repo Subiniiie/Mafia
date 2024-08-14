@@ -25,7 +25,7 @@ function AchievementsPage() {
 
     // const fetchAchievements = async function() {
     //     try {
-    //         const response = await axios.get('https://i11e106.p.ssafy.io/api/honors')
+    //         const response = await axios.get('http://localhost:8080/api/honors')
     //         setMyAchievementsCard(response.data)
     //     } catch(error) {
     //         console.log(error)

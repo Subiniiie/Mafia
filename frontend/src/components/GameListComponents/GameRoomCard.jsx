@@ -22,7 +22,7 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress, password, isP
         }
 
         const access = localStorage.getItem('access');
-        await axios.post(`https://i11e106.p.ssafy.io/api/rooms/${id}`, {}, {
+        await axios.post(`http://localhost:8080/api/rooms/${id}`, {}, {
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${access}`,

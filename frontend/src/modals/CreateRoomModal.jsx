@@ -49,7 +49,7 @@ const CreateRoomModal = ({ isOpen, openModal, setViduToken }) => {
 
             const access = localStorage.getItem('access')
 
-            const response = await axios.post('https://i11e106.p.ssafy.io/api/rooms',
+            const response = await axios.post('http://localhost:8080/api/rooms',
                 JSON.stringify(body), {
                 headers: {
                     "Content-Type": "application/json",

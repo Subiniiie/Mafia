@@ -74,7 +74,7 @@ function GamePage() {
         const access = localStorage.getItem('access');
 
         const gameRoomInfo = async () => {
-            await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}`, {
+            await axios.get(`http://localhost:8080/api/rooms/${roomId}`, {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${access}`,
@@ -215,7 +215,7 @@ function GamePage() {
             console.log("구독 안됐는지 확인")
         }
 
-        const socket = new WebSocket("wss://i11e106.p.ssafy.io/ws")
+        const socket = new WebSocket("ws://localhost:8080/ws")
         const access = localStorage.getItem('access');
 
         stompClient.current = Stomp.over(socket)

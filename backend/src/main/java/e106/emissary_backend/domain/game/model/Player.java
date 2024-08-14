@@ -61,7 +61,10 @@ public class Player implements Serializable {
                 .ready(false)
                 .left(false)
                 .voted(false)
-                .creationTime(creationTime.atZone(ZoneId.systemDefault()).toEpochSecond())
+                .creationTime(creationTime
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                        .toEpochMilli())
                 .alive(true)
                 .build();
     }
