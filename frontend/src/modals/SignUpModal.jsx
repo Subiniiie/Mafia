@@ -269,7 +269,7 @@ const SignUpModal = ({ isOpen, openModal, openLoginModal }) => {
                                     ref={emailRef}
                                 />
                                 <button className={styles.validButton} onClick={handleEmailCheck} ref={emailButtonRef}>
-                                    인증
+                                    입력
                                 </button>
                             </div>
                             {emailSentMessage && <p className={styles.infoMessage}>{emailSentMessage}</p>} {/* 이메일 인증 메시지 추가 */}
@@ -290,7 +290,7 @@ const SignUpModal = ({ isOpen, openModal, openLoginModal }) => {
                                         disabled={isVerified}
                                     />
                                     <button className={styles.validButton} onClick={handleVerificationCodeCheck} ref={verificationCodeButtonRef}>
-                                        입력
+                                        인증
                                     </button>
                                 </div>
                             </div>
