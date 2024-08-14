@@ -271,6 +271,7 @@ public class GameService {
 
     @RedissonLock(value = "#gameId")
     public void day(long gameId) {
+        log.info("day service run");
         GameDTO gameDTO = getGameDTO(gameId);
 
         gameDTO.setGameState(GameState.DAY);
