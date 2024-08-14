@@ -18,9 +18,7 @@ public class StartVoteSubscriber {
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     public void sendMessage(String message){
-        /**
-        프론트로 webSocket을 통해 데이터 내리기
-          */
+        log.info("StartVoteSubscriber run");
         try {
             StartVoteMessage startVoteMessage = objectMapper.readValue(message, StartVoteMessage.class);
             long gameId = startVoteMessage.getGameId();
