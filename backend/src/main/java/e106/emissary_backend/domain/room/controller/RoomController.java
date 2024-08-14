@@ -4,6 +4,8 @@ import e106.emissary_backend.domain.room.dto.*;
 import e106.emissary_backend.domain.room.service.RoomService;
 import e106.emissary_backend.domain.user.dto.CustomUserDetails;
 import e106.emissary_backend.global.common.CommonResponseDto;
+import e106.emissary_backend.global.error.CommonErrorCode;
+import e106.emissary_backend.global.error.exception.NoTitleException;
 import io.openvidu.java.client.OpenViduHttpException;
 import io.openvidu.java.client.OpenViduJavaClientException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -62,11 +64,11 @@ public class RoomController {
      */
     @PostMapping("/rooms")
     public ResponseEntity<Map<String,Object>> makeRoom(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody RoomRequestDto roomRequestDto) {
-        // 테스트용으로
-        long userId = 1L;
-        if(!Objects.isNull(customUserDetails)){
-            userId = customUserDetails.getUserId();
+        if(roomRequestDto.getTitle().isEmpty()){
+            throw new NoTitleException(CommonErrorCode.NO_TITLE_EXCEPTION);
         }
+
+        long userId = customUserDetails.getUserId();
 
         Map<String,Object> map = new HashMap<>();
         try{
@@ -89,7 +91,6 @@ public class RoomController {
      */
     @PostMapping("/rooms/{roomId}")
     public ResponseEntity<RoomJoinDto> enterRoom(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long roomId) {
-        log.info("enterRoom controller run");
         long userId = customUserDetails.getUserId();
 
         try{
@@ -107,11 +108,7 @@ public class RoomController {
 
     @DeleteMapping("/rooms/kick")
     public ResponseEntity<CommonResponseDto> kickRoom(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody RoomKickDto roomKickDto) {
-
-        long userId = 1L;
-        if (!Objects.isNull(customUserDetails)) {
-            userId = customUserDetails.getUserId();
-        }
+        long userId = customUserDetails.getUserId();
 
         try {
             boolean res = roomService.kickUser(roomKickDto, userId);
@@ -132,11 +129,8 @@ public class RoomController {
     @DeleteMapping("/rooms/users/{roomId}")
     public ResponseEntity<CommonResponseDto> leaveRoom(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Long roomId) {
         // 테스트용으로
-        long userId = 1L;
         String nickname = "";
-        if(!Objects.isNull(customUserDetails)){
-            userId = customUserDetails.getUserId();
-        }
+        long userId = customUserDetails.getUserId();
 
         return ResponseEntity.ok(roomService.leaveRoom(roomId, userId));
     }

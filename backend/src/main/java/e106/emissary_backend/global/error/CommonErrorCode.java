@@ -21,6 +21,8 @@ public enum CommonErrorCode implements ErrorCode{
     EMISSARY_KILL_EXCEPTION(HttpStatus.CONFLICT, "You Can't Kill Emissary Error"),
     EMISSARY_APPEASE_EMISSARY_EXCEPTION(HttpStatus.CONFLICT, "Emissary Appease Emissary Error"),
     ALREADY_DETECT_USER_EXCEPTION(HttpStatus.CONFLICT, "Already Detect User Error"),
+    NO_TITLE_EXCEPTION(HttpStatus.BAD_REQUEST, "No Title Room Make Error"),
+    NOT_ENOUGH_REGISTER_FORM_EXCEPTION(HttpStatus.BAD_REQUEST, "Not Enough Register Form Error"),
     GAME_FULL_EXCEPTION(HttpStatus.CONFLICT, "Game Not Found Error"),
     NO_USER_IN_ROOM_EXCEPTION(HttpStatus.NO_CONTENT, "No User In Room Error");
     private final HttpStatus httpStatus;
