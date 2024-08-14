@@ -1,52 +1,30 @@
-/* .container {
-    display: flex;
-    flex-direction: row;
-    border: 5px solid red;
-    overflow: auto;
-    white-space: nowrap;
-} */
-
-/* .container {
-    color: white; 
-    } */
-    
-    /* .main {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 20px;
-        justify-content: center;
-        } */
-        /*         
-        .main {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-} */
-
-.slides {
+.slides1, .slides2 {
     display: flex;
     flex-direction: row;
     width: auto;
     overflow: auto;
-    margin-top : 150px;
+    /* margin-top : 150px; */
     margin-left : 30px;
     margin-right : 50px;
     border-radius: 10px;
 }
 
-.slides::-webkit-scrollbar{
+.slides1::-webkit-scrollbar, .slides2::-webkit-scrollbar {
     height: 10px;
 }
 
-.slides::-webkit-scrollbar-thumb{
+.slides1::-webkit-scrollbar-thumb, .slides2::-webkit-scrollbar-thumb {
     background-color: rgba(239, 242, 247, 0.1);
     border-radius: 10px;
     border: 2px solid #1f2845;;
   }
 
-.slides::-webkit-scrollbar-track{
+.slides1::-webkit-scrollbar-track, .slides2::-webkit-scrollbar-track {
     border-radius: 10px;
     background-color: #1f2845;
 }
+
+.slides1 {
+    margin-top : 100px;
+}
+

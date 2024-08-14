@@ -10,7 +10,7 @@ import styles from "./GamePageMain.module.css"
 import { useNavigate } from "react-router-dom";
 import { decode } from "jwt-js-decode";
 
-function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, stompClient, gameData, nowGameState, gameResponse, players, setPlayers, getMyJob }) {
+function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, stompClient, gameData, nowGameState, gameResponse, players, setPlayers, getMyJob, setNowGameState }) {
     // players 배열을 생성된 시간 순으로 정렬
     // streamManagers와 순서를 맞춰야 하므로 정렬이 필요함
     // setPlayers(playes => players.sort((a, b) => a.creationTime - b.creationTime));
@@ -40,6 +40,18 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     const myId = Number(decodedAccess.payload.userId);
 
     //todo
+    const enter = () => {
+        console.log("입장시 ㄹ처리 : " , gameResponse.gameDTO.playerMap);
+        // 여기서 이제 playerMap을 처리함
+
+        const temp = Object.values(gameResponse.gameDTO.playerMap);
+        const sortedPlayers = temp.sort((a, b) => a.creationTime - b.creationTime);
+
+        setNowGameState('');
+        setPlayers(sortedPlayers);
+    }
+
+
     // 강퇴처리
     const kick = () =>{
         console.log("제아이디는 이것입니다 : ", myId);
@@ -121,6 +133,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
     // 죽일까 변절시킬까
     const handleChoiceDieOrTurncoat = (choiced) => {
+        console.log('죽일거야 변절시킬거야?', choiced)
         if (choiced === '변절') {
             stompClient.current.send(
                 `/ws/pub/appease/${roomId}/${emissaryTarget}`, 
@@ -219,14 +232,25 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     //     return player.role === 'emissary' || player.role === 'betrayer';
     // }
 
-    const isEmissaryOrBetrayer = (player) => {
-       if (!player) {
-        console.log('Player is undefined')
-        return false
-       }
-       console.log('플레이어 있어', player)
-       return player.role === 'EMISSARY' || player.role === 'BETRAYER'
+    const isEmissaryOrBetrayer = async () => {
+       const response = await axios.get(`https://i11e106.p.ssafy.io/api/games/roles/${roomId}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${access}`,
+                }
+            }   
+        );
+        const myRole = response.data;
+       return myRole === 'EMISSARY' || myRole === 'BETRAYER'
     }
+
+    // 채팅창 주석(나중에 지우기!!)
+    // const isEmissaryOrBetrayerByIdx = (idx) => {
+    //     console.log('[isEmissaryOrBetrayerByIdx] gameData : ', gameData);
+    //     const role = gameResponse.playerMap[idx].role;
+
+    //     return role === 'EMISSARY' || role === 'BETRAYER'
+    // }
 
     // 밤이 되었을 때 비디오/오디오 처리 handler
     const handleVideoAudioAtNight = async () => {
@@ -247,7 +271,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         // 밀정, 변절자를 제외한 유저는 비디오/오디오를 publish 하지도 않고,
         // 다른 유저들의 비디오/오디오를 subscribe 하지도 않는다.
         //if (!isEmissaryOrBetrayer(players[publisherIdx])) {
-        if (!(myRole === 'EMISSARY' || myRole === 'BETRAYER'))
+        if (!isEmissaryOrBetrayer(gameResponse.nowPlayer))
             streamManagers[publisherIdx].publishVideo(false);
             streamManagers[publisherIdx].publishAudio(false);
 
@@ -267,13 +291,9 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         const publisherIdx = streamManagers.findIndex(strMgr => !strMgr.remote);
         // console.log('publisherIdx:', publisherIdx)
 
-        const response = await axios.get(`https://i11e106.p.ssafy.io/api/games/roles/${roomId}`);
-        const myRole = response.data;
-        console.log('내 직업 : ', response.data);
-
         //if (!isEmissaryOrBetrayer(players[publisherIdx])) {
             // if (!isEmissaryOrBetrayer(gameResponse.nowPlayer)) {
-        if (!(myRole === 'EMISSARY' || myRole === 'BETRAYER'))
+        if (!isEmissaryOrBetrayer())
             streamManagers[publisherIdx].publishVideo(true);
             streamManagers[publisherIdx].publishAudio(true);
 
@@ -289,16 +309,18 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
     // 밤이 되었을 때, 채팅 모드 변환
     const changeToSecretChatMode = () => {
-        const enemies = streamManagers
-          .filter((_, idx) => isEmissaryOrBetrayer(players[idx]))
-          .map(strMgr => strMgr.stream.connection);
+        // console.log('밤이 되었을 떄 채팅 모드:', players)
+        // const enemies = streamManagers
+        // // TODO: isEmissary어쩌구 함수 변경
+        //   .filter((_, idx) => isEmissaryOrBetrayerByIdx(idx))
+        //   .map(strMgr => strMgr.stream.connection);
 
-        setChatMode(() => { return { mode: 'signal:secretChat', to: enemies }; });
+        // setChatMode(() => { return { mode: 'signal:secretChat', to: enemies }; });
     }
 
     // 낮이 되었을 때, 채팅 모드 변환
     const changeToNormalChatMode = () => {
-        setChatMode(() => { return { mode: 'signal:chat', to: [] }; });
+        // setChatMode(() => { return { mode: 'signal:chat', to: [] }; });
     }
 
 
@@ -317,18 +339,21 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // useEffect(() => {
     //     setPlayers(players => [...players].sort((a, b) => a.creationTime - b.creationTime));
     // }, [players, setPlayers]);
-    useEffect(() => {
-        // 기존 players와 비교하여 변경된 경우에만 업데이트
-        setPlayers(prevPlayers => {
-            const newSortedPlayers = [...players].sort((a, b) => a.creationTime - b.creationTime);
-            console.log('플레이어들이 정렬되는지 확인:', newSortedPlayers)
-            // 상태가 변경된 경우에만 업데이트
-            if (JSON.stringify(prevPlayers) !== JSON.stringify(newSortedPlayers)) {
-                return newSortedPlayers;
-            }
-            return prevPlayers;
-        });
-    }, [players]);
+    
+    // api와 연결된 players 끊기
+    // useEffect(() => {
+    //     // 기존 players와 비교하여 변경된 경우에만 업데이트
+    //     setPlayers(prevPlayers => {
+    //         const newSortedPlayers = [...players].sort((a, b) => a.creationTime - b.creationTime);
+    //         console.log('플레이어들이 추가되고 정렬됨:', newSortedPlayers)
+    //         // 상태가 변경된 경우에만 업데이트
+    //         if (JSON.stringify(prevPlayers) !== JSON.stringify(newSortedPlayers)) {
+    //             return newSortedPlayers;
+    //         }
+    //         return prevPlayers;
+    //     });
+    //     console.log('변화된 플레이어들', players)
+    // }, [players]);
 
 
     // 재투표를 해야할 때
@@ -426,6 +451,9 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
     useEffect(() => {
         switch (nowGameState) {
+            case 'ENTER':
+                enter()
+                break
             case 'KICK':
                 kick()
                 break
@@ -526,10 +554,10 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                 {currentPhase === 'finalDefense' && <p>최후 변론 시간: {finalDefensePlayer}초</p>} */}
           </div>
           <div>
-              {showEmissaryModal ? <EmissaryModal gameData={gameData} onAction={choicePlayer} players={players}/>
+              {showEmissaryModal ? <EmissaryModal gameResponse={gameResponse} onAction={choicePlayer} myId={myId}/>
                 : null}
               {choiceDieOrTurncoat ? <ChoiceDieOrTurncoat onChioce={handleChoiceDieOrTurncoat}/> : null}
-              {showPoliceModal ? <PoliceModal gameData={gameData} onChioce={policeChoicedPlayer}/> : null}
+              {showPoliceModal ? <PoliceModal gameResponse={gameResponse} onChioce={policeChoicedPlayer}/> : null}
               {finalDefensePlayer ?
                 <FinalDefensePlayerModal suspect={suspect} onMessage={handleFinalDefenseResult}/> : null}
           </div>

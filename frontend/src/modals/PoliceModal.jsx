@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./PoliceModal.module.css"
 
-const PoliceModal = function({ gameData, onChioce }) {
+const PoliceModal = function({ gameResponse, onChioce }) {
     const choicedPlayer = function(playerId, playerNickname, palyerRole) {
         onChioce(playerId, playerNickname, palyerRole)
     }
@@ -11,7 +11,7 @@ const PoliceModal = function({ gameData, onChioce }) {
                 <div className={styles.container}>
                     <p>누구를 조사하시겠습니까?</p>
                     <div className={styles.btnContainer}>
-                        {gameData.playerMap
+                        {gameResponse.playerMap
                             .filter(player => player.isAlive)
                             .map((player, index) => (
                                 <button
