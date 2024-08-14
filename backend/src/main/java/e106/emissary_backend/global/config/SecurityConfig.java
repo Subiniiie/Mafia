@@ -90,7 +90,7 @@ public class SecurityConfig {
         //경로별 인가 작업 (/login 페이지와 루트 페이지, 회원가입페이지는 비로그인한 사람에게 접근 허용)
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/api/login","/", "/api/user", "/api/mail", "/api/reissue", "/api/logout", "/api/oauth2/token", "/api/oauth2/login", "/api/checkemail", "/api/checknick", "/api/users/verify").permitAll()
+                        .requestMatchers("/api/login","/", "/api/user", "/api/mail", "/api/reissue", "/api/logout", "/api/oauth2/token", "/api/oauth2/login", "/api/checkemail", "/api/checknick", "/api/users/verify", "/api/users/verifypw").permitAll()
                         .anyRequest().authenticated());
 
         //JWTFilter 추가

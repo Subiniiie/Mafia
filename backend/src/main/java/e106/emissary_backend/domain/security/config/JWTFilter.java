@@ -47,7 +47,7 @@ public class JWTFilter extends OncePerRequestFilter {
         }
 
         String requestURI = request.getRequestURI();
-        if (requestURI.equals("/api/reissue")||requestURI.equals("/")||requestURI.equals("/api/user")||requestURI.equals("/api/login")||requestURI.equals("/api/logout")||requestURI.equals("/api/mail") || requestURI.equals("/api/checknick") || requestURI.equals("/api/checkemail")) {
+        if (requestURI.equals("/api/reissue")||requestURI.equals("/")||requestURI.equals("/api/user")||requestURI.equals("/api/login")||requestURI.equals("/api/logout")||requestURI.equals("/api/mail") || requestURI.equals("/api/checknick") || requestURI.equals("/api/checkemail") || requestURI.equals("/api/users/verify") || requestURI.equals("/api/users/verifypw") ){
             chain.doFilter(request, response);
             return;
         }

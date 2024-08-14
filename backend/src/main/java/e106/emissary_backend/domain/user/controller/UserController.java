@@ -135,7 +135,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/api/users/verify")
+    @PostMapping("/api/users/verify")
     public ResponseEntity<Map<String,Object>> verifyEmail(@RequestBody CheckRequest request ) {
         Map<String, Object> map = new HashMap<>();
         try {
