@@ -111,7 +111,6 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
             setNightTimer(prevState => {
                 if (prevState <= 1) {
                     clearInterval(intervalId)
-                    setShowPoliceModal(true)
                     return 0
                 }
                 return prevState - 1
@@ -156,7 +155,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
         console.log('첩보원활동', gameResponse)
         // 나중에 응답확인
-        console.log('첩보원활동22', gameResponse.gameId)
+        // console.log('첩보원활동22', gameResponse.gameId)
         // 첩보원 플레이어의 id 저장
         // const me = gameResponse.playerMap.find(user => user.id === myId)
         const findPolice = gameResponse.playerMap.find(user => user.role === 'POLICE')
@@ -471,7 +470,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                 changeToSecretChatMode();
                 break
             case 'NIGHT_POLICE' :
-                // policeTime()
+                policeTime()
                 break
             case 'VOTE_START' :
                 // 낮이 되었을 때, 비디오/오디오 처리
@@ -557,7 +556,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
               {showEmissaryModal ? <EmissaryModal gameResponse={gameResponse} onAction={choicePlayer} myId={myId}/>
                 : null}
               {choiceDieOrTurncoat ? <ChoiceDieOrTurncoat onChioce={handleChoiceDieOrTurncoat}/> : null}
-              {showPoliceModal ? <PoliceModal gameResponse={gameResponse} onChioce={policeChoicedPlayer}/> : null}
+              {showPoliceModal ? <PoliceModal gameResponse={gameResponse} onChioce={policeChoicedPlayer} myId={myId}/> : null}
               {finalDefensePlayer ?
                 <FinalDefensePlayerModal suspect={suspect} onMessage={handleFinalDefenseResult}/> : null}
           </div>
