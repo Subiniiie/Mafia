@@ -57,7 +57,7 @@ const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
                 password: password
             }
 
-            const response = await axios.post('http://localhost:8080/api/login',
+            const response = await axios.post('https://i11e106.p.ssafy.io/api/login',
                 JSON.stringify(body), {
                 headers: {
                     "Content-Type": "application/json",
