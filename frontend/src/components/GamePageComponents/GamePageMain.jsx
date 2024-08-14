@@ -312,6 +312,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                 }
               )
         }
+    }
     
 
     // 밤이 되었을 때, 채팅 모드 변환
