@@ -2,6 +2,7 @@ package e106.emissary_backend.domain.game.service.subscriber.message;
 
 import e106.emissary_backend.domain.game.enumType.GameState;
 import e106.emissary_backend.domain.game.enumType.VoteState;
+import e106.emissary_backend.domain.game.model.GameDTO;
 import e106.emissary_backend.domain.game.model.Player;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,6 +23,7 @@ public class EndConfirmMessage {
     private HashMap<Long, Integer> voteMap;
     private Long targetId;
     private String result;
+    private GameDTO gameDTO;
     @Builder.Default
     private Map<Long, Player> playerMap = new HashMap<>();
 

@@ -13,6 +13,7 @@ import e106.emissary_backend.domain.game.util.GameUtil;
 import e106.emissary_backend.global.error.CommonErrorCode;
 import e106.emissary_backend.global.error.exception.NotFoundGameException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisKeyValueTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EndConfirmTask implements GameTask {
@@ -48,6 +50,7 @@ public class EndConfirmTask implements GameTask {
     @RedissonLock(value = "#gameId")
     @Override
     public void execute(Long gameId) {
+        log.info("end confirm task run");
         Game game = redisGameRepository.findById(gameId).orElseThrow(
                 () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
         GameDTO gameDTO = GameDTO.toDto(game);
@@ -65,6 +68,7 @@ public class EndConfirmTask implements GameTask {
 
         EndConfirmMessage endConfirmMessage = EndConfirmMessage.builder()
                 .gameId(gameId)
+                .gameDTO(gameDTO)
                 .voteMap(voteMap)
                 .build();
 
@@ -89,6 +93,7 @@ public class EndConfirmTask implements GameTask {
 
 
         if(!gameUtil.isEnd(gameId)){
+            log.info("game is not end in endConfirm ended");
             Player police = gameDTO.getPolice();
             Player emissary = gameDTO.getEmissary();
             nightEmissaryTask.setGameIdAndTargets(gameId, emissary, police);

@@ -83,6 +83,7 @@ public class EndVoteTask implements GameTask {
             // 다시 투표하세용
             publisher.publish(startVoteTopic, StartVoteMessage.builder()
                             .gameState(GameState.VOTE_START)
+                            .gameDTO(gameDTO)
                             .gameId(gameId)
                             .build());
             // 예약
@@ -91,6 +92,7 @@ public class EndVoteTask implements GameTask {
             // todo : 게임상태 변경 해야함
             // 타이머 - 최후변론 시간 주고 최종투표 안내.
             startConfirmTask.setGameId(gameId);
+            startConfirmTask.setGameDTO(gameDTO);
             scheduler.scheduleTask(gameId, TaskName.START_CONFIRM_TASK, startConfirmTask, 15, TimeUnit.SECONDS);
         }
 
