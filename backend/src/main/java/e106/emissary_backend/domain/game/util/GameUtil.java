@@ -19,6 +19,7 @@ import e106.emissary_backend.domain.userInRoom.repository.UserInRoomRepository;
 import e106.emissary_backend.global.error.CommonErrorCode;
 import e106.emissary_backend.global.error.exception.NotFoundGameException;
 import e106.emissary_backend.global.error.exception.NotFoundRoomException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisKeyValueTemplate;
@@ -43,6 +44,7 @@ public class GameUtil {
     private final ChannelTopic endTopic;
     private final UserRepository userRepository;
 
+    @Transactional
     @RedissonLock(value = "#gameId")
     public boolean isEnd(long gameId){
         log.info("Game is End Validation run in GameUtil.java");
@@ -60,15 +62,17 @@ public class GameUtil {
         long personCnt = roleCounts.getOrDefault(GameRole.PERSON, 0L) + roleCounts.getOrDefault(GameRole.POLICE, 0L);
         log.info("left emissary_betrayer : {} , person_police : {}", emissaryCnt, personCnt);
 
-        List<UserInRoom> userInRooms = userInRoomRepository.findAllByPk_RoomId(gameId).orElseThrow(
-                () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
+//        List<UserInRoom> userInRooms = userInRoomRepository.findAllByPk_RoomId(gameId).orElseThrow(
+//                () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
 
         boolean result = true;
         if(emissaryCnt == 0){
-            update(userInRooms, playerMap, -1);
+//            update(userInRooms, playerMap, -1);
+            update(gameId, playerMap, -1);
             endPublish(gameId, GameRole.PERSON, gameDTO);
         }else if(emissaryCnt >= personCnt){
-            update(userInRooms, playerMap, 1);
+//            update(userInRooms, playerMap, 1);
+            update(gameId, playerMap, 1);
             endPublish(gameId, GameRole.EMISSARY, gameDTO);
         }else{
             result = false;
@@ -78,29 +82,32 @@ public class GameUtil {
         return result;
     } // end of isEnd
 
-    public void emissaryWin(long gameId) {
-        Game game = getGame(gameId);
+//    public void emissaryWin(long gameId) {
+//        Game game = getGame(gameId);
+//
+//        Map<Long, Player> playerMap = game.getPlayerMap();
+//
+//        List<UserInRoom> userInRooms = userInRoomRepository.findAllByPk_RoomId(gameId).orElseThrow(
+//                () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
+//
+//        update(userInRooms, playerMap, 1);
+//    } // end of emissary Win
 
-        Map<Long, Player> playerMap = game.getPlayerMap();
+//    public void personWin(long gameId) {
+//        Game game = getGame(gameId);
+//
+//        Map<Long, Player> playerMap = game.getPlayerMap();
+//
+//        List<UserInRoom> userInRooms = userInRoomRepository.findAllByPk_RoomId(gameId).orElseThrow(
+//                () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
+//
+//        update(userInRooms, playerMap, -1);
+//    } // end of person Win
 
+    private void update(long gameId, Map<Long, Player> playerMap, int value) {
         List<UserInRoom> userInRooms = userInRoomRepository.findAllByPk_RoomId(gameId).orElseThrow(
                 () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
 
-        update(userInRooms, playerMap, 1);
-    } // end of emissary Win
-
-    public void personWin(long gameId) {
-        Game game = getGame(gameId);
-
-        Map<Long, Player> playerMap = game.getPlayerMap();
-
-        List<UserInRoom> userInRooms = userInRoomRepository.findAllByPk_RoomId(gameId).orElseThrow(
-                () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
-
-        update(userInRooms, playerMap, -1);
-    } // end of person Win
-
-    private void update(List<UserInRoom> userInRooms, Map<Long, Player> playerMap, int value) {
         log.info("직업별 유저 리스트 뽑아서 늘려주기");
         List<User> personUsers = getUpdateUsers(userInRooms,
                 getRoleList(playerMap, GameRole.PERSON),
