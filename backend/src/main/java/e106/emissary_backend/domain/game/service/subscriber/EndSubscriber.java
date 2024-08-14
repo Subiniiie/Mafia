@@ -2,7 +2,6 @@ package e106.emissary_backend.domain.game.service.subscriber;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import e106.emissary_backend.domain.game.service.subscriber.message.CommonMessage;
 import e106.emissary_backend.domain.game.service.subscriber.message.EndMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

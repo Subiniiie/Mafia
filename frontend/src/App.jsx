@@ -54,7 +54,7 @@ function App() {
         refresh: refreshToken
       }
 
-      const response = await axios.post('https://i11e106.p.ssafy.io/api/reissue', JSON.stringify(body), {
+      const response = await axios.post('http://localhost:8080/api/reissue', JSON.stringify(body), {
         headers: {
           "Content-Type": "application/json",
         },

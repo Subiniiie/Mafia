@@ -60,7 +60,7 @@ const Monitor = function({ nickname, isRoomManager, isMe, isAlive, onVote, isVot
 
         // 백엔드 서버에 강퇴 요청 => 해당 streamManager에 대해 SessionDisconnected Event 발생
         // event.reason === 'forceDisconnectByServer' 인지 확인 후 조건 분기하여 처리
-        axios.delete('https://i11e106.p.ssafy.io/api/rooms/kick', {
+        axios.delete('http://localhost:8080/api/rooms/kick', {
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${access}`,

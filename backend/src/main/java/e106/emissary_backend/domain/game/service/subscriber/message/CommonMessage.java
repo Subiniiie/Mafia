@@ -8,6 +8,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,4 +20,7 @@ public class CommonMessage {
     private Player nowPlayer;
     private GameState gameState;
     private CommonResult result;
+
+    @Builder.Default
+    private Map<Long, Player> playerMap = new HashMap<>();
 }
