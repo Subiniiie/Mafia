@@ -82,6 +82,10 @@ function GamePage() {
             }).then((res) => {
                 setGameData(res.data);
                 console.log("API요청으로 데이터 들고옴",res.data);
+
+                res.data.userList = res.data.userList.sort((a, b) => a.creationTime - b.creationTime);
+                console.log('res.data.userList 정렬 시도', res.data.userList);
+
                 setPlayers(res.data.userList)
                 console.log("API요청으로 들고온 USER", res.data.userList);
              
@@ -215,6 +219,7 @@ function GamePage() {
             console.log("구독 안됐는지 확인")
         }
 
+        // 연결을 해
         const socket = new WebSocket("wss://i11e106.p.ssafy.io/ws")
         const access = localStorage.getItem('access');
 
@@ -222,23 +227,33 @@ function GamePage() {
         stompClient.current.connect({
             'Authorization': `Bearer ${access}`
         }, () => {
+            // /sub/roomID로 구독을해
             stompClient.current.subscribe(`/sub/${roomId}`, (message) =>
                 {
                     if(message.body){
                         console.log("IN! WS");
                         console.log(message.body);
                         const messageJson = JSON.parse(message.body);
+                        console.log('게임페이지에서 구독한 거 보여줌', messageJson)
+
+                        // console.log('playerMap 타입 : ', typeof messageJson.gameDTO.playerMap);
+
+                        // messageJson.gameDTO.playerMap = Object.values(messageJson.gameDTO.playerMap);
+
+
+                        // messageJson.gameDTO.playerMap = messageJson.gameDTO.playerMap.sort((a, b) => a.creationTime - b.creationTime);
+
+                        console.log('messageJson.playerMap 정렬 시도', messageJson);
+
                         setGameResponse(messageJson);
                         setNowGameState(messageJson.gameState)
                         console.log('웹소켓을 구독하고 나서 서버에서 뭔가를 내려줬을때 받은 message, gameResponse', messageJson);
                         // activeWebsocket()
-
+                        console.log("입장 데이터 확인 : ", messageJson)
                     } else {
                        console.log("OUT! WS");
                     }
                     // const messageJson = JSON.parse(message.body)
-                    console.log("입장 데이터 확인 : ", messageJson)
-                    setGameResponse(messageJson)
                     // setNowGameState(messageJson.gameState)
             })
         })
@@ -279,10 +294,14 @@ function GamePage() {
                         setChatHistory={setChatHistory}
                         setChatMode={setChatMode}
                         stompClient={stompClient}
+                        // 여기도 하나
                         gameData={gameData}
                         nowGameState={nowGameState}
+                        setNowGameState={setNowGameState}
                         gameResponse={gameResponse}
+                        // 여기 하나
                         players={players}
+                        // 바뀔수있는 방법?
                         setPlayers={setPlayers}
                         getMyJob={getMyJob}
                     />
@@ -292,12 +311,14 @@ function GamePage() {
                         systemMessage={systemMessage}
                         roomId={roomId}
                         stompClient={stompClient}
+                        //여기도 하나
                         gameData={gameData}
                         nowGameState={nowGameState}
                         gameResponse={gameResponse}
                         session={session}
                         chatHistory={chatHistory}
                         chatMode={chatMode}
+                        //여기하나
                         players={players}
                         myJob={myJob}
                     />

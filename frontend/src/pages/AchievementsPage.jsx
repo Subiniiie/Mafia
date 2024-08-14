@@ -57,15 +57,33 @@ function AchievementsPage() {
     return (
         <div className={styles.container}>
             <div className={styles.main}>
-                <div className={styles.slides}>
-                    {myAchievementsCard.concat(myAchievementsCard).map((achievement) => (
-                        <AchievementsCard
+                {/* 획득업적 */}
+                <div className={styles.slides1}>
+                    {myAchievementsCard.map((achievement) => (
+                        <AchievementsCard 
                             key={achievement.id}
                             achievementName={achievement.achievementName}
                             achievementDate={achievement.achievementDate}
                             description={achievement.description}
                             image={achievement.image}
+                            acquire={true}
                             className={styles.card}
+                            />
+                        ))}
+                </div>
+            </div>
+            <div className={styles.main}>
+                {/* 미획득업적 */}
+                <div className={styles.slides2}>
+                    {myAchievementsCard.map((achievement) => (
+                        <AchievementsCard 
+                        key={achievement.id}
+                        achievementName={achievement.achievementName}
+                        achievementDate={achievement.achievementDate}
+                        description={achievement.description}
+                        image={achievement.image}
+                        acquire={false}
+                        className={styles.card}
                         />
                     ))}
                 </div>
