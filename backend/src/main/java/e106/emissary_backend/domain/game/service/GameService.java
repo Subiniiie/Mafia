@@ -67,6 +67,7 @@ public class GameService {
     private final StartVoteTask startVoteTask;
     private final ChannelTopic endVoteTopic;
     private final ChannelTopic enterGameTopic;
+    private final ChannelTopic dayTopic;
 
     private final EndVoteTask endVoteTask;
     private final StartConfirmTask startConfirmTask;
@@ -279,6 +280,15 @@ public class GameService {
 
         // 2분뒤 투표 시작
         if(!gameUtil.isEnd(gameId)){
+            log.info("not end so run publish");
+            publisher.publish(dayTopic, DayMessage.builder()
+                            .gameState(GameState.DAY)
+                            .gameId(gameId)
+                            .gameDTO(gameDTO)
+                            .build());
+            log.info("startVoteTask scheduler run");
+            startVoteTask.setGameId(gameId);
+            startVoteTask.setGameDTO(gameDTO);
             scheduler.scheduleTask(gameId, TaskName.START_VOTE_TASK, startVoteTask, 15, TimeUnit.SECONDS );
         }
     } // end of day

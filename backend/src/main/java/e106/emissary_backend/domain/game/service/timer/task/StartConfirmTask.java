@@ -1,20 +1,24 @@
 package e106.emissary_backend.domain.game.service.timer.task;
 
 import e106.emissary_backend.domain.game.enumType.GameState;
+import e106.emissary_backend.domain.game.model.GameDTO;
 import e106.emissary_backend.domain.game.service.publisher.RedisPublisher;
 import e106.emissary_backend.domain.game.service.subscriber.message.StartConfirmMessage;
 import e106.emissary_backend.domain.game.service.timer.SchedulerService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StartConfirmTask implements GameTask {
     private Long gameId;
+    private GameDTO gameDTO;
 
     private final RedisPublisher publisher;
 
@@ -30,9 +34,11 @@ public class StartConfirmTask implements GameTask {
 
     @Override
     public void execute(Long gameId) {
+        log.info("start Confirm task run");
         //todo : vote 시작했다고 publish -> sub에서 프론트에게 알림
         publisher.publish(startConfirmTopic, StartConfirmMessage.builder()
                         .gameState(GameState.CONFIRM_START)
+                        .gameDTO(gameDTO)
                         .gameId(gameId)
                         .build());
         
@@ -43,5 +49,9 @@ public class StartConfirmTask implements GameTask {
 
     public void setGameId(long gameId){
         this.gameId = gameId;
+    }
+
+    public void setGameDTO(GameDTO gameDTO) {
+        this.gameDTO = gameDTO;
     }
 }

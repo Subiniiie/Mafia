@@ -101,7 +101,8 @@ public class RedisConfig {
                                                                        MessageListenerAdapter enterRoomAdapter, ChannelTopic enterRoomTopic,
                                                                        MessageListenerAdapter kickUserAdapter, ChannelTopic kickUserTopic,
                                                                        MessageListenerAdapter endAdapter, ChannelTopic endTopic,
-                                                                       MessageListenerAdapter enterGameAdapter, ChannelTopic enterGameTopic) {
+                                                                       MessageListenerAdapter enterGameAdapter, ChannelTopic enterGameTopic,
+                                                                       MessageListenerAdapter dayAdapter, ChannelTopic dayTopic) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         // subscriber, topic
@@ -251,6 +252,16 @@ public class RedisConfig {
     @Bean
     public ChannelTopic enterGameTopic() {
         return new ChannelTopic("ENTER_GAME");
+    }
+
+    @Bean
+    public MessageListenerAdapter dayAdapter(DaySubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "sendMessage");
+    }
+
+    @Bean
+    public ChannelTopic dayTopic() {
+        return new ChannelTopic("DAY");
     }
 
 }
