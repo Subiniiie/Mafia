@@ -46,7 +46,7 @@ public class StartVoteTask implements GameTask {
         
         // 2분뒤 투표종료 안내
         endVoteTask.setGameId(gameId);
-        scheduler.scheduleTask(gameId, TaskName.END_VOTE_TASK, endVoteTask, 15, TimeUnit.SECONDS);
+        scheduler.scheduleTask(gameId, TaskName.END_VOTE_TASK, endVoteTask, 30, TimeUnit.SECONDS);
     }
 
     public void setGameId(long gameId){
