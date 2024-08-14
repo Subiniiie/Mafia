@@ -1,55 +1,40 @@
-.profilePage {
+/* 최상위 div */
+.container {
+    margin-top: 100px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
-    background-color: #1a1a1a;
-    color: #fff;
+    padding: 30px;
+    background-color: #12151D;
+    color: white;
     min-height: 100vh;
-    /* Viewport의 높이 100% */
 }
 
+/* 2번째 div, 내용이 들어가는 box size 정의 */
+.containerMini {
+    width: 500px;
+}
+
+/* 입단 정보, 제목 div */
 .heading {
     font-size: 24px;
     margin-bottom: 20px;
+    text-align: start;
 }
 
-
+/* 조회 모드 정보 모음 div */
 .profileInfo {
-    text-align: center;
+    text-align: start;
     width: 100%;
-    max-width: 400px;
+    gap: 15px;
+    font-size: 18px;
 }
 
 .infoBox {
-    background-color: #333;
     padding: 10px;
     margin-bottom: 10px;
     border-radius: 5px;
     width: 100%;
-    max-width: 400px;
-}
-
-
-.form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 400px;
-}
-
-.label {
-    margin-bottom: 10px;
-}
-
-
-.infoBox {
-    background-color: #333;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    color: #fff;
 }
 
 .input {

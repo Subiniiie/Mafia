@@ -15,14 +15,21 @@ import e106.emissary_backend.domain.game.service.timer.SchedulerService;
 import e106.emissary_backend.domain.game.service.timer.task.*;
 import e106.emissary_backend.domain.game.util.GameUtil;
 import e106.emissary_backend.domain.game.util.RoleUtils;
+import e106.emissary_backend.domain.room.dto.RoomDetailDto;
 import e106.emissary_backend.domain.room.entity.Room;
 import e106.emissary_backend.domain.room.enumType.RoomState;
 import e106.emissary_backend.domain.room.repository.RoomRepository;
+import e106.emissary_backend.domain.room.service.subscriber.message.EnterRoomMessage;
+import e106.emissary_backend.domain.user.dto.RoomDetailUserDto;
+import e106.emissary_backend.domain.user.entity.User;
+import e106.emissary_backend.domain.userInRoom.entity.UserInRoom;
+import e106.emissary_backend.domain.userInRoom.repository.UserInRoomRepository;
 import e106.emissary_backend.global.error.CommonErrorCode;
 import e106.emissary_backend.global.error.exception.*;
 import io.jsonwebtoken.lang.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.misc.Hash;
 import org.springframework.data.redis.core.RedisKeyValueTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
@@ -41,6 +48,8 @@ public class GameService {
 
     private final RedisGameRepository redisGameRepository;
     private final RoomRepository roomRepository;
+    private final UserInRoomRepository userInRoomRepository;
+
     private final RedisTemplate<String, HashMap<Long, Integer>> voteRedisTemplate;
     private final RedisKeyValueTemplate redisKeyValueTemplate;
     private final SchedulerService scheduler;
@@ -50,11 +59,14 @@ public class GameService {
     private final ChannelTopic readyCompleteTopic;
     private final ChannelTopic gameSetTopic;
     private final ChannelTopic startVoteTopic;
+    private final ChannelTopic enterRoomTopic;
+
 
     private final NightEmissaryTask nightEmissaryTask;
 
     private final StartVoteTask startVoteTask;
     private final ChannelTopic endVoteTopic;
+    private final ChannelTopic enterGameTopic;
 
     private final EndVoteTask endVoteTask;
     private final StartConfirmTask startConfirmTask;
@@ -86,7 +98,7 @@ public class GameService {
             log.info("playerId : {} , ready : {}",value.getId(), value.isReady());
         }
 
-        commonPublish(gameId, GameState.WAIT, CommonResult.SUCCESS);
+        commonPublish(gameId, GameState.WAIT, CommonResult.SUCCESS, playerMap);
 
         // 모두가 준비가 끝나면 알려주기.
         // 로직 개대충 짰더니 일단 급하게 매꾸기
@@ -115,7 +127,7 @@ public class GameService {
 
         player.setReady(false);
 
-        commonPublish(gameId, GameState.WAIT, CommonResult.FAILED);
+        commonPublish(gameId, GameState.WAIT, CommonResult.FAILED, playerMap);
 
         update(gameDTO);
     } // end of readyCancel
@@ -123,6 +135,7 @@ public class GameService {
 
     public void setGame(long roomId, long userId) {
         GameDTO gameDTO = getGameDTO(roomId);
+        Map<Long, Player> playerMap = gameDTO.getPlayerMap();
 
         gameDTO.setGameState(GameState.STARTED);
         gameDTO.setDay(0);
@@ -145,6 +158,7 @@ public class GameService {
         Player emissary = gameDTO.getEmissary();
         Player police = gameDTO.getPolice();
         nightEmissaryTask.setGameIdAndTargets(roomId, emissary, police);
+        nightEmissaryTask.setPlayerMap(playerMap);
         scheduler.scheduleTask(roomId, TaskName.NIGHT_EMISSARY, nightEmissaryTask, 15, TimeUnit.SECONDS);
 
         publisher.publish(gameSetTopic, GameSetMessage.builder()
@@ -285,7 +299,7 @@ public class GameService {
         update(gameDTO);
 
         if(GameRole.BETRAYER.equals(player.getRole())){
-            commonPublish(gameId, GameState.VOTE, CommonResult.SUCCESS);
+            commonPublish(gameId, GameState.VOTE, CommonResult.SUCCESS, playerMap);
         }else {
             String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
 
@@ -294,7 +308,7 @@ public class GameService {
             voteMap.put(targetId, voteMap.getOrDefault(targetId, 0) + 1);
             voteRedisTemplate.opsForValue().set(voteKey, voteMap);
 
-            commonPublish(gameId, GameState.VOTE, CommonResult.SUCCESS);
+            commonPublish(gameId, GameState.VOTE, CommonResult.SUCCESS, playerMap);
         }
         if (playerMap.values().stream().filter(Player::isVoted).count() == playerMap.size()) {
             endVoteTask.execute(gameId);
@@ -338,7 +352,7 @@ public class GameService {
         update(gameDTO);
 
         if(GameRole.BETRAYER.equals(player.getRole())){
-            commonPublish(gameId, GameState.VOTE, CommonResult.SUCCESS);
+            commonPublish(gameId, GameState.VOTE, CommonResult.SUCCESS, playerMap);
         }else{
             String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
 
@@ -347,7 +361,7 @@ public class GameService {
             voteMap.put(userId, confirm ? 1 : 0);
             voteRedisTemplate.opsForValue().set(voteKey, voteMap);
 
-            commonPublish(gameId, GameState.CONFIRM_VOTE, CommonResult.SUCCESS);
+            commonPublish(gameId, GameState.CONFIRM_VOTE, CommonResult.SUCCESS, playerMap);
         }
 
         if (playerMap.values().stream().filter(Player::isVoted).count() == playerMap.size()) {
@@ -403,11 +417,31 @@ public class GameService {
         return gameDTO;
     } // end of getGameDTO
 
-    private void commonPublish(long gameId, GameState gameState, CommonResult commonResult){
+    private void commonPublish(long gameId, GameState gameState, CommonResult commonResult, Map<Long, Player> playerMap){
         publisher.publish(commonTopic, CommonMessage.builder()
-                .gameId(gameId)
-                .gameState(gameState)
-                .result(commonResult)
-                .build());
+                        .gameId(gameId)
+                        .gameState(gameState)
+                        .result(commonResult)
+                        .playerMap(playerMap)
+                        .build());
     } // end of commonPublish
+
+    public GameRole getRole(long userId, long roomId) {
+        Game game = redisGameRepository.findByGameId(roomId).orElseThrow(() -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+
+        return game.getPlayerMap().get(userId).getRole();
+    } // end of getRole
+
+    @RedissonLock(value = "#gameId")
+    public void enter(long gameId, long userId) {
+        Game game = redisGameRepository.findByGameId(gameId).orElseThrow(() -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+
+        GameDTO gameDTO = GameDTO.toDto(game);
+
+        publisher.publish(enterGameTopic, EnterGameMessage.builder()
+                        .gameId(gameId)
+                        .gameState(GameState.ENTER)
+                        .gameDTO(gameDTO)
+                        .build());
+    }
 }

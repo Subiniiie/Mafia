@@ -46,7 +46,7 @@ const GameRoomCard = ({ id, title, leader, progress, isInProgress, password, isP
                 <div className={`${styles.cardMain} ${isInProgress ? styles.inProgressContent : styles.notStartedContent}`}>
                     <p className={styles.progress}>
                         {progress}/8
-                        {isPrivate && <span>극비 임무</span>}
+                        {isPrivate && <span className={styles.privateStyle}>, 극비 임무</span>}
                     </p>
                 </div>
             </div>

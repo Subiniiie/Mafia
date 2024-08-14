@@ -1,6 +1,7 @@
 package e106.emissary_backend.domain.game.controller;
 
 
+import e106.emissary_backend.domain.game.enumType.GameRole;
 import e106.emissary_backend.domain.game.model.ConfirmVoteRequestDTO;
 import e106.emissary_backend.domain.game.model.VoteRequestDTO;
 import e106.emissary_backend.domain.game.service.GameService;
@@ -8,6 +9,7 @@ import e106.emissary_backend.domain.game.service.subscriber.message.ConnectMessa
 import e106.emissary_backend.domain.user.dto.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -17,6 +19,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * MessageMapping request : /ws-stomp/....
@@ -37,6 +42,12 @@ public class SocketGameController {
         return ConnectMessage.builder().build();
     }
 
+    @MessageMapping("/enter/{roomId}")
+    public void enter(@DestinationVariable Long roomId, SimpMessageHeaderAccessor headerAccessor) {
+        long userId = getUserIdIAccessor(headerAccessor);
+
+        gameService.enter(roomId, userId);
+    }
     @MessageMapping("/ready/{roomId}")
     public void ready(@DestinationVariable Long roomId, SimpMessageHeaderAccessor headerAccessor) {
         long userId = getUserIdIAccessor(headerAccessor);
@@ -75,6 +86,13 @@ public class SocketGameController {
     public void detect(SimpMessageHeaderAccessor headerAccessor, @DestinationVariable Long roomId, @DestinationVariable Long targetId) {
         long userId = getUserIdIAccessor(headerAccessor);
         gameService.detect(roomId, targetId, userId);
+    }
+
+    @GetMapping("/api/games/roles/{roomId}")
+    @ResponseBody
+    public ResponseEntity<GameRole> getRole(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable long roomId){
+        long userId = userDetails.getUserId();
+        return ResponseEntity.ok(gameService.getRole(userId, roomId));
     }
 
     @MessageMapping("/day/{roomId}")

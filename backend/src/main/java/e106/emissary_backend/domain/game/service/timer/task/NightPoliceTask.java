@@ -13,6 +13,7 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -21,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 public class NightPoliceTask implements GameTask {
     private Long gameId;
     private Player police;
+    private Map<Long, Player> playerMap;
 
     private final RedisPublisher publisher;
 
@@ -42,11 +44,16 @@ public class NightPoliceTask implements GameTask {
                         .gameState(GameState.NIGHT_POLICE)
                         .result(CommonResult.SUCCESS)
                         .nowPlayer(police)
+                        .playerMap(playerMap)
                         .build());
     }
 
     public void setGameIdAndTarget(long gameId, Player police){
         this.gameId = gameId;
         this.police = police;
+    }
+
+    public void setPlayerMap(Map<Long, Player> playerMap) {
+        this.playerMap = playerMap;
     }
 }
