@@ -97,6 +97,7 @@ public class SocketGameController {
 
     @MessageMapping("/day/{roomId}")
     public void day(@DestinationVariable Long roomId) {
+        log.info("day run");
         gameService.day(roomId);
     }
 
