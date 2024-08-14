@@ -289,8 +289,8 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
                     strMgr.subscribeToAudio(false);
                 }
               )
-            }
-        
+        }
+    }    
     
 
     // 낮이 되었을 때 비디오/오디오 처리 handler
