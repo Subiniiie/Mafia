@@ -136,13 +136,34 @@ public class UserController {
     }
 
     @GetMapping("/api/users/verify")
-    public ResponseEntity<Map<String,Object>> verifyEmail(@AuthenticationPrincipal CustomUserDetails currentUser) {
+    public ResponseEntity<Map<String,Object>> verifyEmail(@RequestBody CheckRequest request ) {
         Map<String, Object> map = new HashMap<>();
         try {
-            String code = userService.verifyUser(currentUser.getEmail());
+            String code = userService.verifyUser(request.getData());
             map.put("status", "success");
             map.put("code", code);
             return ResponseEntity.ok(map);
+        } catch (UsernameNotFoundException e){
+            map.put("status", "fail");
+            map.put("message", e.getMessage());
+            return ResponseEntity.internalServerError().body(map);
+        }
+    }
+
+    @PostMapping("/api/users/verifypw")
+    public ResponseEntity<Map<String,Object>> verifyEmail(@AuthenticationPrincipal CustomUserDetails currentUser, @RequestBody CheckRequest request) {
+        Map<String, Object> map = new HashMap<>();
+        try {
+            boolean res = userService.verifyPwd(currentUser.getEmail(), request.getData());
+            if (res){
+                map.put("status", "success");
+                map.put("message", "비밀번호가 일치합니다.");
+                return ResponseEntity.ok(map);
+            } else {
+                map.put("status", "fail");
+                map.put("message", "비밀번호가 다릅니다.");
+                return ResponseEntity.internalServerError().body(map);
+            }
         } catch (UsernameNotFoundException e){
             map.put("status", "fail");
             map.put("message", e.getMessage());

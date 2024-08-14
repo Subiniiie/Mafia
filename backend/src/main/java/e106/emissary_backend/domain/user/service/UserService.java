@@ -218,6 +218,21 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    public boolean verifyPwd(String email, String inPwd){
+        Optional<User> user = userRepository.findByEmail(email);
+        if(user.isPresent()){
+            String encodedPwd = user.get().getPassword();
+            String rawPwd = inPwd;
+            if(passwordEncoder.matches(rawPwd, encodedPwd)){
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            throw new UsernameNotFoundException("일치하는 유저가 없습니다!");
+        }
+    }
+
     public List<User> getContainNickname(String s){
         return userRepository.findByNicknameContaining(s);
     }
