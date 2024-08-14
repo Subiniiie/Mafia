@@ -133,6 +133,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // 죽일까 변절시킬까
     const handleChoiceDieOrTurncoat = (choiced) => {
         console.log('죽일거야 변절시킬거야?', choiced)
+        console.log('나 얘 죽이거나 변절시킼ㄴ다', emissaryTarget)
         if (choiced === '변절') {
             stompClient.current.send(
                 `/ws/pub/appease/${roomId}/${emissaryTarget}`, 
@@ -147,6 +148,10 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
             )
         }
         setchoiceDieOrTurncoat(false)
+
+        const temp = Object.values(gameResponse.PlayerMap);
+        const sortedPlayers = temp.sort((a, b) => a.creationTime - b.creationTime);
+        setPlayers(sortedPlayers);
     }
 
     // 첩보원이 활동한다
@@ -158,7 +163,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         // console.log('첩보원활동22', gameResponse.gameId)
         // 첩보원 플레이어의 id 저장
         // const me = gameResponse.playerMap.find(user => user.id === myId)
-        const findPolice = gameResponse.playerMap.find(user => user.role === 'POLICE')
+        const findPolice = Object.values(gameResponse.playerMap).find(user => user.role === 'POLICE')
         const me = findPolice.id === Number(myId)
         if (me) {
             setShowPoliceModal(true)
@@ -169,6 +174,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // 첩보원이 선택한 플레이어의 역할을 아는 함수
     const policeChoicedPlayer = function(targetId, targetNickname, targetRole) {
         setShowPoliceModal(false)
+        console.log('첩보원이 조사하기 싶은 사람이 오니?', targetId, targetNickname, targetRole)
         stompClient.current.send(
             `/ws/pub/detect/${roomId}/${targetId}`, 
             header,
@@ -240,7 +246,8 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
             }   
         );
         const myRole = response.data;
-       return myRole === 'EMISSARY' || myRole === 'BETRAYER'
+        console.log('나 밀정임? ', myRole === 'EMISSARY' || myRole === 'BETRAYER');
+        return myRole === 'EMISSARY' || myRole === 'BETRAYER';
     }
 
     // 채팅창 주석(나중에 지우기!!)
@@ -254,6 +261,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // 밤이 되었을 때 비디오/오디오 처리 handler
     const handleVideoAudioAtNight = async () => {
         const publisherIdx = streamManagers.findIndex(strMgr => !strMgr.remote);
+        console.log('handleVideoAudioAtNight : ', publisherIdx);
         // console.log('밤이 되었다', publisherIdx)
         // console.log('밤이 되었다22', streamManagers)
 
@@ -262,7 +270,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         //             "Content-Type": "application/json",
         //             "Authorization": `Bearer ${access}`,
         //         }
-        //     }   
+        //     }
         // );
         // const myRole = response.data;
         // console.log('내 직업 : ', response.data);
@@ -292,7 +300,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
 
         //if (!isEmissaryOrBetrayer(players[publisherIdx])) {
             // if (!isEmissaryOrBetrayer(gameResponse.nowPlayer)) {
-        if (!isEmissaryOrBetrayer())
+        if (!isEmissaryOrBetrayer()) {
             streamManagers[publisherIdx].publishVideo(true);
             streamManagers[publisherIdx].publishAudio(true);
 
@@ -387,7 +395,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         if (choiced === '찬성') {
             stompClient.current.send(
                 `/ws/pub/confirm/${roomId}`,
-                header, 
+                header,
                 JSON.stringify({targetId})
             )
         }
@@ -403,7 +411,6 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         )
         handleResult()
     }
-
 
     // 게임 결과 반영
     const handleResult = async() => {
