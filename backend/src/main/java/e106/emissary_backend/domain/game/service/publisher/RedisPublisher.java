@@ -51,6 +51,11 @@ public class RedisPublisher {
         redisTemplate.convertAndSend(topic.getTopic(), message);
     }
 
+
+    public void publish(ChannelTopic topic, EnterGameMessage message) {
+        redisTemplate.convertAndSend(topic.getTopic(), message);
+    }
+
     public void publish(ChannelTopic topic, EnterRoomMessage message) {
         redisTemplate.convertAndSend(topic.getTopic(), message);
     }

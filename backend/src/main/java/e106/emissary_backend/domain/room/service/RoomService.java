@@ -363,6 +363,9 @@ public class RoomService {
         System.out.println(String.valueOf(roomId));
 
         // 레디스에서 삭제
+        Game game = redisGameRepository.findByGameId(roomId).orElseThrow(() -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+        GameDTO gameDTO = GameDTO.toDto(game);
+
         deleteUserInRedis(roomId, userId);
         System.out.println("redis delete complete");
         
@@ -381,7 +384,7 @@ public class RoomService {
             userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(userId, roomId);
             System.out.println("remove session @mysql complete");
             //remove user @redis
-            publishRemoveUser(roomId, userId);
+            publishRemoveUser(roomId, userId, gameDTO);
         } else if (users.get(token) == SessionRole.HOST){
             // 방장 위임
             users.remove(token);
@@ -405,7 +408,7 @@ public class RoomService {
                 userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(userId, roomId);
                 System.out.println("remove session @mysql complete");
                 //remove user @redis
-                publishRemoveUser(roomId, userId);
+                publishRemoveUser(roomId, userId, gameDTO);
             }
         }
 
@@ -481,8 +484,12 @@ public class RoomService {
         log.info("여긴가");
 
         // 레디스 처리하고
+
+        Game game = redisGameRepository.findByGameId(roomKickDto.getRoomId()).orElseThrow(() -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+        GameDTO gameDTO = GameDTO.toDto(game);
+
         deleteUserInRedis(roomKickDto.getRoomId(), targetId);
-        publishRemoveUser(roomKickDto.getRoomId(), userId);
+        publishRemoveUser(roomKickDto.getRoomId(), userId, gameDTO);
         log.info("레디스 처리 완료");
 
         // Map 삭제하고
@@ -558,7 +565,7 @@ public class RoomService {
         redisKeyValueTemplate.update(updateGame);
     }
 
-    private void publishRemoveUser(Long roomId, long userId) {
+    private void publishRemoveUser(Long roomId, long userId, GameDTO gameDTO) {
         List<UserInRoom> userInRoomList = userInRoomRepository.findAllByPk_RoomId(roomId).orElseThrow(
                 () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
         Room room = userInRoomList.get(0).getRoom();
@@ -587,6 +594,7 @@ public class RoomService {
 
         redisPublisher.publish(enterRoomTopic, EnterRoomMessage.builder()
                         .gameState(GameState.ENTER)
+                        .gameDTO(gameDTO)
                         .roomDetailDto(roomDetailDto)
                         .build());
     }

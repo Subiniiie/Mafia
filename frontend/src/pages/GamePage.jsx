@@ -230,7 +230,7 @@ function GamePage() {
                         const messageJson = JSON.parse(message.body);
                         setGameResponse(messageJson);
                         setNowGameState(messageJson.gameState)
-                        console.log('웹소켓을 구독하고 받은 message, gameResponse', messageJson);
+                        console.log('웹소켓을 구독하고 나서 서버에서 뭔가를 내려줬을때 받은 message, gameResponse', messageJson);
                         // activeWebsocket()
 
                     } else {
@@ -241,9 +241,19 @@ function GamePage() {
                     setGameResponse(messageJson)
                     // setNowGameState(messageJson.gameState)
             })
-
         })
-        
+
+        setTimeout(() => {
+            stompClient.current.send(
+                `/ws/pub/enter/${roomId}`, 
+                {            
+                    'Authorization': `Bearer ${access}`
+                },
+                {}
+            );
+        }, 1000);
+
+    
 
         return () => {
             if (stompClient.current) {
@@ -252,8 +262,6 @@ function GamePage() {
         }
 
     }, [])
-
-
 
       
     return (
