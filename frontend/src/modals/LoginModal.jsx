@@ -19,20 +19,32 @@ const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
     const passwordRef = useRef()
     const loginButtonRef = useRef()
 
+    const [emailSentMessage, setEmailSentMessage] = useState('') // 이메일 입력 메시지 상태
+    const [passwordSentMessage, setPasswordSentMessage] = useState('') // 비밀번호 입력 메시지 상태
+
     const [loginFailed, setLoginFailed] = useState(false)
 
     const handleEmailKeyDown = (e) => {
         if (e.key === 'Enter') {
             console.log('Enter를 눌렀네!')
-            passwordRef.current.focus()
+            if (email === '') {
+                setEmailSentMessage('이메일을 입력해주세요.')
+            } else {
+                setEmailSentMessage('')
+                passwordRef.current.focus()
+            }
         }
     }
 
     const handlePasswordKeyDown = (e) => {
         if (e.key === 'Enter') {
             console.log('Enter를 눌렀네!')
-            loginButtonRef.current.focus()
-            // handleLogin()
+            if (password === '') {
+                setPasswordSentMessage('비밀번호를 입력해주세요.')
+            } else {
+                setPasswordSentMessage('')
+                loginButtonRef.current.focus()
+            }
         }
     }
 
@@ -45,7 +57,7 @@ const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
                 password: password
             }
 
-            const response = await axios.post('http://localhost:8080/api/login',
+            const response = await axios.post('https://i11e106.p.ssafy.io/api/login',
                 JSON.stringify(body), {
                 headers: {
                     "Content-Type": "application/json",
@@ -58,11 +70,8 @@ const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
             // 로그인 성공 시 처리 로직
             const { access, refresh } = response.data
             const decodedAccess = decode(access)
-            // console.log('난 디코딩 된 accessToken :', decodedAccess)
             const { username } = decodedAccess.payload // 디코딩된 토큰에서 이름 추출
             console.log('username :', username)
-            // const decodedRefresh = decode(refresh)
-            // console.log('난 디코딩 된 refreshToken :', decodedRefresh)
             localStorage.setItem('access', access) // 로컬 스토리지에 토큰 저장
             localStorage.setItem('refresh', refresh)
             setLoginFailed(false)
@@ -97,6 +106,7 @@ const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
                             onKeyDown={handleEmailKeyDown}
                             ref={emailRef}
                         />
+                        {emailSentMessage && <p className={styles.alertMessage}>{emailSentMessage}</p>} {/* 이메일 입력 메시지 추가 */}
                     </div>
 
                     <div className={styles.formContainerMini}>
@@ -111,6 +121,7 @@ const LoginModal = ({ isOpen, openModal, onLoginSuccess }) => {
                             onKeyDown={handlePasswordKeyDown}
                             ref={passwordRef}
                         />
+                        {passwordSentMessage && <p className={styles.alertMessage}>{passwordSentMessage}</p>} {/* 비밀번호 입력 메시지 추가 */}
                     </div>
 
                     <button className={styles.submitButton} onClick={handleLogin} ref={loginButtonRef}>

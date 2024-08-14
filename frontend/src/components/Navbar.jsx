@@ -99,7 +99,7 @@ const Navbar = ({ isLoggedIn, name, onLoginSuccess, isSpeakerOn, toggleSpeaker }
             }
 
             // 로그아웃 API 요청
-            await axios.post('http://localhost:8080/api/logout', JSON.stringify(body), {
+            await axios.post('https://i11e106.p.ssafy.io/api/logout', JSON.stringify(body), {
                 headers: {
                     "Content-Type": "application/json",
                     // "Authorization": `Bearer ${access}`,
