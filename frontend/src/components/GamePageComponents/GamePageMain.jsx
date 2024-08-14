@@ -258,12 +258,20 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         // console.log('밤이 되었다', publisherIdx)
         // console.log('밤이 되었다22', streamManagers)
 
-        
+        const response = await axios.get(`https://i11e106.p.ssafy.io/api/games/roles/${roomId}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${access}`,
+                }
+            }   
+        );
+        const myRole = response.data;
+        console.log('내 직업 : ', response.data);
 
         // 밀정, 변절자를 제외한 유저는 비디오/오디오를 publish 하지도 않고,
         // 다른 유저들의 비디오/오디오를 subscribe 하지도 않는다.
         //if (!isEmissaryOrBetrayer(players[publisherIdx])) {
-        if (!isEmissaryOrBetrayer())
+        if (!isEmissaryOrBetrayer(gameResponse.nowPlayer))
             streamManagers[publisherIdx].publishVideo(false);
             streamManagers[publisherIdx].publishAudio(false);
 
@@ -282,10 +290,6 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     const handleVideoAudioAtDay = async () => {
         const publisherIdx = streamManagers.findIndex(strMgr => !strMgr.remote);
         // console.log('publisherIdx:', publisherIdx)
-
-        // const response = await axios.get(`https://i11e106.p.ssafy.io/api/games/roles/${roomId}`);
-        // const myRole = response.data;
-        // console.log('내 직업 : ', response.data);
 
         //if (!isEmissaryOrBetrayer(players[publisherIdx])) {
             // if (!isEmissaryOrBetrayer(gameResponse.nowPlayer)) {
@@ -421,7 +425,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // 업적 처리
     const handleAchievenets = async() => {
         try {
-            const response = await axios.post('https://i11e106.p.ssafy.io//api/honors', {}, {
+            const response = await axios.post('https://i11e106.p.ssafy.io/api/honors', {}, {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${access}`,

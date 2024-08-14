@@ -184,7 +184,7 @@ public class RoomService {
     public CommonResponseDto deleteUser(Long roomId, Long userId) {
         roomRepository.findByRoomId(roomId).orElseThrow(() -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
         userInRoomRepository.findByPk_UserId(userId).orElseThrow(() -> new NotFoundUserException(CommonErrorCode.NOT_FOUND_USER_EXCEPTION));
-        userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
+        userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(userId, roomId);
 
         Game game = redisGameRepository.findByGameId(roomId).orElseThrow(() -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
         GameDTO gameDTO = GameDTO.toDto(game);
@@ -241,7 +241,9 @@ public class RoomService {
                 .isHaveBetrayer(savedRoom.isHaveBetray())
                 .gameState(GameState.WAIT)
                 .build();
+        log.info("userInroom getCon... {}", userInRoom.getConnectTime());
         Player player = Player.createPlayer(user.getUserId(), user.getNickname(), userInRoom.getConnectTime());
+        log.info("create!!!!! : {}", player.getCreationTime());
         player.setReady(true);
 
         gameDTO.addPlayer(player);
@@ -325,18 +327,23 @@ public class RoomService {
 
             // Redis 발행 로직
             List<RoomDetailUserDto> userList = userInRoomList.stream()
-                    .map(UserInRoom::getUser)
-                    .map(nowUser -> RoomDetailUserDto.of(nowUser, room.getOwnerId(), userId))
+                    .map(nowUserInRoom -> {
+                        User nowUser = nowUserInRoom.getUser();
+                        RoomDetailUserDto nowDto = RoomDetailUserDto.of(nowUser, room.getOwnerId(), userId);
+                        nowDto.changeTime(nowUserInRoom.getConnectTime());
+                        return nowDto;
+                    })
                     .collect(Collectors.toList());
             RoomDetailUserDto dto = RoomDetailUserDto.of(user, room.getOwnerId(), userId);
+            dto.changeTime(LocalDateTime.now());
             userList.add(dto);
 
             RoomDetailDto roomDetailDto = RoomDetailDto.toDTO(room, userList);
 
-            redisPublisher.publish(enterRoomTopic, EnterRoomMessage.builder()
-                            .gameState(GameState.ENTER)
-                            .roomDetailDto(roomDetailDto)
-                            .build());
+//            redisPublisher.publish(enterRoomTopic, EnterRoomMessage.builder()
+//                            .gameState(GameState.ENTER)
+//                            .roomDetailDto(roomDetailDto)
+//                            .build());
             // 다했으면 leave나 kick할시에 발행하는것도 해야해
             log.info("발행완료");
 
@@ -356,6 +363,9 @@ public class RoomService {
         System.out.println(String.valueOf(roomId));
 
         // 레디스에서 삭제
+        Game game = redisGameRepository.findByGameId(roomId).orElseThrow(() -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+        GameDTO gameDTO = GameDTO.toDto(game);
+
         deleteUserInRedis(roomId, userId);
         System.out.println("redis delete complete");
         
@@ -371,10 +381,10 @@ public class RoomService {
             // 유저일 경우 나가기 처리
             users.remove(token);
             System.out.println("remove session @vidu complete");
-            userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
+            userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(userId, roomId);
             System.out.println("remove session @mysql complete");
             //remove user @redis
-            publishRemoveUser(roomId, userId);
+            publishRemoveUser(roomId, userId, gameDTO);
         } else if (users.get(token) == SessionRole.HOST){
             // 방장 위임
             users.remove(token);
@@ -395,10 +405,10 @@ public class RoomService {
                 Room room = userInRoom.getRoom();
                 room.changeOwner(ownerId);
 
-                userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomId, userId);
+                userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(userId, roomId);
                 System.out.println("remove session @mysql complete");
                 //remove user @redis
-                publishRemoveUser(roomId, userId);
+                publishRemoveUser(roomId, userId, gameDTO);
             }
         }
 
@@ -470,12 +480,16 @@ public class RoomService {
             log.info("방장이 스스로를 강퇴하면 안돼.");
             return false;
         }
-        userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(roomKickDto.getRoomId(), targetId);
+        userInRoomRepository.deletePeopleByPk_UserIdAndRoom_RoomId(targetId, roomKickDto.getRoomId());
         log.info("여긴가");
 
         // 레디스 처리하고
+
+        Game game = redisGameRepository.findByGameId(roomKickDto.getRoomId()).orElseThrow(() -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+        GameDTO gameDTO = GameDTO.toDto(game);
+
         deleteUserInRedis(roomKickDto.getRoomId(), targetId);
-        publishRemoveUser(roomKickDto.getRoomId(), userId);
+        publishRemoveUser(roomKickDto.getRoomId(), userId, gameDTO);
         log.info("레디스 처리 완료");
 
         // Map 삭제하고
@@ -529,9 +543,13 @@ public class RoomService {
         Room room = userInRoom.get(0).getRoom();
 
         List<RoomDetailUserDto> roomDetailUserDtoList = userInRoom.stream()
-                .map(UserInRoom::getUser)
-                .map(user -> RoomDetailUserDto.of(user, room.getOwnerId(), userId))
-                .toList();
+                .map(nowUserInRoom -> {
+                    User nowUser = nowUserInRoom.getUser();
+                    RoomDetailUserDto nowDto = RoomDetailUserDto.of(nowUser, room.getOwnerId(), userId);
+                    nowDto.changeTime(nowUserInRoom.getConnectTime());
+                    return nowDto;
+                })
+                .collect(Collectors.toList());
 
         return RoomDetailDto.toDTO(room, roomDetailUserDtoList);
     }
@@ -547,14 +565,18 @@ public class RoomService {
         redisKeyValueTemplate.update(updateGame);
     }
 
-    private void publishRemoveUser(Long roomId, long userId) {
+    private void publishRemoveUser(Long roomId, long userId, GameDTO gameDTO) {
         List<UserInRoom> userInRoomList = userInRoomRepository.findAllByPk_RoomId(roomId).orElseThrow(
                 () -> new NotFoundRoomException(CommonErrorCode.NOT_FOUND_ROOM_EXCEPTION));
         Room room = userInRoomList.get(0).getRoom();
         List<RoomDetailUserDto> userList = userInRoomList.stream()
-                .map(UserInRoom::getUser)
-                .map(nowUser -> RoomDetailUserDto.of(nowUser, room.getOwnerId(), userId))
-                .toList();
+                .map(nowUserInRoom -> {
+                    User nowUser = nowUserInRoom.getUser();
+                    RoomDetailUserDto nowDto = RoomDetailUserDto.of(nowUser, room.getOwnerId(), userId);
+                    nowDto.changeTime(nowUserInRoom.getConnectTime());
+                    return nowDto;
+                })
+                .collect(Collectors.toList());
 
         for (RoomDetailUserDto roomDetailUserDto : userList) {
             log.info(roomDetailUserDto.toString());
@@ -572,6 +594,7 @@ public class RoomService {
 
         redisPublisher.publish(enterRoomTopic, EnterRoomMessage.builder()
                         .gameState(GameState.ENTER)
+                        .gameDTO(gameDTO)
                         .roomDetailDto(roomDetailDto)
                         .build());
     }

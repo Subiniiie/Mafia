@@ -8,11 +8,13 @@ import e106.emissary_backend.global.error.exception.GameFullException;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.Id;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Slf4j
 @ToString
 @Setter
 @Getter
@@ -55,16 +57,7 @@ public class GameDTO {
         if(maxPlayer < playerMap.size()){
             throw new GameFullException(CommonErrorCode.GAME_FULL_EXCEPTION);
         }
-
-        playerMap.put(player.getId(),
-                Player.builder()
-                        .id(player.getId())
-                        .nickname(player.getNickname())
-                        .alive(false)
-                        .left(false)
-                        .ready(player.isReady())
-                        .role(GameRole.PERSON)
-                        .build());
+        playerMap.put(player.getId(), player);
     }
 
     public Optional<Player> findPlayerByNickname(String nickname) {

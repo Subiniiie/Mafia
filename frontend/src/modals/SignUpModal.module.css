@@ -132,8 +132,7 @@
 
 /* .loginFailed { */
 .alertMessage {
-    color: #aa0000;
     font-size: 12px;
-    white-space: pre-line;
-    text-align: center;
+    color: #aa0000;
+    margin-top: 5px;
 }

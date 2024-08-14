@@ -100,7 +100,8 @@ public class RedisConfig {
                                                                        MessageListenerAdapter nightPoliceAdapter, ChannelTopic nightPoliceTopic,
                                                                        MessageListenerAdapter enterRoomAdapter, ChannelTopic enterRoomTopic,
                                                                        MessageListenerAdapter kickUserAdapter, ChannelTopic kickUserTopic,
-                                                                       MessageListenerAdapter endAdapter, ChannelTopic endTopic) {
+                                                                       MessageListenerAdapter endAdapter, ChannelTopic endTopic,
+                                                                       MessageListenerAdapter enterGameAdapter, ChannelTopic enterGameTopic) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         // subscriber, topic
@@ -116,6 +117,7 @@ public class RedisConfig {
         container.addMessageListener(enterRoomAdapter, enterRoomTopic);
         container.addMessageListener(kickUserAdapter, kickUserTopic);
         container.addMessageListener(endAdapter, endTopic);
+        container.addMessageListener(enterGameAdapter, enterGameTopic);
 
         return container;
     }
@@ -239,6 +241,16 @@ public class RedisConfig {
     @Bean
     public ChannelTopic endTopic() {
         return new ChannelTopic("END");
+    }
+
+    @Bean
+    public MessageListenerAdapter enterGameAdapter(EnterGameSubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "sendMessage");
+    }
+
+    @Bean
+    public ChannelTopic enterGameTopic() {
+        return new ChannelTopic("ENTER_GAME");
     }
 
 }

@@ -82,6 +82,7 @@ public class EndConfirmTask implements GameTask {
             Player police = gameDTO.getPolice();
             Player emissary = gameDTO.getEmissary();
             nightEmissaryTask.setGameIdAndTargets(gameId, emissary, police);
+            nightEmissaryTask.setPlayerMap(playerMap);
             schedulerService.scheduleTask(gameId, TaskName.NIGHT_EMISSARY, nightEmissaryTask, 15, TimeUnit.SECONDS);
         }
 //        gameService.endConfirm(EndConfirmMessage.builder().gameId(gameId).build());

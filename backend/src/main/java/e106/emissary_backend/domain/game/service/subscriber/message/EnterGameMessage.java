@@ -2,6 +2,7 @@ package e106.emissary_backend.domain.game.service.subscriber.message;
 
 import e106.emissary_backend.domain.game.enumType.CommonResult;
 import e106.emissary_backend.domain.game.enumType.GameState;
+import e106.emissary_backend.domain.game.model.GameDTO;
 import e106.emissary_backend.domain.game.model.Player;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,12 +16,8 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class CommonMessage {
+public class EnterGameMessage {
     private long gameId;
-    private Player nowPlayer;
     private GameState gameState;
-    private CommonResult result;
-
-    @Builder.Default
-    private Map<Long, Player> playerMap = new HashMap<>();
+    private GameDTO gameDTO;
 }
