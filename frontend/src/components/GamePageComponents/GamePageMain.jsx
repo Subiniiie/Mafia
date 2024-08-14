@@ -278,7 +278,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         // 밀정, 변절자를 제외한 유저는 비디오/오디오를 publish 하지도 않고,
         // 다른 유저들의 비디오/오디오를 subscribe 하지도 않는다.
         //if (!isEmissaryOrBetrayer(players[publisherIdx])) {
-        if (!isEmissaryOrBetrayer())
+        if (!isEmissaryOrBetrayer()){
             streamManagers[publisherIdx].publishVideo(false);
             streamManagers[publisherIdx].publishAudio(false);
 
@@ -573,7 +573,6 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
             </div> : null}
       </>
     )
-    }
 }
 
 export default GamePageMain;
