@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -24,6 +25,7 @@ public class NightEmissaryTask implements GameTask {
     private Long gameId;
     private Player emissary;
     private Player police;
+    private Map<Long, Player> playerMap;
 
     private final RedisPublisher publisher;
 
@@ -45,9 +47,11 @@ public class NightEmissaryTask implements GameTask {
                         .gameState(GameState.NIGHT_EMISSARY)
                         .result(CommonResult.SUCCESS)
                         .nowPlayer(emissary)
+                        .playerMap(playerMap)
                         .build());
 
         nightPoliceTask.setGameIdAndTarget(gameId, police);
+        nightPoliceTask.setPlayerMap(playerMap);
         scheduler.scheduleTask(gameId, TaskName.NIGHT_POLICE, nightPoliceTask, 15, TimeUnit.SECONDS);
     }
 
@@ -55,5 +59,9 @@ public class NightEmissaryTask implements GameTask {
         this.gameId = gameId;
         this.emissary = emissary;
         this.police = police;
+    }
+
+    public void setPlayerMap(Map<Long, Player> playerMap) {
+        this.playerMap = playerMap;
     }
 }

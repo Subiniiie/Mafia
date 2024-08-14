@@ -31,7 +31,7 @@ function GamePageHeader({ gameData, id, leaveSession }) {
             const refreshToken = localStorage.getItem('refresh_token');
             if (!refreshToken) throw new Error('Refresh token is missing.');
     
-            const response = await axios.post('https://i11e106.p.ssafy.io/api/auth/refresh', { token: refreshToken });
+            const response = await axios.post('http://localhost:8080/api/auth/refresh', { token: refreshToken });
             const newAccessToken = response.data.accessToken;
     
             localStorage.setItem('access', newAccessToken);
@@ -45,7 +45,7 @@ function GamePageHeader({ gameData, id, leaveSession }) {
     const exitHandler = async (e) => {
         e.preventDefault();
         await axios.delete(
-          `https://i11e106.p.ssafy.io/api/rooms/users/${id}`,
+          `http://localhost:8080/api/rooms/users/${id}`,
           {
               headers: {
                   "Content-Type": "application/json",

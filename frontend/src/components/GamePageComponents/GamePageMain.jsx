@@ -369,7 +369,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // 게임 결과 반영
     const handleResult = async() => {
         try {
-            const response = await axios.post('https://i11e106.p.ssafy.io/api/results', {}, {
+            const response = await axios.post('http://localhost:8080/api/results', {}, {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${access}`,
@@ -385,7 +385,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     // 업적 처리
     const handleAchievenets = async() => {
         try {
-            const response = await axios.post('https://i11e106.p.ssafy.io//api/honors', {}, {
+            const response = await axios.post('http://localhost:8080//api/honors', {}, {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${access}`,

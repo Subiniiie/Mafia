@@ -26,7 +26,7 @@ const GLMain = ({ setViduToken, checkPublic, checkPrivate, checkCanEnter, search
                 filter2 = 'false'
             }
 
-            const filterUrl = `https://i11e106.p.ssafy.io/api/rooms/filter?filter1=${filter1}&filter2=${filter2}&filter3=${filter3}&search=${encodeURIComponent(search)}&page=0&size=200`;
+            const filterUrl = `http://localhost:8080/api/rooms/filter?filter1=${filter1}&filter2=${filter2}&filter3=${filter3}&search=${encodeURIComponent(search)}&page=0&size=200`;
 
             response = await axios.get(filterUrl, {
                 headers: {

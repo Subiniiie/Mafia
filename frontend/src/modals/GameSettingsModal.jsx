@@ -27,7 +27,7 @@ function GameSettingsModal({ isOpen, openModal, roomId }) {
                 console.log('access를 보자', access)
                 const decodedAccess = decode(access)
                 console.log('디코딩된 access를 보자 :', decodedAccess)
-                const response = await axios.get(`https://i11e106.p.ssafy.io/api/rooms/${roomId}/options`, {
+                const response = await axios.get(`http://localhost:8080/api/rooms/${roomId}/options`, {
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${access}`,
@@ -62,7 +62,7 @@ function GameSettingsModal({ isOpen, openModal, roomId }) {
 
             const access = localStorage.getItem('access')
 
-            const response = await axios.patch(`https://i11e106.p.ssafy.io/api/options/rooms/${roomId}`,
+            const response = await axios.patch(`http://localhost:8080/api/options/rooms/${roomId}`,
                 JSON.stringify(body), {
                     headers: {
                         "Content-Type": "application/json",
@@ -74,12 +74,12 @@ function GameSettingsModal({ isOpen, openModal, roomId }) {
         }  catch (error) {
             console.log('방 못 바꿈', error)
         }
-        // await axios.patch(`https://i11e106.p.ssafy.io/api/options/rooms/${roomId}`, {
+        // await axios.patch(`http://localhost:8080/api/options/rooms/${roomId}`, {
 
         // })
         // try {
         //     const access = localStorage.getItem('access')
-        //     const response = await fetch(`https://i11e106.p.ssafy.io/api/options/rooms/${roomId}`, {
+        //     const response = await fetch(`http://localhost:8080/api/options/rooms/${roomId}`, {
         //         method: 'PUT',
         //         headers: {
         //             "Content-Type": "application/json",
