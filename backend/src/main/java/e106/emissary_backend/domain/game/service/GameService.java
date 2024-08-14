@@ -15,9 +15,15 @@ import e106.emissary_backend.domain.game.service.timer.SchedulerService;
 import e106.emissary_backend.domain.game.service.timer.task.*;
 import e106.emissary_backend.domain.game.util.GameUtil;
 import e106.emissary_backend.domain.game.util.RoleUtils;
+import e106.emissary_backend.domain.room.dto.RoomDetailDto;
 import e106.emissary_backend.domain.room.entity.Room;
 import e106.emissary_backend.domain.room.enumType.RoomState;
 import e106.emissary_backend.domain.room.repository.RoomRepository;
+import e106.emissary_backend.domain.room.service.subscriber.message.EnterRoomMessage;
+import e106.emissary_backend.domain.user.dto.RoomDetailUserDto;
+import e106.emissary_backend.domain.user.entity.User;
+import e106.emissary_backend.domain.userInRoom.entity.UserInRoom;
+import e106.emissary_backend.domain.userInRoom.repository.UserInRoomRepository;
 import e106.emissary_backend.global.error.CommonErrorCode;
 import e106.emissary_backend.global.error.exception.*;
 import io.jsonwebtoken.lang.Objects;
@@ -42,6 +48,8 @@ public class GameService {
 
     private final RedisGameRepository redisGameRepository;
     private final RoomRepository roomRepository;
+    private final UserInRoomRepository userInRoomRepository;
+
     private final RedisTemplate<String, HashMap<Long, Integer>> voteRedisTemplate;
     private final RedisKeyValueTemplate redisKeyValueTemplate;
     private final SchedulerService scheduler;
@@ -51,11 +59,14 @@ public class GameService {
     private final ChannelTopic readyCompleteTopic;
     private final ChannelTopic gameSetTopic;
     private final ChannelTopic startVoteTopic;
+    private final ChannelTopic enterRoomTopic;
+
 
     private final NightEmissaryTask nightEmissaryTask;
 
     private final StartVoteTask startVoteTask;
     private final ChannelTopic endVoteTopic;
+    private final ChannelTopic enterGameTopic;
 
     private final EndVoteTask endVoteTask;
     private final StartConfirmTask startConfirmTask;
@@ -420,4 +431,17 @@ public class GameService {
 
         return game.getPlayerMap().get(userId).getRole();
     } // end of getRole
+
+    @RedissonLock(value = "#gameId")
+    public void enter(long gameId, long userId) {
+        Game game = redisGameRepository.findByGameId(gameId).orElseThrow(() -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
+
+        GameDTO gameDTO = GameDTO.toDto(game);
+
+        publisher.publish(enterGameTopic, EnterGameMessage.builder()
+                        .gameId(gameId)
+                        .gameState(GameState.ENTER)
+                        .gameDTO(gameDTO)
+                        .build());
+    }
 }
