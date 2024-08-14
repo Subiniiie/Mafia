@@ -250,6 +250,16 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         return myRole === 'EMISSARY' || myRole === 'BETRAYER';
     }
 
+    const getMyRole = async () => {
+        return axios.get(`https://i11e106.p.ssafy.io/api/games/roles/${roomId}`, {
+              headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${access}`,
+              }
+          }
+        );
+    }
+
     // 채팅창 주석(나중에 지우기!!)
     // const isEmissaryOrBetrayerByIdx = (idx) => {
     //     console.log('[isEmissaryOrBetrayerByIdx] gameData : ', gameData);
@@ -262,23 +272,15 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     const handleVideoAudioAtNight = async () => {
         const publisherIdx = streamManagers.findIndex(strMgr => !strMgr.remote);
         console.log('handleVideoAudioAtNight : ', publisherIdx);
-        // console.log('밤이 되었다', publisherIdx)
-        // console.log('밤이 되었다22', streamManagers)
 
-        // const response = await axios.get(`https://i11e106.p.ssafy.io/api/games/roles/${roomId}`, {
-        //         headers: {
-        //             "Content-Type": "application/json",
-        //             "Authorization": `Bearer ${access}`,
-        //         }
-        //     }
-        // );
-        // const myRole = response.data;
-        // console.log('내 직업 : ', response.data);
+        const myRole = (await getMyRole()).data;
+
+        const isEmissaryOrBetrayer = myRole === 'EMISSARY' || myRole === 'BETRAYER'
 
         // 밀정, 변절자를 제외한 유저는 비디오/오디오를 publish 하지도 않고,
         // 다른 유저들의 비디오/오디오를 subscribe 하지도 않는다.
         //if (!isEmissaryOrBetrayer(players[publisherIdx])) {
-        if (!await isEmissaryOrBetrayer()) {
+        if (!isEmissaryOrBetrayer) {
             streamManagers[publisherIdx].publishVideo(false);
             streamManagers[publisherIdx].publishAudio(false);
 
@@ -299,9 +301,11 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
         const publisherIdx = streamManagers.findIndex(strMgr => !strMgr.remote);
         // console.log('publisherIdx:', publisherIdx)
 
-        //if (!isEmissaryOrBetrayer(players[publisherIdx])) {
-            // if (!isEmissaryOrBetrayer(gameResponse.nowPlayer)) {
-        if (!await isEmissaryOrBetrayer()) {
+        const myRole = (await getMyRole()).data;
+
+        const isEmissaryOrBetrayer = myRole === 'EMISSARY' || myRole === 'BETRAYER'
+
+        if (!isEmissaryOrBetrayer) {
             streamManagers[publisherIdx].publishVideo(true);
             streamManagers[publisherIdx].publishAudio(true);
 
