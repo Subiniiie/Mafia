@@ -33,6 +33,12 @@ const SignUpModal = ({ isOpen, openModal, openLoginModal }) => {
     const [givenCode, setGivenCode] = useState('')
     const [emailSentMessage, setEmailSentMessage] = useState('') // 이메일 인증 메시지 상태
 
+    const [emailMessage, setEmailMessage] = useState('')
+    const [verificationMessage, setVerificationMessage] = useState('')
+    const [nicknameMessage, setNicknameMessage] = useState('')
+    const [passwordMessage, setPasswordMessage] = useState('')
+    const [confirmPasswordMessage, setConfirmPasswordMessage] = useState('')
+
     const emailRef = useRef()
     const verificationCodeRef = useRef()
     const nicknameRef = useRef()
@@ -137,9 +143,10 @@ const SignUpModal = ({ isOpen, openModal, openLoginModal }) => {
             if (email === '') {
                 setEmailValid(false)
                 setEmailError(true)
-                alert('이메일을 입력해주세요.')
+                setEmailMessage('이메일을 입력해주세요.')
             } else {
                 console.log('Email을 입력했네! handleEmailCheck를 실행시켜볼게')
+                setEmailMessage('')
                 handleEmailCheck()
             }
         }
@@ -174,9 +181,10 @@ const SignUpModal = ({ isOpen, openModal, openLoginModal }) => {
             if (nickname === '') {
                 setNicknameValid(false)
                 setNicknameError(true)
-                alert('닉네임을 입력해주세요.')
+                setNicknameMessage('닉네임을 입력해주세요.')
 
             } else {
+                setNicknameMessage('')
                 handleNicknameCheck()
             }
         }
@@ -203,7 +211,12 @@ const SignUpModal = ({ isOpen, openModal, openLoginModal }) => {
     const handlePasswordKeyDown = (e) => {
         if (e.key === 'Enter') {
             console.log('Enter를 눌렀네! 비밀번호를 검증해볼게')
-            handlePasswordCheck()
+            if (password === '') {
+                setPasswordMessage('비밀번호를 입력해주세요.')
+            } else {
+                setPasswordMessage('')
+                handlePasswordCheck()
+            }
         }
     }
 
@@ -221,8 +234,13 @@ const SignUpModal = ({ isOpen, openModal, openLoginModal }) => {
 
     const handleConfirmPasswordKeyDown = (e) => {
         if (e.key === 'Enter') {
-            console.log('Enter를 눌렀네! 비밀번호 확인을 검증해볼게')
-            handleConfirmPasswordCheck()
+            if (confirmPassword === '') {
+                setConfirmPasswordMessage('비밀번호를 다시 한번 입력해주세요.')
+            } else {
+                setConfirmPasswordMessage('')
+                console.log('Enter를 눌렀네! 비밀번호 확인을 검증해볼게')
+                handleConfirmPasswordCheck()
+            }
         }
     }
 
@@ -242,9 +260,12 @@ const SignUpModal = ({ isOpen, openModal, openLoginModal }) => {
 
     const handleVerificationCodeKeyDown = (e) => {
         if (e.key === 'Enter') {
-            // nicknameRef.current ? nicknameRef.current.focus() : handleSignUp()
-            console.log('givenCode :', givenCode)
-            handleVerificationCodeCheck()
+            if (verificationCode === '') {
+                setVerificationMessage('인증번호를 입력해주세요.')
+            } else {
+                setVerificationMessage('')
+                handleVerificationCodeCheck()
+            }
         }
     }
 
@@ -272,6 +293,7 @@ const SignUpModal = ({ isOpen, openModal, openLoginModal }) => {
                                     입력
                                 </button>
                             </div>
+                            {emailMessage && <p className={styles.alertMessage}>{emailMessage}</p>} {/* 이메일 입력 메시지 추가 */}
                             {emailSentMessage && <p className={styles.infoMessage}>{emailSentMessage}</p>} {/* 이메일 인증 메시지 추가 */}
                         </div>
                         {showVerificationCodeInput && (
@@ -293,6 +315,7 @@ const SignUpModal = ({ isOpen, openModal, openLoginModal }) => {
                                         인증
                                     </button>
                                 </div>
+                                {verificationMessage && <p className={styles.alertMessage}>{verificationMessage}</p>} {/* 인증코드 입력 메시지 추가 */}
                             </div>
                         )}
 
@@ -313,6 +336,7 @@ const SignUpModal = ({ isOpen, openModal, openLoginModal }) => {
                                     입력
                                 </button>
                             </div>
+                            {nicknameMessage && <p className={styles.alertMessage}>{nicknameMessage}</p>} {/* 닉네임 입력 메시지 추가 */}
                         </div>
 
                         <div className={styles.formContainerMini}>
@@ -332,6 +356,7 @@ const SignUpModal = ({ isOpen, openModal, openLoginModal }) => {
                                     입력
                                 </button>
                             </div>
+                            {passwordMessage && <p className={styles.alertMessage}>{passwordMessage}</p>} {/* 비밀번호 입력 메시지 추가 */}
                         </div>
 
                         <div className={styles.formContainerMini}>
@@ -351,6 +376,7 @@ const SignUpModal = ({ isOpen, openModal, openLoginModal }) => {
                                     입력
                                 </button>
                             </div>
+                            {confirmPasswordMessage && <p className={styles.alertMessage}>{confirmPasswordMessage}</p>} {/* 비밀번호 재입력 메시지 추가 */}
                         </div>
 
                         <button className={styles.submitButton} onClick={handleSignUp} ref={submitButtonRef}>
