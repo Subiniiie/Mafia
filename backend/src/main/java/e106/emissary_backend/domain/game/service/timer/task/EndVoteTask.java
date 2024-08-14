@@ -59,12 +59,8 @@ public class EndVoteTask implements GameTask {
 
         gameDTO.getPlayerMap().values().forEach(player -> {player.setVoted(false);});
 
-        redisKeyValueTemplate.update(gameDTO.toDao());
-
-
         String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
         HashMap<Long, Integer> voteMap = voteRedisTemplate.opsForValue().get(voteKey);
-
 
         if (voteMap == null) {
             voteMap = new HashMap<>();
@@ -83,6 +79,8 @@ public class EndVoteTask implements GameTask {
 
         if(VoteState.RE_VOTE.equals(endVoteMessage.getResult())){
             // 다시 투표하세용
+            gameDTO.setGameState(GameState.VOTE_START);
+
             publisher.publish(startVoteTopic, StartVoteMessage.builder()
                             .gameState(GameState.VOTE_START)
                             .gameDTO(gameDTO)
@@ -93,11 +91,14 @@ public class EndVoteTask implements GameTask {
         }else {
             // todo : 게임상태 변경 해야함
             // 타이머 - 최후변론 시간 주고 최종투표 안내.
+            gameDTO.setGameState(GameState.VOTE_END);
+
             startConfirmTask.setGameId(gameId);
             startConfirmTask.setGameDTO(gameDTO);
             scheduler.scheduleTask(gameId, TaskName.START_CONFIRM_TASK, startConfirmTask, 15, TimeUnit.SECONDS);
         }
 
+        redisKeyValueTemplate.update(gameDTO.toDao());
     }
 
     public void setGameId(long gameId){

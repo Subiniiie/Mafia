@@ -3,6 +3,7 @@ package e106.emissary_backend.domain.game.service.timer.task;
 import e106.emissary_backend.domain.game.GameConstant;
 import e106.emissary_backend.domain.game.aspect.RedissonLock;
 import e106.emissary_backend.domain.game.entity.Game;
+import e106.emissary_backend.domain.game.enumType.GameState;
 import e106.emissary_backend.domain.game.model.GameDTO;
 import e106.emissary_backend.domain.game.model.Player;
 import e106.emissary_backend.domain.game.repository.RedisGameRepository;
@@ -56,6 +57,7 @@ public class EndConfirmTask implements GameTask {
         Game game = redisGameRepository.findById(gameId).orElseThrow(
                 () -> new NotFoundGameException(CommonErrorCode.NOT_FOUND_GAME_EXCEPTION));
         GameDTO gameDTO = GameDTO.toDto(game);
+        gameDTO.setGameState(GameState.CONFIRM_END);
 
         Map<Long, Player> playerMap = gameDTO.getPlayerMap();
         playerMap.values().forEach(player -> {player.setVoted(false);});
