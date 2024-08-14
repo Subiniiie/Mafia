@@ -53,18 +53,6 @@ const SignUpModal = ({ isOpen, openModal, openLoginModal }) => {
 
     const [isVerified, setIsVerified] = useState(false)
 
-    // const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
-    // const openLoginModal = () => setIsLoginModalOpen(!isLoginModalOpen)
-
-    // const location = useLocation()
-
-    // URL이 변경되면 모달을 닫음
-    // useEffect(() => {
-    //     if (isLoginModalOpen) {
-    //         setIsLoginModalOpen(false)
-    //     }
-    // }, [location])
-
     if (!isOpen) return null; // 모달이 열리지 않았다면 렌더링하지 않음
 
     const handleSignUp = async () => {

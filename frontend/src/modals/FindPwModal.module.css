@@ -115,3 +115,18 @@
     border: 1.8px solid #02A434;
 
 }
+
+
+.infoMessage {
+    font-size: 12px;
+    color: #02A434;
+    margin-top: 5px;
+    /* 작은 크기와 녹색 텍스트 */
+}
+
+/* .loginFailed { */
+.alertMessage {
+    font-size: 12px;
+    color: #aa0000;
+    margin-top: 5px;
+}
