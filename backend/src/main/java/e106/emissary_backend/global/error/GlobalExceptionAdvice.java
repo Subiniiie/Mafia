@@ -38,6 +38,18 @@ public class GlobalExceptionAdvice {
         return handleExceptionInternal(errorCode);
     }
 
+    @ExceptionHandler
+    public ResponseEntity<Object> noTitle(NoTitleException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return handleExceptionInternal(errorCode);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Object> notEnoughRegister(NotEnoughRegisterFormException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return handleExceptionInternal(errorCode);
+    }
+
 
     @ExceptionHandler
     public ResponseEntity<Object> alreadyUserInRoom(AlreadyUserInRoomException e) {

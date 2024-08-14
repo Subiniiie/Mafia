@@ -5,6 +5,8 @@ import e106.emissary_backend.domain.user.dto.CustomUserDetails;
 import e106.emissary_backend.domain.user.dto.EditRequest;
 import e106.emissary_backend.domain.user.dto.RegisterRequest;
 import e106.emissary_backend.domain.user.service.UserService;
+import e106.emissary_backend.global.error.CommonErrorCode;
+import e106.emissary_backend.global.error.exception.NotEnoughRegisterFormException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -56,6 +58,9 @@ public class UserController {
     // registerUser(Create)
     @PostMapping("/api/user")
     public ResponseEntity<Map<String,Object>> registerUser(@RequestBody RegisterRequest request) {
+        if(request.getNickname().isEmpty() || request.getEmail().isEmpty() || request.getPassword().isEmpty()){
+            throw new NotEnoughRegisterFormException(CommonErrorCode.NOT_ENOUGH_REGISTER_FORM_EXCEPTION);
+        }
         Map<String, Object> map = new HashMap<>();
         int ret = userService.registerUser(request);
         if (ret > 0) {
