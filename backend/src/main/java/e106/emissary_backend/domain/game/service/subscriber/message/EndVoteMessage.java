@@ -19,6 +19,7 @@ public class EndVoteMessage {
     private GameState gameState = GameState.VOTE_END;
     private HashMap<Long, Integer> voteMap;
     private VoteState result;
+    private long targetId;
     private List<Long> maxPlayerList;
 
     public void organizeVote() {
@@ -44,6 +45,7 @@ public class EndVoteMessage {
             result = VoteState.FINISH;
         }
 
+        targetId = maxVoteList.get(0);
         maxPlayerList = maxVoteList;
     }
 }
