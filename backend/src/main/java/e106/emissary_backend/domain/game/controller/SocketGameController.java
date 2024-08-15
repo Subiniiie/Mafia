@@ -106,7 +106,11 @@ public class SocketGameController {
                      @DestinationVariable Long roomId,
                      @Payload VoteRequestDTO request) {
         long userId = getUserIdIAccessor(headerAccessor);
-        long targetId = request.getTargetId();
+
+        Object t = request.getTargetId();
+        log.info( "너의 타입은 : {} ", t.getClass());
+
+        long targetId = Long.parseLong(String.valueOf(request.getTargetId()));
 
         gameService.startVote(roomId, userId, targetId);
     }
