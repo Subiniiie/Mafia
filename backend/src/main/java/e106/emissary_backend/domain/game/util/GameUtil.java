@@ -57,10 +57,12 @@ public class GameUtil {
 
         Map<Long, Player> playerMap = game.getPlayerMap();
 
-        Map<GameRole, Long> roleCounts = playerMap.values().stream().collect(Collectors.groupingBy(
-                Player::getRole,
-                Collectors.counting()
-        ));
+        Map<GameRole, Long> roleCounts = playerMap.values().stream()
+                .filter(Player::isAlive) // alive가 true인 Player만 필터링
+                .collect(Collectors.groupingBy(
+                        Player::getRole,
+                        Collectors.counting()
+                ));
 
         long emissaryCnt = roleCounts.getOrDefault(GameRole.EMISSARY, 0L) + roleCounts.getOrDefault(GameRole.BETRAYER, 0L);
         long personCnt = roleCounts.getOrDefault(GameRole.PERSON, 0L) + roleCounts.getOrDefault(GameRole.POLICE, 0L);
