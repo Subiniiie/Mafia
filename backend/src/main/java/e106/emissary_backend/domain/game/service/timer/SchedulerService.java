@@ -1,12 +1,14 @@
 package e106.emissary_backend.domain.game.service.timer;
 
 import jakarta.annotation.PreDestroy;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.*;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 @Service
 public class SchedulerService {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(20);
@@ -26,8 +28,10 @@ public class SchedulerService {
 
     public boolean cancelTask(Long gameId, String taskName) {
         Map<String, ScheduledFuture<?>> tasks = gameTasks.get(gameId);
+        log.info("취소할 스케줄러 : {}",tasks.toString());
         if (tasks != null) {
             ScheduledFuture<?> future = tasks.remove(taskName);
+            log.info("삭제 완료");
             if (future != null && !future.isDone()) {
                 return future.cancel(false);
             }
