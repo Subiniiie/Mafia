@@ -190,6 +190,11 @@ public class GameService {
         log.info("gameService kill run");
         GameDTO gameDTO = getGameDTO(gameId);
 
+        log.info("지금 kill상태인데 game상태 어떤지 체크하자 : {} ", gameDTO.getGameState());
+        if(!gameDTO.getGameState().equals(GameState.NIGHT_EMISSARY)){
+            throw new NotTimeToNightException(CommonErrorCode.NOT_TIME_TO_NIGHT_EXCEPTION);
+        }
+
         Player targetPlayer = gameDTO.getPlayerMap().get(targetId);
 
         if(!targetPlayer.isAlive()){
@@ -210,8 +215,15 @@ public class GameService {
                         .build());
     } // end of Kill
 
+    @RedissonLock(value = "#gameId")
     public void appease(long gameId, long targetId) {
         GameDTO gameDTO = getGameDTO(gameId);
+
+        log.info("지금 변절하려는 game상태 어떤지 체크하자 : {} ", gameDTO.getGameState());
+
+        if(!gameDTO.getGameState().equals(GameState.NIGHT_EMISSARY)){
+            throw new NotTimeToNightException(CommonErrorCode.NOT_TIME_TO_NIGHT_EXCEPTION);
+        }
 
         if(!Objects.isEmpty(gameDTO.getBetrayer()))
             throw new AlreadyUseAppeaseException(CommonErrorCode.ALREADY_USE_APPEASE_EXCEPTION);
@@ -261,12 +273,20 @@ public class GameService {
         // userId로 경찰인지 확인 해줘야하나? -> 해야하면 마피아도..
         GameDTO gameDTO = getGameDTO(gameId);
 
+        if(!gameDTO.getGameState().equals(GameState.NIGHT_POLICE)){
+            throw new NotTimeToNightException(CommonErrorCode.NOT_TIME_TO_NIGHT_EXCEPTION);
+        }
+
+        log.info("지금 경찰상태인데 game상태 어떤지 체크하자 : {} ", gameDTO.getGameState());
+        
+
         Map<Long, Player> playerMap = gameDTO.getPlayerMap();
         Player targetPlayer = playerMap.get(targetId);
 
-        if(!targetPlayer.isAlive()){
-            throw new AlreadyRemoveUserException(CommonErrorCode.ALREADY_REMOVE_USER_EXCEPTION);
-        }
+        // todo : 이미 죽은 유저 검사못하게 빼는 로직 삭제
+//        if(!targetPlayer.isAlive()){
+//            throw new AlreadyRemoveUserException(CommonErrorCode.ALREADY_REMOVE_USER_EXCEPTION);
+//        }
 
         // todo : 이미 조사한 유저에 대해서 어떻게하지? -> 그냥 다 모른다 쳐!
         publisher.publish(nightPoliceTopic,  NightPoliceMessage.builder()
@@ -307,15 +327,19 @@ public class GameService {
         GameDTO gameDTO = getGameDTO(gameId);
 
         log.info("투표 요청 들어왔을 때 dto의 상태 확인 : {}", gameDTO.getGameState());
-//        if(gameDTO.getGameState().equals(GameState.VOTE_START)){
-//            throw new NotTimeToVoteException(CommonErrorCode.NOT_TIME_TO_VOTE_EXCEPTION);
-//        }
+        if(!gameDTO.getGameState().equals(GameState.VOTE_START)){
+            throw new NotTimeToVoteException(CommonErrorCode.NOT_TIME_TO_VOTE_EXCEPTION);
+        }
 
         Map<Long, Player> playerMap = gameDTO.getPlayerMap().entrySet().stream()
                 .filter(entry -> entry.getValue().isAlive())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         Player player = playerMap.get(userId);
+
+        if(java.util.Objects.isNull(player)){
+            throw new NotAlivePlayerException(CommonErrorCode.NOT_ALIVE_PLAYER_EXCEPTION);
+        }
 
         player.setVoted(true);
 
@@ -366,6 +390,10 @@ public class GameService {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         Player player = playerMap.get(userId);
+
+        if(java.util.Objects.isNull(player)){
+            throw new NotAlivePlayerException(CommonErrorCode.NOT_ALIVE_PLAYER_EXCEPTION);
+        }
 
         player.setVoted(true);
         gameDTO.setGameState(GameState.CONFIRM_START);

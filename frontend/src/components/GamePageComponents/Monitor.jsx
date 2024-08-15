@@ -8,7 +8,10 @@ import { data } from "autoprefixer"
 // const Monitor = function({ nickname, isMe, isAlive, hasEveryoneVoted, onVote }) {
 // streamManager => StreamManager 타입
 // streamManager => 비디오 창에 표시되는 유저, (비디오 표시, 음소거, 강퇴) 기능 구현을 위해 필요
-const Monitor = function({ nickname, isRoomManager, isMe, isAlive, onVote, isVote, roomId, streamManager }) {
+const Monitor = function({ id, nickname, isRoomManager, isMe, isAlive, onVote, roomId, streamManager, onSendTargetId, player }) {
+    console.log('모니터로 가져온 id', id)
+
+    const [ isVoted, setIsVoted ] = useState(false)
 
     // 투표 상태를 나타내는 상태
     // const [ isVote, setIsVote ] = useState(false)
@@ -28,17 +31,19 @@ const Monitor = function({ nickname, isRoomManager, isMe, isAlive, onVote, isVot
     }, [streamManager]);
 
 
-    const [localIsVote, setLocalIsVote] = useState(isVote)
+    // const [localIsVote, setLocalIsVote] = useState(isVote)
 
-    useEffect(() => {
-        setLocalIsVote(isVote); // Prop으로 받은 isVote 상태 업데이트
-    }, [isVote]);
+    // useEffect(() => {
+    //     setLocalIsVote(isVote); // Prop으로 받은 isVote 상태 업데이트
+    // }, [isVote]);
 
 
     const handleVote = function () {
         // setIsVote(prevState => !prevState)
         // 투표 당한 플레이어의 닉네임을 GamePageMain에 보낼거야
-        onVote(id)
+        console.log('내가 투표한 플레이어', id);
+        setIsVoted(true)
+        onSendTargetId(id)
     }
 
     const [ isMuteVoice, setIsMuteVoice ] = useState(false)
@@ -82,14 +87,16 @@ const Monitor = function({ nickname, isRoomManager, isMe, isAlive, onVote, isVot
                 <div className={styles.monitorHeader}>
                     <div className={styles.nickname}>
                         {/* 닉네임 출력하기 */}
-                        {isMe ? 'me' : nickname}
+                        {nickname}
                     </div>
 
 
                     {/* 투표창 | 죽으면 회색으로 하고 인덱스는 그대로 유지 */}
                     <div
-                      className={isAlive ? isVote ? styles.voteBtnRed : styles.voteBtnGreen : styles.deadBtn}
+                      className={isAlive ? isVoted ? styles.voteBtnRed : styles.voteBtnGreen : styles.deadBtn}
                       disabled={!isAlive}
+                    // className={streamManager.alive ? isVoted ? styles.voteBtnRed : styles.voteBtnGreen : styles.deadBtn}
+                    // disabled={!streamManager.alive}
                       // 투표 당한 플레이어의 닉네임 전송
                       onClick={handleVote}>
                     </div>
