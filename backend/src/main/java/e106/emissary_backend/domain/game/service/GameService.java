@@ -116,7 +116,7 @@ public class GameService {
                         .build());
             }
 //        }
-        
+
 
         update(gameDTO);
     } // end of ready
@@ -300,6 +300,7 @@ public class GameService {
 
     @RedissonLock(value = "#gameId")
     public void startVote(long gameId, long userId, long targetId) {
+        log.info("투표 요청 들어옴");
         GameDTO gameDTO = getGameDTO(gameId);
 
         if(gameDTO.getGameState().equals(GameState.VOTE_START)){
@@ -313,23 +314,27 @@ public class GameService {
         Player player = playerMap.get(userId);
 
         player.setVoted(true);
-        gameDTO.setDay(gameDTO.getDay() + 1);
 
         update(gameDTO);
 
         if(GameRole.BETRAYER.equals(player.getRole())){
             commonPublish(gameId, GameState.VOTE, CommonResult.SUCCESS, playerMap);
         }else {
+            log.info("투표 함");
             String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
 
             // 현재 투표 상태 가져와서 투표
             HashMap<Long, Integer> voteMap = getVoteMapFromRedis(voteKey);
+            log.info("voteMap을 들고와서 투표 시작");
             voteMap.put(targetId, voteMap.getOrDefault(targetId, 0) + 1);
+            log.info("업데이트 하기");
             voteRedisTemplate.opsForValue().set(voteKey, voteMap);
 
+            log.info("응답 내리기");
             commonPublish(gameId, GameState.VOTE, CommonResult.SUCCESS, playerMap);
         }
         if (playerMap.values().stream().filter(Player::isVoted).count() == playerMap.size()) {
+            log.info("모두가 투표를 완료함");
             endVoteTask.execute(gameId);
 //            EndVoteMessage endVoteMessage = EndVoteMessage.builder().gameId(gameId).voteMap(voteMap).build();
 //            endVote(endVoteMessage);
