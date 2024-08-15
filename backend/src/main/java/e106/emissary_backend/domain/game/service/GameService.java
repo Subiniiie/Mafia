@@ -343,7 +343,7 @@ public class GameService {
         }
         if (playerMap.values().stream().filter(Player::isVoted).count() == playerMap.size()) {
             log.info("모두가 투표를 완료함");
-            scheduler.cancelTask(gameId, TaskName.END_CONFIRM_TASK);
+            scheduler.cancelTask(gameId, TaskName.END_VOTE_TASK);
             log.info("모두가 투표 했으니 타이머 끄고");
             endVoteTask.execute(gameId);
 //            EndVoteMessage endVoteMessage = EndVoteMessage.builder().gameId(gameId).voteMap(voteMap).build();
