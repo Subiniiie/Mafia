@@ -1,5 +1,7 @@
 package e106.emissary_backend.domain.game.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import e106.emissary_backend.domain.game.GameConstant;
 import e106.emissary_backend.domain.game.aspect.RedissonLock;
 import e106.emissary_backend.domain.game.entity.Game;
@@ -51,6 +53,7 @@ public class GameService {
     private final RedisGameRepository redisGameRepository;
     private final RoomRepository roomRepository;
     private final UserInRoomRepository userInRoomRepository;
+    private final ObjectMapper objectMapper;
 
     private final RedisTemplate<String, HashMap<Long, Integer>> voteRedisTemplate;
     private final RedisKeyValueTemplate redisKeyValueTemplate;
@@ -327,7 +330,11 @@ public class GameService {
             // 현재 투표 상태 가져와서 투표
             HashMap<Long, Integer> voteMap = getVoteMapFromRedis(voteKey);
             log.info("voteMap을 들고와서 투표 시작");
-            voteMap.put(targetId, voteMap.getOrDefault(targetId, 0) + 1);
+            log.info("들고온 voteMap: {}",voteMap.toString());
+
+            voteMap.merge(targetId, 1, Integer::sum);
+
+//            voteMap.put(targetId, voteMap.getOrDefault(targetId, 0) + 1);
             log.info("업데이트 하기");
             voteRedisTemplate.opsForValue().set(voteKey, voteMap);
 
@@ -342,24 +349,6 @@ public class GameService {
         }
     } // end of startVote
 
-
-    public void endVote(EndVoteMessage message) {
-        // 무승부의 경우 재투표로 설정
-        message.organizeVote();
-
-        // todo : 게임상태 변경 해야함
-        // 타이머 - 최후변론 시간 주고 최종투표 안내.
-        long gameId = message.getGameId();
-        startConfirmTask.setGameId(gameId);
-        scheduler.scheduleTask(gameId, TaskName.START_CONFIRM_TASK, startConfirmTask, 2, TimeUnit.MINUTES);
-
-        // subscriber에게 메시지 발행
-        publisher.publish(endVoteTopic, message);
-
-        // 투표 결과 처리 후 Redis에서 해당 게임의 투표 데이터 삭제
-        String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
-        voteRedisTemplate.delete(voteKey);
-    } // end of endVote
 
     @RedissonLock(value = "#gameId")
     public void startConfirm(long gameId, long userId, boolean confirm) {
@@ -402,18 +391,6 @@ public class GameService {
 
     } // end of startConfirm
 
-    public void endConfirm(EndConfirmMessage message) {
-        // todo : endConfirmMessage에 결과를 담아서 프론트로 보내자.
-        // 여기서 플레이어를 하나 죽이는게 좋나? remove 메서드를 하나 만들자 <- 이건 마피아 능력으로도 쓸수있으니까!
-        message.organizeVote();
-
-        publisher.publish(endConfirmTopic, message);
-
-        // 레디스에 결과 삭제
-        long gameId = message.getGameId();
-        String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
-        voteRedisTemplate.delete(voteKey);
-    } // end of endConfirm
 
     /**
      나간거 로직
@@ -431,11 +408,20 @@ public class GameService {
 
     @RedissonLock(value = "#gameId")
     private HashMap<Long, Integer> getVoteMapFromRedis(String voteKey) {
-        HashMap<Long, Integer> voteMap = voteRedisTemplate.opsForValue().get(voteKey);
-        if (voteMap == null) {
-            voteMap = new HashMap<>();
+        HashMap<Long, Integer> result = voteRedisTemplate.opsForValue().get(voteKey);
+        if (result == null) {
+            return new HashMap<>();
         }
-        return voteMap;
+
+        if (result instanceof Map) {
+            log.info("voteMap 들고올 때 여기가 찍혀야함");
+            Map<?, ?> map = (Map<?, ?>) result;
+            return map.entrySet().stream()
+                    .collect(HashMap::new,
+                            (m, e) -> m.put(Long.valueOf(e.getKey().toString()), (Integer) e.getValue()),
+                            HashMap::putAll);
+        }
+        return new HashMap<>();
     } // end of getVoteMapFromRedis
 
     private GameDTO getGameDTO(long gameId) {

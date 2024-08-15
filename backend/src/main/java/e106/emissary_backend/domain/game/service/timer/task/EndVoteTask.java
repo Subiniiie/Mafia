@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -60,7 +61,9 @@ public class EndVoteTask implements GameTask {
         gameDTO.getPlayerMap().values().forEach(player -> {player.setVoted(false);});
 
         String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
-        HashMap<Long, Integer> voteMap = voteRedisTemplate.opsForValue().get(voteKey);
+//        HashMap<Long, Integer> voteMap = voteRedisTemplate.opsForValue().get(voteKey);
+        HashMap<Long, Integer> voteMap = getVoteMapFromRedis(voteKey);
+        log.info("들고온 voteMap: {}",voteMap.toString());
 
         if (voteMap == null) {
             voteMap = new HashMap<>();
@@ -100,6 +103,22 @@ public class EndVoteTask implements GameTask {
 
         redisKeyValueTemplate.update(gameDTO.toDao());
     }
+    @RedissonLock(value = "#gameId")
+    private HashMap<Long, Integer> getVoteMapFromRedis(String voteKey) {
+        HashMap<Long, Integer> result = voteRedisTemplate.opsForValue().get(voteKey);
+        if (result == null) {
+            return new HashMap<>();
+        }
+
+        if (result instanceof Map) {
+            Map<?, ?> map = (Map<?, ?>) result;
+            return map.entrySet().stream()
+                    .collect(HashMap::new,
+                            (m, e) -> m.put(Long.valueOf(e.getKey().toString()), (Integer) e.getValue()),
+                            HashMap::putAll);
+        }
+        return new HashMap<>();
+    } // end of getVoteMapFromRedis
 
     public void setGameId(long gameId){
         this.gameId = gameId;
