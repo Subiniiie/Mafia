@@ -343,6 +343,8 @@ public class GameService {
         }
         if (playerMap.values().stream().filter(Player::isVoted).count() == playerMap.size()) {
             log.info("모두가 투표를 완료함");
+            scheduler.cancelTask(gameId, TaskName.END_CONFIRM_TASK);
+            log.info("모두가 투표 했으니 타이머 끄고");
             endVoteTask.execute(gameId);
 //            EndVoteMessage endVoteMessage = EndVoteMessage.builder().gameId(gameId).voteMap(voteMap).build();
 //            endVote(endVoteMessage);
@@ -354,9 +356,9 @@ public class GameService {
     public void startConfirm(long gameId, long userId, boolean confirm) {
         GameDTO gameDTO = getGameDTO(gameId);
 
-        if(gameDTO.getGameState().equals(GameState.CONFIRM_START)){
-            throw new NotTimeToVoteException(CommonErrorCode.NOT_TIME_TO_VOTE_EXCEPTION);
-        }
+//        if(gameDTO.getGameState().equals(GameState.CONFIRM_START)){
+//            throw new NotTimeToVoteException(CommonErrorCode.NOT_TIME_TO_VOTE_EXCEPTION);
+//        }
 
         Map<Long, Player> playerMap = gameDTO.getPlayerMap().entrySet().stream()
                 .filter(entry -> entry.getValue().isAlive())
@@ -384,6 +386,9 @@ public class GameService {
 
         if (playerMap.values().stream().filter(Player::isVoted).count() == playerMap.size()) {
             // todo : 얘도 이거 타면 end confirm 타이머 끄는게 필요함
+            log.info("모두가 최종 끝");
+            scheduler.cancelTask(gameId, TaskName.END_CONFIRM_TASK);
+            log.info("타이머 끄고");
             endConfirmTask.execute(gameId);
 //            EndConfirmMessage endConfirmMessage = EndConfirmMessage.builder().gameId(gameId).voteMap(voteMap).build();
 //            endConfirm(endConfirmMessage);
