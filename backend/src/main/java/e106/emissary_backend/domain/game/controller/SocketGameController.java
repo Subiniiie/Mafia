@@ -106,6 +106,7 @@ public class SocketGameController {
                      @DestinationVariable Long roomId,
                      @Payload VoteRequestDTO request) {
         long userId = getUserIdIAccessor(headerAccessor);
+
         long targetId = request.getTargetId();
 
         gameService.startVote(roomId, userId, targetId);

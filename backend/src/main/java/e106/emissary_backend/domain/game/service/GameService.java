@@ -1,5 +1,7 @@
 package e106.emissary_backend.domain.game.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import e106.emissary_backend.domain.game.GameConstant;
 import e106.emissary_backend.domain.game.aspect.RedissonLock;
 import e106.emissary_backend.domain.game.entity.Game;
@@ -51,6 +53,7 @@ public class GameService {
     private final RedisGameRepository redisGameRepository;
     private final RoomRepository roomRepository;
     private final UserInRoomRepository userInRoomRepository;
+    private final ObjectMapper objectMapper;
 
     private final RedisTemplate<String, HashMap<Long, Integer>> voteRedisTemplate;
     private final RedisKeyValueTemplate redisKeyValueTemplate;
@@ -116,7 +119,7 @@ public class GameService {
                         .build());
             }
 //        }
-        
+
 
         update(gameDTO);
     } // end of ready
@@ -187,6 +190,11 @@ public class GameService {
         log.info("gameService kill run");
         GameDTO gameDTO = getGameDTO(gameId);
 
+        log.info("지금 kill상태인데 game상태 어떤지 체크하자 : {} ", gameDTO.getGameState());
+        if(!gameDTO.getGameState().equals(GameState.NIGHT_EMISSARY)){
+            throw new NotTimeToNightException(CommonErrorCode.NOT_TIME_TO_NIGHT_EXCEPTION);
+        }
+
         Player targetPlayer = gameDTO.getPlayerMap().get(targetId);
 
         if(!targetPlayer.isAlive()){
@@ -207,8 +215,15 @@ public class GameService {
                         .build());
     } // end of Kill
 
+    @RedissonLock(value = "#gameId")
     public void appease(long gameId, long targetId) {
         GameDTO gameDTO = getGameDTO(gameId);
+
+        log.info("지금 변절하려는 game상태 어떤지 체크하자 : {} ", gameDTO.getGameState());
+
+        if(!gameDTO.getGameState().equals(GameState.NIGHT_EMISSARY)){
+            throw new NotTimeToNightException(CommonErrorCode.NOT_TIME_TO_NIGHT_EXCEPTION);
+        }
 
         if(!Objects.isEmpty(gameDTO.getBetrayer()))
             throw new AlreadyUseAppeaseException(CommonErrorCode.ALREADY_USE_APPEASE_EXCEPTION);
@@ -258,12 +273,20 @@ public class GameService {
         // userId로 경찰인지 확인 해줘야하나? -> 해야하면 마피아도..
         GameDTO gameDTO = getGameDTO(gameId);
 
+        if(!gameDTO.getGameState().equals(GameState.NIGHT_POLICE)){
+            throw new NotTimeToNightException(CommonErrorCode.NOT_TIME_TO_NIGHT_EXCEPTION);
+        }
+
+        log.info("지금 경찰상태인데 game상태 어떤지 체크하자 : {} ", gameDTO.getGameState());
+        
+
         Map<Long, Player> playerMap = gameDTO.getPlayerMap();
         Player targetPlayer = playerMap.get(targetId);
 
-        if(!targetPlayer.isAlive()){
-            throw new AlreadyRemoveUserException(CommonErrorCode.ALREADY_REMOVE_USER_EXCEPTION);
-        }
+        // todo : 이미 죽은 유저 검사못하게 빼는 로직 삭제
+//        if(!targetPlayer.isAlive()){
+//            throw new AlreadyRemoveUserException(CommonErrorCode.ALREADY_REMOVE_USER_EXCEPTION);
+//        }
 
         // todo : 이미 조사한 유저에 대해서 어떻게하지? -> 그냥 다 모른다 쳐!
         publisher.publish(nightPoliceTopic,  NightPoliceMessage.builder()
@@ -300,9 +323,11 @@ public class GameService {
 
     @RedissonLock(value = "#gameId")
     public void startVote(long gameId, long userId, long targetId) {
+        log.info("투표 요청 들어옴");
         GameDTO gameDTO = getGameDTO(gameId);
 
-        if(gameDTO.getGameState().equals(GameState.VOTE_START)){
+        log.info("투표 요청 들어왔을 때 dto의 상태 확인 : {}", gameDTO.getGameState());
+        if(!gameDTO.getGameState().equals(GameState.VOTE_START)){
             throw new NotTimeToVoteException(CommonErrorCode.NOT_TIME_TO_VOTE_EXCEPTION);
         }
 
@@ -312,24 +337,39 @@ public class GameService {
 
         Player player = playerMap.get(userId);
 
+        if(java.util.Objects.isNull(player)){
+            throw new NotAlivePlayerException(CommonErrorCode.NOT_ALIVE_PLAYER_EXCEPTION);
+        }
+
         player.setVoted(true);
-        gameDTO.setDay(gameDTO.getDay() + 1);
 
         update(gameDTO);
 
         if(GameRole.BETRAYER.equals(player.getRole())){
             commonPublish(gameId, GameState.VOTE, CommonResult.SUCCESS, playerMap);
         }else {
+            log.info("투표 함");
             String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
 
             // 현재 투표 상태 가져와서 투표
             HashMap<Long, Integer> voteMap = getVoteMapFromRedis(voteKey);
-            voteMap.put(targetId, voteMap.getOrDefault(targetId, 0) + 1);
+            log.info("voteMap을 들고와서 투표 시작");
+            log.info("들고온 voteMap: {}",voteMap.toString());
+
+            voteMap.merge(targetId, 1, Integer::sum);
+
+//            voteMap.put(targetId, voteMap.getOrDefault(targetId, 0) + 1);
+            log.info("업데이트 하기");
             voteRedisTemplate.opsForValue().set(voteKey, voteMap);
 
+            log.info("응답 내리기");
             commonPublish(gameId, GameState.VOTE, CommonResult.SUCCESS, playerMap);
         }
         if (playerMap.values().stream().filter(Player::isVoted).count() == playerMap.size()) {
+            log.info("모두가 투표를 완료함");
+            scheduler.cancelTask(gameId, TaskName.END_VOTE_TASK);
+            log.info("모두가 투표 했으니 타이머 끄고");
+            endVoteTask.setGameId(gameId);
             endVoteTask.execute(gameId);
 //            EndVoteMessage endVoteMessage = EndVoteMessage.builder().gameId(gameId).voteMap(voteMap).build();
 //            endVote(endVoteMessage);
@@ -337,37 +377,23 @@ public class GameService {
     } // end of startVote
 
 
-    public void endVote(EndVoteMessage message) {
-        // 무승부의 경우 재투표로 설정
-        message.organizeVote();
-
-        // todo : 게임상태 변경 해야함
-        // 타이머 - 최후변론 시간 주고 최종투표 안내.
-        long gameId = message.getGameId();
-        startConfirmTask.setGameId(gameId);
-        scheduler.scheduleTask(gameId, TaskName.START_CONFIRM_TASK, startConfirmTask, 2, TimeUnit.MINUTES);
-
-        // subscriber에게 메시지 발행
-        publisher.publish(endVoteTopic, message);
-
-        // 투표 결과 처리 후 Redis에서 해당 게임의 투표 데이터 삭제
-        String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
-        voteRedisTemplate.delete(voteKey);
-    } // end of endVote
-
     @RedissonLock(value = "#gameId")
     public void startConfirm(long gameId, long userId, boolean confirm) {
         GameDTO gameDTO = getGameDTO(gameId);
 
-        if(gameDTO.getGameState().equals(GameState.CONFIRM_START)){
-            throw new NotTimeToVoteException(CommonErrorCode.NOT_TIME_TO_VOTE_EXCEPTION);
-        }
+//        if(gameDTO.getGameState().equals(GameState.CONFIRM_START)){
+//            throw new NotTimeToVoteException(CommonErrorCode.NOT_TIME_TO_VOTE_EXCEPTION);
+//        }
 
         Map<Long, Player> playerMap = gameDTO.getPlayerMap().entrySet().stream()
                 .filter(entry -> entry.getValue().isAlive())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         Player player = playerMap.get(userId);
+
+        if(java.util.Objects.isNull(player)){
+            throw new NotAlivePlayerException(CommonErrorCode.NOT_ALIVE_PLAYER_EXCEPTION);
+        }
 
         player.setVoted(true);
         gameDTO.setGameState(GameState.CONFIRM_START);
@@ -387,27 +413,20 @@ public class GameService {
             commonPublish(gameId, GameState.CONFIRM_VOTE, CommonResult.SUCCESS, playerMap);
         }
 
-        if (playerMap.values().stream().filter(Player::isVoted).count() == playerMap.size()) {
-            // todo : 얘도 이거 타면 end confirm 타이머 끄는게 필요함
-            endConfirmTask.execute(gameId);
-//            EndConfirmMessage endConfirmMessage = EndConfirmMessage.builder().gameId(gameId).voteMap(voteMap).build();
-//            endConfirm(endConfirmMessage);
-        }
+//        if (playerMap.values().stream().filter(Player::isVoted).count() == playerMap.size()) {
+//            // todo : 얘도 이거 타면 end confirm 타이머 끄는게 필요함
+//            log.info("모두가 최종 끝");
+//            scheduler.cancelTask(gameId, TaskName.END_CONFIRM_TASK);
+//            log.info("타이머 끄고");
+//            endConfirmTask.setGameId(gameId);
+//            // todo : 타이머 끄는건 좋은데 targetId를 넣어줘야해...
+//            endConfirmTask.execute(gameId);
+////            EndConfirmMessage endConfirmMessage = EndConfirmMessage.builder().gameId(gameId).voteMap(voteMap).build();
+////            endConfirm(endConfirmMessage);
+//        }
 
     } // end of startConfirm
 
-    public void endConfirm(EndConfirmMessage message) {
-        // todo : endConfirmMessage에 결과를 담아서 프론트로 보내자.
-        // 여기서 플레이어를 하나 죽이는게 좋나? remove 메서드를 하나 만들자 <- 이건 마피아 능력으로도 쓸수있으니까!
-        message.organizeVote();
-
-        publisher.publish(endConfirmTopic, message);
-
-        // 레디스에 결과 삭제
-        long gameId = message.getGameId();
-        String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
-        voteRedisTemplate.delete(voteKey);
-    } // end of endConfirm
 
     /**
      나간거 로직
@@ -425,11 +444,20 @@ public class GameService {
 
     @RedissonLock(value = "#gameId")
     private HashMap<Long, Integer> getVoteMapFromRedis(String voteKey) {
-        HashMap<Long, Integer> voteMap = voteRedisTemplate.opsForValue().get(voteKey);
-        if (voteMap == null) {
-            voteMap = new HashMap<>();
+        HashMap<Long, Integer> result = voteRedisTemplate.opsForValue().get(voteKey);
+        if (result == null) {
+            return new HashMap<>();
         }
-        return voteMap;
+
+        if (result instanceof Map) {
+            log.info("voteMap 들고올 때 여기가 찍혀야함");
+            Map<?, ?> map = (Map<?, ?>) result;
+            return map.entrySet().stream()
+                    .collect(HashMap::new,
+                            (m, e) -> m.put(Long.valueOf(e.getKey().toString()), (Integer) e.getValue()),
+                            HashMap::putAll);
+        }
+        return new HashMap<>();
     } // end of getVoteMapFromRedis
 
     private GameDTO getGameDTO(long gameId) {

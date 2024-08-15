@@ -50,6 +50,19 @@ public class GlobalExceptionAdvice {
         return handleExceptionInternal(errorCode);
     }
 
+
+    @ExceptionHandler
+    public ResponseEntity<Object> notAliveUser(NotAlivePlayerException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return handleExceptionInternal(errorCode);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Object> notTimeToNight(NotTimeToNightException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return handleExceptionInternal(errorCode);
+    }
+
     @ExceptionHandler
     public ResponseEntity<Object> noTitle(NoTitleException e) {
         ErrorCode errorCode = e.getErrorCode();

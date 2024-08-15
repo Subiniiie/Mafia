@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 public class EndConfirmTask implements GameTask {
     private final SchedulerService schedulerService;
     private Long gameId;
+    private long targetId;
 
     private final RedisTemplate<String, HashMap<Long, Integer>> voteRedisTemplate;
     private final RedisKeyValueTemplate redisKeyValueTemplate;
@@ -65,7 +66,11 @@ public class EndConfirmTask implements GameTask {
 //        redisKeyValueTemplate.update(gameDTO.toDao());
 
         String voteKey = GameConstant.VOTE_KEY_PREFIX + gameId;
-        HashMap<Long, Integer> voteMap = voteRedisTemplate.opsForValue().get(voteKey);
+//        HashMap<Long, Integer> voteMap = voteRedisTemplate.opsForValue().get(voteKey);
+        HashMap<Long, Integer> voteMap = getVoteMapFromRedis(voteKey);
+        log.info("들고온 voteMap: {}",voteMap.toString());
+
+
         if (voteMap == null) {
             voteMap = new HashMap<>();
         }
@@ -73,6 +78,7 @@ public class EndConfirmTask implements GameTask {
         EndConfirmMessage endConfirmMessage = EndConfirmMessage.builder()
                 .gameId(gameId)
                 .gameDTO(gameDTO)
+                .targetId(targetId)
                 .voteMap(voteMap)
                 .build();
 
@@ -107,8 +113,28 @@ public class EndConfirmTask implements GameTask {
 //        gameService.endConfirm(EndConfirmMessage.builder().gameId(gameId).build());
     }
 
+    @RedissonLock(value = "#gameId")
+    private HashMap<Long, Integer> getVoteMapFromRedis(String voteKey) {
+        HashMap<Long, Integer> result = voteRedisTemplate.opsForValue().get(voteKey);
+        if (result == null) {
+            return new HashMap<>();
+        }
+
+        if (result instanceof Map) {
+            Map<?, ?> map = (Map<?, ?>) result;
+            return map.entrySet().stream()
+                    .collect(HashMap::new,
+                            (m, e) -> m.put(Long.valueOf(e.getKey().toString()), (Integer) e.getValue()),
+                            HashMap::putAll);
+        }
+        return new HashMap<>();
+    } // end of getVoteMapFromRedis
+
     public void setGameId(long gameId){
         this.gameId = gameId;
     }
 
+    public void setTargetId(long targetId){
+        this.targetId = targetId;
+    }
 }
