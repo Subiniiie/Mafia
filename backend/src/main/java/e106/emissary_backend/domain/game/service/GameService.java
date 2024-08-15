@@ -303,9 +303,10 @@ public class GameService {
         log.info("투표 요청 들어옴");
         GameDTO gameDTO = getGameDTO(gameId);
 
-        if(gameDTO.getGameState().equals(GameState.VOTE_START)){
-            throw new NotTimeToVoteException(CommonErrorCode.NOT_TIME_TO_VOTE_EXCEPTION);
-        }
+        log.info("투표 요청 들어왔을 때 dto의 상태 확인 : {}", gameDTO.getGameState());
+//        if(gameDTO.getGameState().equals(GameState.VOTE_START)){
+//            throw new NotTimeToVoteException(CommonErrorCode.NOT_TIME_TO_VOTE_EXCEPTION);
+//        }
 
         Map<Long, Player> playerMap = gameDTO.getPlayerMap().entrySet().stream()
                 .filter(entry -> entry.getValue().isAlive())
