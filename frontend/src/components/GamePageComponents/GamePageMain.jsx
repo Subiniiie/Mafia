@@ -453,16 +453,13 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     const gameEnd = () => {
         console.log('게임 끝날 때 오는 gameResponse:', gameResponse)
         console.log('게임 끝날 때 오는 gameResponse의 winRole:', gameResponse.winRole)
-        setEnding(gameResponse.winRole)
-    }
-
-    useEffect(() => {
-        if (ending === "PERSON") {
+        if (gameResponse.winRole === "PERSON") {
             setSystemMessage(`게임이 끝났습니다. 독립운동가의 승리입니다`)
         } else {
             setSystemMessage(`게임이 끝났습니다. 밀정의 승리입니다`)
         }
-    }, [ending])
+        // setEnding(gameResponse.winRole)
+    }
 
     // 게임 결과 반영
     const handleResult = async() => {
