@@ -317,6 +317,10 @@ public class GameService {
 
         Player player = playerMap.get(userId);
 
+        if(java.util.Objects.isNull(player)){
+            throw new NotAlivePlayerException(CommonErrorCode.NOT_ALIVE_PLAYER_EXCEPTION);
+        }
+
         player.setVoted(true);
 
         update(gameDTO);
@@ -366,6 +370,10 @@ public class GameService {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         Player player = playerMap.get(userId);
+
+        if(java.util.Objects.isNull(player)){
+            throw new NotAlivePlayerException(CommonErrorCode.NOT_ALIVE_PLAYER_EXCEPTION);
+        }
 
         player.setVoted(true);
         gameDTO.setGameState(GameState.CONFIRM_START);
