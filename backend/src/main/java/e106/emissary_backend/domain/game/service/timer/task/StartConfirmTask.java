@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 public class StartConfirmTask implements GameTask {
     private Long gameId;
     private GameDTO gameDTO;
+    private long targetId;
 
     private final RedisPublisher publisher;
 
@@ -53,12 +54,15 @@ public class StartConfirmTask implements GameTask {
         
         // 2분뒤 투표종료 안내
         endConfirmTask.setGameId(gameId);
+        endConfirmTask.setTargetId(targetId);
         scheduler.scheduleTask(gameId, TaskName.END_CONFIRM_TASK, endConfirmTask, 30, TimeUnit.SECONDS);
     }
 
     public void setGameId(long gameId){
         this.gameId = gameId;
     }
+
+    public void setTargetId(long targetId){this.targetId = targetId;}
 
     public void setGameDTO(GameDTO gameDTO) {
         this.gameDTO = gameDTO;

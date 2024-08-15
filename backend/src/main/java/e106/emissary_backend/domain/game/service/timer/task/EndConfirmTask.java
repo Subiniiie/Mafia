@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 public class EndConfirmTask implements GameTask {
     private final SchedulerService schedulerService;
     private Long gameId;
+    private long targetId;
 
     private final RedisTemplate<String, HashMap<Long, Integer>> voteRedisTemplate;
     private final RedisKeyValueTemplate redisKeyValueTemplate;
@@ -77,6 +78,7 @@ public class EndConfirmTask implements GameTask {
         EndConfirmMessage endConfirmMessage = EndConfirmMessage.builder()
                 .gameId(gameId)
                 .gameDTO(gameDTO)
+                .targetId(targetId)
                 .voteMap(voteMap)
                 .build();
 
@@ -132,4 +134,7 @@ public class EndConfirmTask implements GameTask {
         this.gameId = gameId;
     }
 
+    public void setTargetId(long targetId){
+        this.targetId = targetId;
+    }
 }

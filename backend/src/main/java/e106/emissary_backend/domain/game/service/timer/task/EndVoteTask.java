@@ -98,6 +98,8 @@ public class EndVoteTask implements GameTask {
 
             startConfirmTask.setGameId(gameId);
             startConfirmTask.setGameDTO(gameDTO);
+            // todo : 이거 지금은 그냥 maxPlayerList의 제일 상단에 있는놈 userId를 갖고옴
+            startConfirmTask.setTargetId(endVoteMessage.getMaxPlayerList().get(0));
             scheduler.scheduleTask(gameId, TaskName.START_CONFIRM_TASK, startConfirmTask, 15, TimeUnit.SECONDS);
 //        }
 

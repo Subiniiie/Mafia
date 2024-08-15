@@ -345,6 +345,7 @@ public class GameService {
             log.info("모두가 투표를 완료함");
             scheduler.cancelTask(gameId, TaskName.END_VOTE_TASK);
             log.info("모두가 투표 했으니 타이머 끄고");
+            endVoteTask.setGameId(gameId);
             endVoteTask.execute(gameId);
 //            EndVoteMessage endVoteMessage = EndVoteMessage.builder().gameId(gameId).voteMap(voteMap).build();
 //            endVote(endVoteMessage);
@@ -384,15 +385,17 @@ public class GameService {
             commonPublish(gameId, GameState.CONFIRM_VOTE, CommonResult.SUCCESS, playerMap);
         }
 
-        if (playerMap.values().stream().filter(Player::isVoted).count() == playerMap.size()) {
-            // todo : 얘도 이거 타면 end confirm 타이머 끄는게 필요함
-            log.info("모두가 최종 끝");
-            scheduler.cancelTask(gameId, TaskName.END_CONFIRM_TASK);
-            log.info("타이머 끄고");
-            endConfirmTask.execute(gameId);
-//            EndConfirmMessage endConfirmMessage = EndConfirmMessage.builder().gameId(gameId).voteMap(voteMap).build();
-//            endConfirm(endConfirmMessage);
-        }
+//        if (playerMap.values().stream().filter(Player::isVoted).count() == playerMap.size()) {
+//            // todo : 얘도 이거 타면 end confirm 타이머 끄는게 필요함
+//            log.info("모두가 최종 끝");
+//            scheduler.cancelTask(gameId, TaskName.END_CONFIRM_TASK);
+//            log.info("타이머 끄고");
+//            endConfirmTask.setGameId(gameId);
+//            // todo : 타이머 끄는건 좋은데 targetId를 넣어줘야해...
+//            endConfirmTask.execute(gameId);
+////            EndConfirmMessage endConfirmMessage = EndConfirmMessage.builder().gameId(gameId).voteMap(voteMap).build();
+////            endConfirm(endConfirmMessage);
+//        }
 
     } // end of startConfirm
 
