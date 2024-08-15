@@ -23,6 +23,8 @@ public class StartVoteSubscriber {
             StartVoteMessage startVoteMessage = objectMapper.readValue(message, StartVoteMessage.class);
             long gameId = startVoteMessage.getGameId();
 
+            log.info("startVoteSubscriber run, gameId : {}", startVoteMessage.getGameId());
+
             simpMessagingTemplate.convertAndSend("/sub/" + gameId, startVoteMessage);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);

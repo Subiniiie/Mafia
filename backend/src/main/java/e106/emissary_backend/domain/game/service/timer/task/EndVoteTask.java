@@ -68,7 +68,7 @@ public class EndVoteTask implements GameTask {
         EndVoteMessage endVoteMessage = EndVoteMessage.builder().gameId(gameId).voteMap(voteMap).build();
 
         endVoteMessage.organizeVote();
-
+        log.info("투표 결과 : {}", endVoteMessage.getResult());
 
         // subscriber에게 메시지 발행
         publisher.publish(endVoteTopic, endVoteMessage);
@@ -77,18 +77,18 @@ public class EndVoteTask implements GameTask {
         // 투표 결과 처리 후 Redis에서 해당 게임의 투표 데이터 삭제
         voteRedisTemplate.delete(voteKey);
 
-        if(VoteState.RE_VOTE.equals(endVoteMessage.getResult())){
-            // 다시 투표하세용
-            gameDTO.setGameState(GameState.VOTE_START);
-
-            publisher.publish(startVoteTopic, StartVoteMessage.builder()
-                            .gameState(GameState.VOTE_START)
-                            .gameDTO(gameDTO)
-                            .gameId(gameId)
-                            .build());
-            // 예약
-            ScheduledFuture<?> future = scheduler.scheduleTask(gameId, TaskName.END_VOTE_TASK, this, 10, TimeUnit.SECONDS);
-        }else {
+//        if(VoteState.RE_VOTE.equals(endVoteMessage.getResult())){
+//            // 다시 투표하세용
+//            gameDTO.setGameState(GameState.VOTE_START);
+//
+//            publisher.publish(startVoteTopic, StartVoteMessage.builder()
+//                            .gameState(GameState.VOTE_START)
+//                            .gameDTO(gameDTO)
+//                            .gameId(gameId)
+//                            .build());
+//            // 예약
+//            ScheduledFuture<?> future = scheduler.scheduleTask(gameId, TaskName.END_VOTE_TASK, this, 10, TimeUnit.SECONDS);
+//        }else {
             // todo : 게임상태 변경 해야함
             // 타이머 - 최후변론 시간 주고 최종투표 안내.
             gameDTO.setGameState(GameState.VOTE_END);
@@ -96,7 +96,7 @@ public class EndVoteTask implements GameTask {
             startConfirmTask.setGameId(gameId);
             startConfirmTask.setGameDTO(gameDTO);
             scheduler.scheduleTask(gameId, TaskName.START_CONFIRM_TASK, startConfirmTask, 15, TimeUnit.SECONDS);
-        }
+//        }
 
         redisKeyValueTemplate.update(gameDTO.toDao());
     }
