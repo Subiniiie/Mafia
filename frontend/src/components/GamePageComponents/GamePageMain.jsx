@@ -450,8 +450,6 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     }
 
     // 게임 끝
-    const [ending, setEnding] = useState("")
-
     const gameEnd = () => {
         console.log('게임 끝날 때 오는 gameResponse:', gameResponse)
         console.log('게임 끝날 때 오는 gameResponse의 winRole:', gameResponse.winRole)
