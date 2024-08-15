@@ -190,6 +190,8 @@ public class GameService {
         log.info("gameService kill run");
         GameDTO gameDTO = getGameDTO(gameId);
 
+        log.info("지금 kill상태인데 game상태 어떤지 체크하자 : {} ", gameDTO.getGameState());
+
         Player targetPlayer = gameDTO.getPlayerMap().get(targetId);
 
         if(!targetPlayer.isAlive()){
@@ -212,6 +214,9 @@ public class GameService {
 
     public void appease(long gameId, long targetId) {
         GameDTO gameDTO = getGameDTO(gameId);
+
+        log.info("지금 변절하려는 game상태 어떤지 체크하자 : {} ", gameDTO.getGameState());
+
 
         if(!Objects.isEmpty(gameDTO.getBetrayer()))
             throw new AlreadyUseAppeaseException(CommonErrorCode.ALREADY_USE_APPEASE_EXCEPTION);
@@ -261,12 +266,16 @@ public class GameService {
         // userId로 경찰인지 확인 해줘야하나? -> 해야하면 마피아도..
         GameDTO gameDTO = getGameDTO(gameId);
 
+        log.info("지금 경찰상태인데 game상태 어떤지 체크하자 : {} ", gameDTO.getGameState());
+        
+
         Map<Long, Player> playerMap = gameDTO.getPlayerMap();
         Player targetPlayer = playerMap.get(targetId);
 
-        if(!targetPlayer.isAlive()){
-            throw new AlreadyRemoveUserException(CommonErrorCode.ALREADY_REMOVE_USER_EXCEPTION);
-        }
+        // todo : 이미 죽은 유저 검사못하게 빼는 로직 삭제
+//        if(!targetPlayer.isAlive()){
+//            throw new AlreadyRemoveUserException(CommonErrorCode.ALREADY_REMOVE_USER_EXCEPTION);
+//        }
 
         // todo : 이미 조사한 유저에 대해서 어떻게하지? -> 그냥 다 모른다 쳐!
         publisher.publish(nightPoliceTopic,  NightPoliceMessage.builder()
