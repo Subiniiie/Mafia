@@ -19,6 +19,7 @@ public enum CommonErrorCode implements ErrorCode{
     ALREADY_USER_IN_ROOM_EXCEPTION(HttpStatus.CONFLICT, "Already User In Room Error"),
     ALREADY_REMOVE_USER_EXCEPTION(HttpStatus.CONFLICT, "Already Remove User Error"),
     ALREADY_START_ROOM_EXCEPTION(HttpStatus.CONFLICT, "Already Start Room Error"),
+    NOT_TIME_TO_NIGHT_EXCEPTION(HttpStatus.BAD_REQUEST, "Not Time To Night Error"),
     NOT_TIME_TO_VOTE_EXCEPTION(HttpStatus.BAD_REQUEST, "Not Time To Vote Error"),
     NOT_ALIVE_PLAYER_EXCEPTION(HttpStatus.CONFLICT, "Not Alive Player Error"),
     EMISSARY_KILL_EXCEPTION(HttpStatus.CONFLICT, "You Can't Kill Emissary Error"),

@@ -191,6 +191,9 @@ public class GameService {
         GameDTO gameDTO = getGameDTO(gameId);
 
         log.info("지금 kill상태인데 game상태 어떤지 체크하자 : {} ", gameDTO.getGameState());
+        if(!gameDTO.getGameState().equals(GameState.NIGHT_EMISSARY)){
+            throw new NotTimeToNightException(CommonErrorCode.NOT_TIME_TO_NIGHT_EXCEPTION);
+        }
 
         Player targetPlayer = gameDTO.getPlayerMap().get(targetId);
 
@@ -212,11 +215,15 @@ public class GameService {
                         .build());
     } // end of Kill
 
+    @RedissonLock(value = "#gameId")
     public void appease(long gameId, long targetId) {
         GameDTO gameDTO = getGameDTO(gameId);
 
         log.info("지금 변절하려는 game상태 어떤지 체크하자 : {} ", gameDTO.getGameState());
 
+        if(!gameDTO.getGameState().equals(GameState.NIGHT_EMISSARY)){
+            throw new NotTimeToNightException(CommonErrorCode.NOT_TIME_TO_NIGHT_EXCEPTION);
+        }
 
         if(!Objects.isEmpty(gameDTO.getBetrayer()))
             throw new AlreadyUseAppeaseException(CommonErrorCode.ALREADY_USE_APPEASE_EXCEPTION);
@@ -265,6 +272,10 @@ public class GameService {
     public void detect(long gameId, long targetId, long userId) {
         // userId로 경찰인지 확인 해줘야하나? -> 해야하면 마피아도..
         GameDTO gameDTO = getGameDTO(gameId);
+
+        if(!gameDTO.getGameState().equals(GameState.NIGHT_POLICE)){
+            throw new NotTimeToNightException(CommonErrorCode.NOT_TIME_TO_NIGHT_EXCEPTION);
+        }
 
         log.info("지금 경찰상태인데 game상태 어떤지 체크하자 : {} ", gameDTO.getGameState());
         
@@ -316,9 +327,9 @@ public class GameService {
         GameDTO gameDTO = getGameDTO(gameId);
 
         log.info("투표 요청 들어왔을 때 dto의 상태 확인 : {}", gameDTO.getGameState());
-//        if(gameDTO.getGameState().equals(GameState.VOTE_START)){
-//            throw new NotTimeToVoteException(CommonErrorCode.NOT_TIME_TO_VOTE_EXCEPTION);
-//        }
+        if(!gameDTO.getGameState().equals(GameState.VOTE_START)){
+            throw new NotTimeToVoteException(CommonErrorCode.NOT_TIME_TO_VOTE_EXCEPTION);
+        }
 
         Map<Long, Player> playerMap = gameDTO.getPlayerMap().entrySet().stream()
                 .filter(entry -> entry.getValue().isAlive())
