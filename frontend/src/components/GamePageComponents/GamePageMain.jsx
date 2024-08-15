@@ -453,7 +453,7 @@ function GamePageMain({ setSystemMessage, roomId, streamManagers, setChatMode, s
     const gameEnd = () => {
         console.log('게임 끝날 때 오는 gameResponse:', gameResponse)
         setEnding(gameResponse.winRole)
-        if (ending === PERSON) {
+        if (ending === "PERSON") {
             setRealEnding('독립운동가')
         } else {
             setRealEnding('밀정')
